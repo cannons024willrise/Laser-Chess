@@ -2,10 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=laserchess/index.html">
   <title>Redirecting…</title>
+  <script>
+    // Only redirect at the root to prevent loops
+    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+      window.location.replace('laserchess/docs/Auth/login.html');
+    }
+  </script>
 </head>
 <body>
-  <p>If you are not redirected automatically, <a href="laserchess/index.html">click here</a>.</p>
+  <p>If you are not redirected automatically, <a href="laserchess/docs/Auth/login.html">click here</a>.</p>
 </body>
 </html>
+
