@@ -4,231 +4,8 @@
     <meta charset="utf-8" />
     <title>Login to Laser Chess Nexus</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- THEME 1 -->
-    <style id="theme1" disabled>
-      @font-face {
-        font-family: customfont;
-        src: url(c.otf);
-      }
-
-      html { height: 100%; }
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: customfont;
-        
-  background-image: url("Gemini_Generated_Image_tjcevutjcevutjce.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-      }
-
-      .login-box {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 700px;
-        padding: 40px;
-        transform: translate(-50%, -50%);
-        background: rgba(0,0,0,.5);
-        box-sizing: border-box;
-        box-shadow: 0 15px 25px rgba(0,0,0,.6);
-        border-radius: 10px;
-      }
-
-      .login-box h2 {
-        margin: 0 0 30px;
-        padding: 0;
-        color: #fff;
-        text-align: center;
-      }
-
-      .login-box .user-box { position: relative; }
-
-      .login-box .user-box input {
-        width: 100%;
-        padding: 10px 0;
-        font-size: 16px;
-        color: #fff;
-        margin-bottom: 30px;
-        border: none;
-        border-bottom: 1px solid #fff;
-        outline: none;
-        background: transparent;
-      }
-
-      .login-box .user-box label {
-        position: absolute;
-        top: 0;
-        left: 0;
-        padding: 10px 0;
-        font-size: 16px;
-        color: #fff;
-        pointer-events: none;
-        transition: .5s;
-      }
-
-      .login-box .user-box input:focus ~ label,
-      .login-box .user-box input:valid ~ label {
-        top: -20px;
-        left: 0;
-        color: #f44336;
-        font-size: 12px;
-      }
-
-      .login-box form a {
-        position: relative;
-        display: inline-block;
-        padding: 10px 20px;
-        color: #f44336;
-        font-size: 16px;
-        text-decoration: none;
-        text-transform: uppercase;
-        overflow: hidden;
-        transition: .5s;
-        margin-top: 40px;
-        letter-spacing: 4px;
-      }
-
-      .login-box a:hover {
-        background: #f44336;
-        color: #fff;
-        border-radius: 5px;
-        box-shadow: 0 0 5px #f44336,
-                    0 0 25px #f44336,
-                    0 0 50px #f44336,
-                    0 0 100px #f44336;
-      }
-
-      .login-box a span { position: absolute; display: block; }
-
-      .login-box a span:nth-child(1) {
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, #f44336);
-        animation: btn-anim1 1s linear infinite;
-      }
-      @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
-
-      .login-box a span:nth-child(2) {
-        top: -100%;
-        right: 0;
-        width: 2px;
-        height: 100%;
-        background: linear-gradient(180deg, transparent, #f44336);
-        animation: btn-anim2 1s linear infinite;
-        animation-delay: .25s;
-      }
-      @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
-
-      .login-box a span:nth-child(3) {
-        bottom: 0;
-        right: -100%;
-        width: 100%;
-        height: 2px;
-        background: linear-gradient(270deg, transparent, #f44336);
-        animation: btn-anim3 1s linear infinite;
-        animation-delay: .5s;
-      }
-      @keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
-
-      .login-box a span:nth-child(4) {
-        bottom: -100%;
-        left: 0;
-        width: 2px;
-        height: 100%;
-        background: linear-gradient(360deg, transparent, #f44336);
-        animation: btn-anim4 1s linear infinite;
-        animation-delay: .75s;
-      }
-      @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
-
-      /* Columns & layout */
-      .columns {
-        display: flex;
-        gap: 28px;
-        align-items: flex-start;
-      }
-
-      /* LEFT: form */
-      #login-form {
-        flex: 1 1 50%;
-        display: flex;
-        flex-direction: column;
-      }
-
-      /* Button row (Sign Up / Sign In side-by-side) */
-      .button-row {
-        display: flex;
-        gap: 12px;
-        margin-top: 6px;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .button-row a {
-        flex: 1 1 50%;
-        display: inline-block; /* keeps animations working */
-        margin-top: 0;
-        text-align: center;
-      }
-
-      /* keep the other actions full-width feeling under the row */
-      #googleLogin, #passwordResetBtn {
-        display: block;
-        margin-top: 14px;
-        text-align: center;
-      }
-
-      /* RIGHT: text */
-      .login-text {
-        flex: 1 1 50%;
-      }
-
-      .login-text p {
-        color: #fff;
-        margin: 0;
-        line-height: 1.45;
-        font-size: 20px;
-      }
-
-      /* Status / Error area (full-width, outside columns) */
-      .status-msg, .error-msg {
-        width: 100%;
-        text-align: center;
-        margin-top: 14px;
-        word-wrap: break-word;
-        white-space: pre-wrap;
-        max-width: 100%;
-      }
-      .status-msg { color: #fff; }
-      .error-msg { color: #ff6b6b; /* slightly lighter red for visibility */ }
-
-      /* keep very long messages from exploding layout — allow scrolling inside if needed */
-      .status-msg, .error-msg {
-        max-height: 160px;
-        overflow: auto;
-        padding: 6px 8px;
-        box-sizing: border-box;
-      }
-
-      /* Responsive */
-      @media (max-width: 720px) {
-        .login-box { width: 90vw; padding: 24px; }
-        .columns { flex-direction: column; gap: 18px; }
-        #login-form, .login-text { flex: 1 1 100%; }
-        .button-row { flex-direction: column; gap: 10px; }
-        .button-row a { flex: unset; }
-        .login-text p { font-size: 13px; }
-      }
-    </style>
-
-    <!-- THEME 2 -->
-    <style id="theme2" disabled>
+    
+    <style>
       @font-face {
         font-family: customfont;
         src: url(c.otf);
@@ -447,6 +224,26 @@
       }
     </style>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     <script>
       window.onTurnstileSuccess = function(token) {
         console.log("✅ Turnstile success:", token);
@@ -455,14 +252,6 @@
     </script>
 
     <script type="module">
-      // Only toggle theme styles (those with id starting "theme")
-      function randomizeTheme() {
-        const chosen = Math.random() < 0.5 ? 'theme1' : 'theme2';
-        document.querySelectorAll('style[id^="theme"]').forEach(s => s.disabled = true);
-        const el = document.getElementById(chosen);
-        if (el) el.disabled = false;
-      }
-      window.onload = randomizeTheme;
 
       // Firebase imports & config (kept intact)
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -636,4 +425,5 @@
     </div>
   </body>
 </html>
+
 
