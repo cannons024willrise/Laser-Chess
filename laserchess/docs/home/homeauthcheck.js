@@ -3,15 +3,14 @@
 // Requires: firebase-app-compat.js and firebase-auth-compat.js loaded BEFORE this script.
 
 // Use the same Firebase project as your working Auth code:
-const HOME_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCVHWRoVyuDnKRPY4EQbmyeY_rRR56XpEg",
-  authDomain: "laserchessnexus-lobby-db-auth.firebaseapp.com",
-  databaseURL: "https://laserchessnexus-lobby-db-auth-default-rtdb.europe-west1.firebasedatabase.app", // <- Add this
-  projectId: "laserchessnexus-lobby-db-auth",
-  storageBucket: "laserchessnexus-lobby-db-auth.firebasestorage.app",
-  messagingSenderId: "1054469827964",
-  appId: "1:1054469827964:web:0fe70a1fddb5b5d27588f9",
-  measurementId: "G-F0PHDZYB4M"
+const firebaseConfig = {
+  apiKey: "AIzaSyBuT7P1iTdXcZW-y05DX-kseuLrPGmaWSs",
+  authDomain: "laserchess-web-free.firebaseapp.com",
+  projectId: "laserchess-web-free",
+  storageBucket: "laserchess-web-free.firebasestorage.app",
+  messagingSenderId: "887464510754",
+  appId: "1:887464510754:web:aee6938681543602a4517b",
+  measurementId: "G-KC5J6JPX2M"
 };
 
 (function() {
@@ -61,4 +60,5 @@ const HOME_FIREBASE_CONFIG = {
     }
   });
 })();
+
 
