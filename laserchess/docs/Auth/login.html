@@ -309,7 +309,7 @@
           await sendEmailVerification(userCredential.user);
           statusEl.textContent = "Signed up as " + userCredential.user.email + ". Check your email for verification!";
           errorMsgEl.textContent = "";
-          window.location.href = "https://laserchess.pages.dev/home/home";
+          window.location.href = "https://laserchess.pages.dev/laserchess/home/home.html";
           alert("A verification email has been sent. Please verify your email.");
         } catch (error) {
           console.error("Error signing up:", error);
@@ -326,7 +326,7 @@
           if (userCredential.user.emailVerified) {
             statusEl.textContent = "Signed in as " + userCredential.user.email;
             errorMsgEl.textContent = "";
-            window.location.href = "https://laserchess.pages.dev/laserchess/home/home";
+            window.location.href = "https://laserchess.pages.dev/laserchess/home/home.html";
           } else {
             alert("Please verify your email before signing in.");
           }
@@ -342,7 +342,7 @@
           const result = await signInWithPopup(auth, provider);
           statusEl.textContent = "Signed in as " + result.user.displayName;
           errorMsgEl.textContent = "";
-          window.location.href = "https://laserchess.pages.dev/laserchess/home/home";
+          window.location.href = "https://laserchess.pages.dev/laserchess/home/home.htmle";
         } catch (error) {
           errorMsgEl.textContent = "Google sign-in failed: " + error.message;
         }
@@ -461,6 +461,7 @@
     </div>
   </body>
 </html>
+
 
 
 
