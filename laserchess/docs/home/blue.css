@@ -3,32 +3,46 @@
       src: url(c.otf);
     }
 
-    html, body {
+    html {
       height: 100%;
+      /* Exact filename and .png extension match */
+      background: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), 
+        url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    body {
       margin: 0;
       padding: 0;
       font-family: customfont;
-      /* Background stays fixed and full-screen */
-      background: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), 
-        url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed;
-      background-size: cover;
+      background: transparent;
       color: white;
+      min-height: 100%;
     }
 
-    /* USE THIS FOR CENTERING CONTENT INSTEAD OF THE BODY */
-    .hero-wrapper {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+    /* === TRANSPARENT TOP BANNER === */
+    /* Target the white bar seen in your screenshot */
+    .header, header { 
+      background: rgba(0, 0, 0, 0.4); /* Dark translucent background */
+      border-bottom: 1px solid rgba(3, 233, 244, 0.3); /* Subtle cyan edge */
+      padding: 10px 0;
+    }
+
+    /* === TRANSLUCENT DISCORD BANNER === */
+    /* Target the purple/blue bar seen in your screenshot */
+    .discord-banner, .banner { 
+      background: rgba(88, 101, 242, 0.25); /* Discord purple at 25% opacity */
+      border: 1px solid rgba(88, 101, 242, 0.4);
+      color: #fff;
+      text-transform: uppercase;
+      padding: 12px;
+      margin: 15px 0;
       text-align: center;
-      padding: 20px;
-      box-sizing: border-box;
+      letter-spacing: 2px;
     }
 
-    /* === PLAY NOW Animated Button (Blue) === */
+    /* === SEND MATCH REQUEST BUTTON === */
     .play-now-btn {
       position: relative;
       display: inline-block;
@@ -39,11 +53,11 @@
       overflow: hidden;
       transition: 0.5s;
       letter-spacing: 4px;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.6); /* Slightly darker to stand out */
       border: none;
       cursor: pointer;
       z-index: 1;
-      text-decoration: none; /* In case it's an <a> tag */
+      margin-top: 40px;
     }
   
     .play-now-btn:hover {
@@ -52,20 +66,15 @@
       border-radius: 5px;
       box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0 100px #03e9f4;
     }
-  
-    .play-now-btn span {
-      position: absolute;
-      display: block;
-      background: #03e9f4;
-    }
 
+    /* Animation Spans & Keyframes */
+    .play-now-btn span { position: absolute; display: block; background: #03e9f4; }
     .play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #03e9f4); animation: btn-anim1 1s linear infinite; }
     .play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, #03e9f4); animation: btn-anim2 1s linear infinite; animation-delay: .25s; }
     .play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, #03e9f4); animation: btn-anim3 1s linear infinite; animation-delay: .5s; }
     .play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, #03e9f4); animation: btn-anim4 1s linear infinite; animation-delay: .75s; }
-  
+
     @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
     @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
     @keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
     @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
-
