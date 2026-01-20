@@ -11,7 +11,7 @@
       /* Background stays fixed and full-screen */
       background: 
         linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), 
-        url('Gemini_Generated_Image_tjcevutjcevutjce.jpg') no-repeat center center fixed;
+        url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
     }
@@ -68,3 +68,4 @@
     @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
     @keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
     @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
+
