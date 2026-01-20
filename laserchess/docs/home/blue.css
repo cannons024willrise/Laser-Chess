@@ -1,84 +1,25 @@
 /* ============================================================
-   TAILWIND CDN OVERRIDES 
+   1. TAILWIND BANNER OVERRIDES
    ============================================================ */
+/* Top Header */
 [class*="bg-white"] {
     background-color: rgba(0, 0, 0, 0.4) !important;
     border-bottom: 1px solid rgba(3, 233, 244, 0.3) !important;
 }
 
-[class*="bg-indigo"], [class*="bg-blue"] {
+/* Discord/Notice Banner */
+[class*="bg-indigo"], [class*="bg-blue-600"], .discord-banner {
     background-color: rgba(88, 101, 242, 0.2) !important;
     border: 1px solid rgba(88, 101, 242, 0.4) !important;
 }
 
-[class*="text-gray-"], [class*="text-slate-"], [class*="text-black"], .text-black {
+/* Force text to white for visibility */
+[class*="text-gray-900"], .text-black {
     color: #ffffff !important;
 }
 
-header a, .header a, header button {
-    color: #03e9f4 !important;
-}
-
 /* ============================================================
-   HALF-TRANSPARENT TOGGLE (Restored & Refined)
-   ============================================================ */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  /* Half-transparent background */
-  background-color: rgba(255, 255, 255, 0.15);
-  transition: .4s;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  /* Translucent Blue background when ON */
-  background-color: rgba(3, 233, 244, 0.4);
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px rgba(3, 233, 244, 0.4);
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
-
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
-/* ============================================================
-   CORE PAGE STYLES
+   2. CORE PAGE & BACKGROUND
    ============================================================ */
 @font-face {
   font-family: customfont;
@@ -103,7 +44,65 @@ body {
 }
 
 /* ============================================================
-   ANIMATED BUTTON & SPANS
+   3. RESTORED TOGGLE (FROM YOUR OLD CODE + TRANSLUCENCY)
+   ============================================================ */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  /* MODIFICATION: Half-transparent instead of solid */
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+/* Functional sliding logic from your old code */
+input:checked + .slider {
+  /* MODIFICATION: Translucent Cyan instead of solid blue/red */
+  background-color: rgba(3, 233, 244, 0.4) !important;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* ============================================================
+   4. RESTORED BUTTON ANIMATIONS
    ============================================================ */
 .play-now-btn {
   position: relative;
@@ -129,41 +128,11 @@ body {
   box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0 100px #03e9f4;
 }
 
-.play-now-btn span {
-  position: absolute;
-  display: block;
-}
-
-.play-now-btn span:nth-child(1) {
-  top: 0; left: -100%;
-  width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, #03e9f4);
-  animation: btn-anim1 1s linear infinite;
-}
-
-.play-now-btn span:nth-child(2) {
-  top: -100%; right: 0;
-  width: 2px; height: 100%;
-  background: linear-gradient(180deg, transparent, #03e9f4);
-  animation: btn-anim2 1s linear infinite;
-  animation-delay: .25s;
-}
-
-.play-now-btn span:nth-child(3) {
-  bottom: 0; right: -100%;
-  width: 100%; height: 2px;
-  background: linear-gradient(270deg, transparent, #03e9f4);
-  animation: btn-anim3 1s linear infinite;
-  animation-delay: .5s;
-}
-
-.play-now-btn span:nth-child(4) {
-  bottom: -100%; left: 0;
-  width: 2px; height: 100%;
-  background: linear-gradient(360deg, transparent, #03e9f4);
-  animation: btn-anim4 1s linear infinite;
-  animation-delay: .75s;
-}
+.play-now-btn span { position: absolute; display: block; background: #03e9f4; }
+.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #03e9f4); animation: btn-anim1 1s linear infinite; }
+.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, #03e9f4); animation: btn-anim2 1s linear infinite; animation-delay: .25s; }
+.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, #03e9f4); animation: btn-anim3 1s linear infinite; animation-delay: .5s; }
+.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, #03e9f4); animation: btn-anim4 1s linear infinite; animation-delay: .75s; }
 
 @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
 @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
