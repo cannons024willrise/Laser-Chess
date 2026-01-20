@@ -10,10 +10,7 @@
       font-family: customfont;
       background: linear-gradient(#141e30, #243b55);
     }
-background: 
-    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), /* Darkens for readability */
-    url('Gemini_Generated_Image_tjcevutjcevutjce.jpg') no-repeat center center fixed; 
-  background-size: cover;
+
   
     /* === PLAY NOW Animated Button (Blue) === */
     .play-now-btn {
@@ -93,4 +90,5 @@ background:
       0%   { bottom: -100%; }
       50%,100% { bottom: 100%; }
     }
+
 
