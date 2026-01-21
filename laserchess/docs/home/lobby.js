@@ -1,41 +1,31 @@
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-window.creatematchrequest = async (event) => {
+window.creatematchrequest = (event) => {
     if (event) event.preventDefault();
 
     const auth = getAuth();
     const user = auth.currentUser;
 
     if (!user) {
-        console.error("❌ Auth not ready.");
+        console.error("❌ Auth not ready - Cannot find UID.");
         return;
     }
 
-    // 1. Create the Object
-    const matchData = {
-        USER_UID: user.uid,
+    // This is the clean structure you want for the DB node
+    const nodeData = {
+        COLOR: document.getElementById('sideToggle')?.checked ? "blue" : "red",
         TIME: Date.now(),
-        TYPE: "standard",
-        COLOR: document.getElementById('sideToggle')?.checked ? "blue" : "red"
+        TYPE: "standard"
     };
 
-    // 2. Console the Object
-    console.log("--- ATTEMPTING BARE WRITE ---");
-    console.log(matchData);
+    // This is the 'Wrapper' we send to the Worker so it knows the Node Name
+    const payload = {
+        USER_UID: user.uid, // Worker will use this for the path: /queue/USER_UID
+        DATA: nodeData      // Worker will write this inside the path
+    };
 
-    try {
-        // 3. Simple POST to Worker
-        const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
-            method: "POST",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify(matchData)
-        });
-
-        const statusText = await response.text();
-        console.log("✅ Worker Response:", statusText);
-        console.log("Check your Firebase Realtime Database now.");
-
-    } catch (err) {
-        console.error("❌ Network/Worker Error:", err);
-    }
+    console.log("--- CLIENT-SIDE VERIFICATION ---");
+    console.log("Target Node Name (UID):", payload.USER_UID);
+    console.log("Data to be written inside:", payload.DATA);
+    console.log("-------------------------------");
 };
