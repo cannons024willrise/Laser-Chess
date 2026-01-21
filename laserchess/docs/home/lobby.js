@@ -7,25 +7,27 @@ window.creatematchrequest = (event) => {
     const user = auth.currentUser;
 
     if (!user) {
-        console.error("❌ Auth not ready - Cannot find UID.");
+        console.error("❌ Auth not ready.");
         return;
     }
 
-    // This is the clean structure you want for the DB node
-    const nodeData = {
+    // This is the UID that will become the Node Name (The Object Name)
+    const objectName = user.uid;
+
+    // This is the content that goes INSIDE that object
+    const objectContent = {
         COLOR: document.getElementById('sideToggle')?.checked ? "blue" : "red",
         TIME: Date.now(),
         TYPE: "standard"
     };
 
-    // This is the 'Wrapper' we send to the Worker so it knows the Node Name
-    const payload = {
-        USER_UID: user.uid, // Worker will use this for the path: /queue/USER_UID
-        DATA: nodeData      // Worker will write this inside the path
+    // The final payload for the Worker
+    const finalPayload = {
+        [objectName]: objectContent
     };
 
-    console.log("--- CLIENT-SIDE VERIFICATION ---");
-    console.log("Target Node Name (UID):", payload.USER_UID);
-    console.log("Data to be written inside:", payload.DATA);
-    console.log("-------------------------------");
+    console.log("--- CLIENT SIDE OBJECT VERIFICATION ---");
+    console.log("This will be the structure in Firebase:");
+    console.log(JSON.stringify(finalPayload, null, 2));
+    console.log("---------------------------------------");
 };
