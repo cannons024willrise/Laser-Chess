@@ -1,29 +1,42 @@
-// lobby.js
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-// DO NOT initializeApp here if it's already done in homeauthcheck.js
-const auth = getAuth(); 
-
 window.creatematchrequest = async () => {
   const user = auth.currentUser;
-  
-  if (!user) {
-    alert("Auth is still loading. Please try again in a second!");
-    return;
-  }
+  if (!user) return alert("Please log in first!");
 
-  // Your worker logic...
-  console.log("Using UID:", user.uid);
+  const btn = document.querySelector('.play-now-btn');
+  const selectedColor = document.getElementById('sideToggle').checked ? "blue" : "red";
   
+  btn.innerText = "Searching...";
+  btn.disabled = true;
+
+  const payload = {
+    uid: user.uid,
+    time: Date.now(),
+    type: "classic",
+    color: selectedColor
+  };
+
   try {
-    const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
+    await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uid: user.uid })
+      body: JSON.stringify(payload)
     });
-    const data = await response.json();
-    alert("Success! Echoed UID: " + data.echo);
-  } catch (err) {
-    console.error("Worker connection failed.");
+
+    // Listen for the matchId to be written to YOUR user node
+    const matchRef = ref(db, `users/${user.uid}/matchId`);
+    onValue(matchRef, (snapshot) => {
+      const matchId = snapshot.val();
+      if (matchId) {
+        off(matchRef); // Unsubscribe
+        console.log("Match established:", matchId);
+        // Change to your game page
+        window.location.href = `game.html?matchId=${matchId}`;
+      }
+    });
+
+  } catch (error) {
+    console.error("Matchmaking failed:", error);
+    btn.disabled = false;
+    btn.innerText = "Send Match Request";
   }
 };
