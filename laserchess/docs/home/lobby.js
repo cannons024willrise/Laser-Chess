@@ -31,3 +31,19 @@ window.creatematchrequest = (event) => {
     console.log(JSON.stringify(finalPayload, null, 2));
     console.log("---------------------------------------");
 };
+
+console.log("--- SENDING TO WORKER ---");
+console.log(JSON.stringify(finalPayload, null, 2));
+
+try {
+    const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" }, // Keeps quota usage low
+        body: JSON.stringify(finalPayload)
+    });
+
+    const result = await response.text();
+    console.log("✅ Worker Says:", result);
+} catch (err) {
+    console.error("❌ Network Error:", err);
+}
