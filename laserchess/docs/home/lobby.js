@@ -1,37 +1,49 @@
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-auth.js";
 
-// Get the auth instance within this module
+
+// We assume Firebase was initialized in 'homeauthcheck.js'
 const auth = getAuth();
 
 window.creatematchrequest = async () => {
-  // Use the local 'auth' variable defined above
   const user = auth.currentUser;
 
+  // 1. Safety check for Auth state
   if (!user) {
-    alert("Authentication in progress... please try again in a second.");
-    console.log("Auth State:", auth); // Debug to see if auth is initialized
+    alert("Please sign in or wait a moment for auth to initialize.");
     return;
   }
 
   const btn = document.querySelector('.play-now-btn');
-  btn.innerText = "Triggering...";
+  const originalText = btn.innerHTML;
+  
+  // UI Feedback
+  btn.disabled = true;
+  btn.innerHTML = "<span></span>Connecting to Worker...";
 
   try {
+    // 2. The Request to your Cloudflare Worker
     const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json" 
+      headers: {
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ uid: user.uid })
+      body: JSON.stringify({ 
+        uid: user.uid 
+      }),
     });
 
+    if (!response.ok) throw new Error("Worker responded with error");
+
     const data = await response.json();
-    alert("Worker Echo Success! UID: " + data.echo);
     
-  } catch (err) {
-    console.error("Worker connection failed:", err);
-    alert("Check console for CORS or Network errors.");
+    // 3. Success Echo
+    console.log("Worker Response:", data);
+    alert(`Success! Worker recognized UID: ${data.echo}`);
+
+  } catch (error) {
+    console.error("Integration Error:", error);
+    alert("Connection failed. Check if Worker is deployed and CORS is set.");
   } finally {
-    btn.innerText = "Send Match Request";
+    btn.disabled = false;
+    btn.innerHTML = originalText;
   }
 };
