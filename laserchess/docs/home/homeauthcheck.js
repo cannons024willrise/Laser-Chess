@@ -1,8 +1,7 @@
-// docs/home/homeauthcheck.js
-// Minimal compat auth-check for Home page.
-// Requires: firebase-app-compat.js and firebase-auth-compat.js loaded BEFORE this script.
+// firebase-config.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Use the same Firebase project as your working Auth code:
 const firebaseConfig = {
   apiKey: "AIzaSyBuT7P1iTdXcZW-y05DX-kseuLrPGmaWSs",
   authDomain: "laserchess-web-free.firebaseapp.com",
@@ -13,52 +12,21 @@ const firebaseConfig = {
   measurementId: "G-KC5J6JPX2M"
 };
 
-(function() {
-  if (typeof firebase === 'undefined' || !firebase.auth) {
-    console.warn('homeauthcheck: Firebase compat SDK not found. Load firebase-app-compat.js and firebase-auth-compat.js first.');
-    return;
-  }
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
 
-  // Initialize only if not already initialized (safe when other pages also init)
-  if (!firebase.apps || !firebase.apps.length) {
-    try {
-      firebase.initializeApp(HOME_FIREBASE_CONFIG);
-      console.log('homeauthcheck: Firebase initialized for project', HOME_FIREBASE_CONFIG.projectId);
-    } catch (e) {
-      console.warn('homeauthcheck: initializeApp error (ignored):', e);
-    }
+// auth-check.js
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { auth } from "./firebase-config.js";
+
+onAuthStateChanged(auth, (user) => {
+  // Check if user is logged in AND has verified their email
+  if (!user || !user.emailVerified) {
+    console.warn("Unauthorized or unverified access. Redirecting...");
+    window.location.replace("../../login/login.html");
   } else {
-    // already initialized; log which project is active
-    try {
-      console.log('homeauthcheck: Firebase already initialized for project', firebase.app().options.projectId);
-    } catch (e) {}
+    // Reveal the UI once authenticated
+    document.body.style.display = "block";
+    console.log("Welcome, Strategist:", user.email);
   }
-
-  const auth = firebase.auth();
-
-  // Sign-out helper wired to your "Sign out" link
-  window.handleSignOut = async function() {
-    try {
-      await auth.signOut();
-      console.log('Signed out.');
-      window.location.replace('/Auth/login.html');
-    } catch (e) {
-      console.error('Sign out failed:', e);
-    }
-  };
-
-  // Main check — redirect to login if not signed in
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      console.log('homeauthcheck: Signed in as', user.email || user.uid);
-      const el = document.getElementById('userEmail');
-      if (el) el.textContent = user.email || user.displayName || 'Account';
-    } else {
-      console.warn('homeauthcheck: Not signed in — redirecting to /Auth/login.html');
-      // Use relative path to your Auth login page (adjust only if your hosting uses a different route)
-      window.location.replace('/Auth/login.html');
-    }
-  });
-})();
-
-
+});
