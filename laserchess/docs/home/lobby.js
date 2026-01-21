@@ -1,6 +1,6 @@
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-window.creatematchrequest = (event) => {
+window.creatematchrequest = async (event) => {
     if (event) event.preventDefault();
 
     const auth = getAuth();
@@ -11,39 +11,34 @@ window.creatematchrequest = (event) => {
         return;
     }
 
-    // This is the UID that will become the Node Name (The Object Name)
-    const objectName = user.uid;
-
-    // This is the content that goes INSIDE that object
+    // 1. Define the contents
     const objectContent = {
         COLOR: document.getElementById('sideToggle')?.checked ? "blue" : "red",
         TIME: Date.now(),
         TYPE: "standard"
     };
 
-    // The final payload for the Worker
+    // 2. Define the payload (using the UID as the Key)
     const finalPayload = {
-        [objectName]: objectContent
+        [user.uid]: objectContent
     };
 
-    console.log("--- CLIENT SIDE OBJECT VERIFICATION ---");
-    console.log("This will be the structure in Firebase:");
-    console.log(JSON.stringify(finalPayload, null, 2));
-    console.log("---------------------------------------");
+    // 3. Log it (No more ReferenceError)
+    console.log("--- SENDING TO WORKER ---");
+    console.log(finalPayload);
+
+    try {
+        // 4. Send to Worker
+        const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(finalPayload)
+        });
+
+        const result = await response.text();
+        console.log("✅ Worker Response:", result);
+
+    } catch (err) {
+        console.error("❌ Network Error:", err);
+    }
 };
-
-console.log("--- SENDING TO WORKER ---");
-console.log(JSON.stringify(finalPayload, null, 2));
-
-try {
-    const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" }, // Keeps quota usage low
-        body: JSON.stringify(finalPayload)
-    });
-
-    const result = await response.text();
-    console.log("✅ Worker Says:", result);
-} catch (err) {
-    console.error("❌ Network Error:", err);
-}
