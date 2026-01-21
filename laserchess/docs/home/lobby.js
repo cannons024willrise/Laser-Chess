@@ -1,33 +1,37 @@
-// window.creatematchrequest is called by the onclick in your HTML
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-auth.js";
+
+// Get the auth instance within this module
+const auth = getAuth();
+
 window.creatematchrequest = async () => {
+  // Use the local 'auth' variable defined above
   const user = auth.currentUser;
 
   if (!user) {
-    alert("Auth not ready or user not logged in!");
+    alert("Authentication in progress... please try again in a second.");
+    console.log("Auth State:", auth); // Debug to see if auth is initialized
     return;
   }
 
-  console.log("Sending UID to Worker:", user.uid);
+  const btn = document.querySelector('.play-now-btn');
+  btn.innerText = "Triggering...";
 
   try {
     const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
+      headers: { 
+        "Content-Type": "application/json" 
       },
       body: JSON.stringify({ uid: user.uid })
     });
 
     const data = await response.json();
-
-    if (response.ok) {
-      console.log("Worker Echo:", data.echo);
-      alert(`Success! Worker echoed your UID: ${data.echo}`);
-    } else {
-      console.error("Worker error:", data);
-    }
+    alert("Worker Echo Success! UID: " + data.echo);
+    
   } catch (err) {
-    console.error("Network error:", err);
-    alert("Could not connect to Worker. Check console.");
+    console.error("Worker connection failed:", err);
+    alert("Check console for CORS or Network errors.");
+  } finally {
+    btn.innerText = "Send Match Request";
   }
 };
