@@ -1,33 +1,47 @@
-// auth-check.js
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { auth } from "./firebase-config.js";
+// homeauthcheck.js
 
-onAuthStateChanged(auth, (user) => {
-  if (!user || !user.emailVerified) {
-    console.warn("Unauthorized or unverified access. Redirecting...");
-    window.location.replace("../../login/login.html");
-  } else {
-    // 1. Find the Account label and swap text with the user's email
-    // This assumes your link has the class 'account-link'
-    const accountLabel = document.querySelector('.account-link');
-    if (accountLabel) {
-      accountLabel.textContent = user.email; 
+// 1. Initial Config (Necessary because home.html doesn't have it)
+const firebaseConfig = {
+    apiKey: "AIzaSyBuT7P1iTdXcZW-y05DX-kseuLrPGmaWSs",
+    authDomain: "laserchess-web-free.firebaseapp.com",
+    projectId: "laserchess-web-free",
+    storageBucket: "laserchess-web-free.firebasestorage.app",
+    messagingSenderId: "887464510754",
+    appId: "1:887464510754:web:aee6938681543602a4517b"
+};
+
+// Initialize Firebase for the Home Page
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+
+// 2. The Gatekeeper Logic
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // Check if they verified their email (matching your login.html logic)
+        if (user.emailVerified || user.providerData[0].providerId === 'google.com') {
+            console.log("Access Granted:", user.email);
+            
+            // Update the 'Account' link with the user's email
+            const emailLink = document.getElementById('userEmail');
+            if (emailLink) {
+                emailLink.textContent = user.email;
+            }
+        } else {
+            // Logged in but not verified
+            window.location.replace("../../login/login.html");
+        }
+    } else {
+        // Not logged in at all
+        window.location.replace("../../login/login.html");
     }
-
-    // 2. Reveal the UI once authenticated
-    document.body.style.display = "block";
-    console.log("Verified Strategist:", user.email);
-  }
 });
 
-// 3. Handle Sign Out (Add this to make the button functional)
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth).then(() => {
-      window.location.replace("../../login/login.html");
-    }).catch((error) => {
-      console.error("Sign out error:", error);
+// 3. Global Sign Out Function (for the onclick in your HTML)
+window.handleSignOut = function() {
+    auth.signOut().then(() => {
+        window.location.replace("../../login/login.html");
     });
-  });
-}
+};
