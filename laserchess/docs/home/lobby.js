@@ -1,36 +1,33 @@
-// lobby.js
-
-const WORKER_URL = "https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev";
-
+// window.creatematchrequest is called by the onclick in your HTML
 window.creatematchrequest = async () => {
-  console.log("Button clicked! Triggering Worker...");
+  const user = auth.currentUser;
 
-  const btn = document.querySelector('.play-now-btn');
-  btn.innerText = "Triggering...";
-  btn.style.opacity = "0.5";
+  if (!user) {
+    alert("Auth not ready or user not logged in!");
+    return;
+  }
+
+  console.log("Sending UID to Worker:", user.uid);
 
   try {
-    const response = await fetch(WORKER_URL, {
+    const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
-      // Sending a test UID
-      body: JSON.stringify({ uid: "test_user_123" }),
+      body: JSON.stringify({ uid: user.uid })
     });
 
-    const result = await response.json();
-    
-    // Success Check
-    console.log("Response from Worker:", result);
-    alert("Connection Success: " + result.message);
+    const data = await response.json();
 
-  } catch (error) {
-    console.error("Connection Failed:", error);
-    alert("Worker failed to trigger. Check console.");
-  } finally {
-    btn.innerText = "Send Match Request";
-    btn.style.opacity = "1";
+    if (response.ok) {
+      console.log("Worker Echo:", data.echo);
+      alert(`Success! Worker echoed your UID: ${data.echo}`);
+    } else {
+      console.error("Worker error:", data);
+    }
+  } catch (err) {
+    console.error("Network error:", err);
+    alert("Could not connect to Worker. Check console.");
   }
 };
-
