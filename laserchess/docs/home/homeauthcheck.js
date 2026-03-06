@@ -12,76 +12,55 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-
-// Global variable so the UID is always ready
 let currentUID = null;
 
-// --- MATCHMAKING LOGIC ---
-async function startMatchmaking(color) {
-  if (!currentUID) {
-    console.error("Matchmaking blocked: No UID found yet.");
-    alert("Still authenticating... please wait a second.");
-    return;
-  }
-
-  try {
-    const user = auth.currentUser;
-    // Fast token retrieval
-    const idToken = await user.getIdToken();
-
-    console.log(`Sending Match Request: Color=${color}, UID=${currentUID}`);
-
-    // REPLACE 'your-zuplo-url' with your actual Zuplo URL!
-    const response = await fetch("https://your-zuplo-url.zuplo.io/join-lobby", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${idToken}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ color: color })
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      if (result.status === "matched") {
-        console.log("Match found!", result.matchId);
-        localStorage.setItem("match_ticket", result.ticket);
-        alert(`Match Found! Room: ${result.matchId}`);
-      } else {
-        alert("Searching for opponent...");
-      }
-    } else {
-      console.error("Zuplo error:", result);
-    }
-  } catch (error) {
-    console.error("Network error:", error);
-  }
-}
-
-// --- GATEKEEPER LOGIC ---
+// --- GATEKEEPER ---
 onAuthStateChanged(auth, (user) => {
   if (user && (user.emailVerified || user.providerData[0]?.providerId === 'google.com')) {
-    // UID is now globally available
     currentUID = user.uid; 
     console.log("Global UID Set:", currentUID);
-
     const emailLink = document.getElementById('userEmail');
     if (emailLink) emailLink.textContent = user.email;
-    
     document.body.style.display = "block";
   } else {
     currentUID = null;
-
-
-    // --- ONE-TIME EVENT LISTENERS ---
-document.getElementById('btnPlayRed')?.addEventListener('click', () => startMatchmaking('red'));
-document.getElementById('btnPlayBlue')?.addEventListener('click', () => startMatchmaking('blue'));
-
-document.getElementById('signOutBtn')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  signOut(auth).then(() => {
-    window.location.replace("../../login/login.html");
-  });
+    if (!window.location.pathname.includes("login.html")) {
+        window.location.replace("../../login/login.html");
+    }
+  }
 });
 
+// --- SIGN OUT (The Fix) ---
+const signOutBtn = document.getElementById('signOutBtn');
+if (signOutBtn) {
+  signOutBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    console.log("Attempting Sign Out...");
+    signOut(auth)
+      .then(() => {
+        console.log("Sign Out Success");
+        window.location.replace("../../login/login.html");
+      })
+      .catch((error) => console.error("Sign Out Error:", error));
+  });
+}
+
+// --- MATCHMAKING ---
+async function startMatchmaking(color) {
+  if (!currentUID) return;
+  try {
+    const idToken = await auth.currentUser.getIdToken();
+    const response = await fetch("https://your-zuplo-url.zuplo.io/join-lobby", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${idToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ color: color })
+    });
+    const result = await response.json();
+    console.log("Result:", result);
+  } catch (err) {
+    console.error("Matchmaking Error:", err);
+  }
+}
+
+document.getElementById('btnPlayRed')?.addEventListener('click', () => startMatchmaking('red'));
+document.getElementById('btnPlayBlue')?.addEventListener('click', () => startMatchmaking('blue'));
