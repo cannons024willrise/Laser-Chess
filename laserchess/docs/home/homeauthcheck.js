@@ -13,12 +13,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Global variable to ensure UID is accessible to the whole script
+// Global variable so the UID is always ready
 let currentUID = null;
 
 // --- MATCHMAKING LOGIC ---
 async function startMatchmaking(color) {
-  // We check the global currentUID instead of the flaky auth.currentUser
   if (!currentUID) {
     console.error("Matchmaking blocked: No UID found yet.");
     alert("Still authenticating... please wait a second.");
@@ -27,10 +26,12 @@ async function startMatchmaking(color) {
 
   try {
     const user = auth.currentUser;
+    // Fast token retrieval
     const idToken = await user.getIdToken();
 
     console.log(`Sending Match Request: Color=${color}, UID=${currentUID}`);
 
+    // REPLACE 'your-zuplo-url' with your actual Zuplo URL!
     const response = await fetch("https://your-zuplo-url.zuplo.io/join-lobby", {
       method: "POST",
       headers: {
@@ -44,23 +45,24 @@ async function startMatchmaking(color) {
 
     if (response.ok) {
       if (result.status === "matched") {
+        console.log("Match found!", result.matchId);
         localStorage.setItem("match_ticket", result.ticket);
         alert(`Match Found! Room: ${result.matchId}`);
       } else {
         alert("Searching for opponent...");
       }
     } else {
-      console.error("Zuplo rejected request:", result);
+      console.error("Zuplo error:", result);
     }
   } catch (error) {
-    console.error("Fetch failed:", error);
+    console.error("Network error:", error);
   }
 }
 
 // --- GATEKEEPER LOGIC ---
 onAuthStateChanged(auth, (user) => {
   if (user && (user.emailVerified || user.providerData[0]?.providerId === 'google.com')) {
-    // LOCK THE UID INTO THE GLOBAL VARIABLE
+    // UID is now globally available
     currentUID = user.uid; 
     console.log("Global UID Set:", currentUID);
 
@@ -70,17 +72,3 @@ onAuthStateChanged(auth, (user) => {
     document.body.style.display = "block";
   } else {
     currentUID = null;
-    window.location.replace("../../login/login.html");
-  }
-});
-
-// --- EVENT LISTENERS ---
-document.getElementById('btnPlayRed')?.addEventListener('click', () => startMatchmaking('red'));
-document.getElementById('btnPlayBlue')?.addEventListener('click', () => startMatchmaking('blue'));
-
-document.getElementById('signOutBtn')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  signOut(auth).then(() => {
-    window.location.replace("../../login/login.html");
-  });
-});
