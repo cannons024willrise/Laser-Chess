@@ -13,24 +13,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Global variable to ensure UID is accessible to the whole script
+let currentUID = null;
+
 // --- MATCHMAKING LOGIC ---
 async function startMatchmaking(color) {
-  const user = auth.currentUser;
-  
-  if (!user) {
-    alert("You must be logged in to play!");
+  // We check the global currentUID instead of the flaky auth.currentUser
+  if (!currentUID) {
+    console.error("Matchmaking blocked: No UID found yet.");
+    alert("Still authenticating... please wait a second.");
     return;
   }
 
   try {
-    // 1. Obtain the JWT (ID Token) from Firebase.
-    // Zuplo will use this to verify the user identity server-side.
+    const user = auth.currentUser;
     const idToken = await user.getIdToken();
 
-    console.log(`Requesting match for color: ${color} (UID: ${user.uid})`);
+    console.log(`Sending Match Request: Color=${color}, UID=${currentUID}`);
 
-    // 2. Call your Zuplo Gateway
-    // REPLACE 'your-zuplo-url' with your actual Zuplo Gateway URL (e.g., https://laser-chess-api-main-abc123.zuplo.io/join-lobby)
     const response = await fetch("https://your-zuplo-url.zuplo.io/join-lobby", {
       method: "POST",
       headers: {
@@ -44,24 +44,43 @@ async function startMatchmaking(color) {
 
     if (response.ok) {
       if (result.status === "matched") {
-        console.log("MATCH FOUND!", result.matchId);
-        // Store the signed ticket for future Gate B validation
         localStorage.setItem("match_ticket", result.ticket);
-        alert(`Match Found! Room ID: ${result.matchId}`);
-        // Optional: window.location.href = `../game/game.html?id=${result.matchId}`;
+        alert(`Match Found! Room: ${result.matchId}`);
       } else {
-        console.log("Searching...", result.message);
-        alert("Searching for opponent... You are now in the lobby.");
+        alert("Searching for opponent...");
       }
     } else {
-      console.error("Matchmaking error:", result.error || result);
-      alert("Matchmaking failed. Check the console for details.");
+      console.error("Zuplo rejected request:", result);
     }
   } catch (error) {
-    console.error("Connection error:", error);
-    alert("Could not connect to the matchmaking server.");
+    console.error("Fetch failed:", error);
   }
 }
 
 // --- GATEKEEPER LOGIC ---
 onAuthStateChanged(auth, (user) => {
+  if (user && (user.emailVerified || user.providerData[0]?.providerId === 'google.com')) {
+    // LOCK THE UID INTO THE GLOBAL VARIABLE
+    currentUID = user.uid; 
+    console.log("Global UID Set:", currentUID);
+
+    const emailLink = document.getElementById('userEmail');
+    if (emailLink) emailLink.textContent = user.email;
+    
+    document.body.style.display = "block";
+  } else {
+    currentUID = null;
+    window.location.replace("../../login/login.html");
+  }
+});
+
+// --- EVENT LISTENERS ---
+document.getElementById('btnPlayRed')?.addEventListener('click', () => startMatchmaking('red'));
+document.getElementById('btnPlayBlue')?.addEventListener('click', () => startMatchmaking('blue'));
+
+document.getElementById('signOutBtn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  signOut(auth).then(() => {
+    window.location.replace("../../login/login.html");
+  });
+});
