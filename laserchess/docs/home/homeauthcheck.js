@@ -30,37 +30,35 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// --- SIGN OUT (The Fix) ---
+// --- SIGN OUT LOGIC ---
+// We attach the listener directly to the ID from your HTML
 const signOutBtn = document.getElementById('signOutBtn');
 if (signOutBtn) {
   signOutBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    console.log("Attempting Sign Out...");
+    e.preventDefault(); // Stop the '#' link from jumping the page
+    console.log("Sign Out Button clicked. Triggering Firebase SignOut...");
+    
     signOut(auth)
       .then(() => {
-        console.log("Sign Out Success");
+        console.log("Successfully signed out of Firebase.");
         window.location.replace("../../login/login.html");
       })
-      .catch((error) => console.error("Sign Out Error:", error));
+      .catch((error) => {
+        console.error("Error during sign out:", error);
+      });
+  });
+} else {
+  console.error("Could not find the 'signOutBtn' element in the HTML.");
+}
+
+// --- MATCHMAKING STUB ---
+// Keeping this here so your play button doesn't break, 
+// but focusing only on the event connection.
+const playBtn = document.getElementById('btnSendRequest');
+if (playBtn) {
+  playBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    console.log("Match request button clicked for UID:", currentUID);
+    // Add your matchmaking fetch here when ready
   });
 }
-
-// --- MATCHMAKING ---
-async function startMatchmaking(color) {
-  if (!currentUID) return;
-  try {
-    const idToken = await auth.currentUser.getIdToken();
-    const response = await fetch("https://your-zuplo-url.zuplo.io/join-lobby", {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${idToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ color: color })
-    });
-    const result = await response.json();
-    console.log("Result:", result);
-  } catch (err) {
-    console.error("Matchmaking Error:", err);
-  }
-}
-
-document.getElementById('btnPlayRed')?.addEventListener('click', () => startMatchmaking('red'));
-document.getElementById('btnPlayBlue')?.addEventListener('click', () => startMatchmaking('blue'));
