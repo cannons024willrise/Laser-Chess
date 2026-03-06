@@ -72,3 +72,16 @@ onAuthStateChanged(auth, (user) => {
     document.body.style.display = "block";
   } else {
     currentUID = null;
+
+
+    // --- ONE-TIME EVENT LISTENERS ---
+document.getElementById('btnPlayRed')?.addEventListener('click', () => startMatchmaking('red'));
+document.getElementById('btnPlayBlue')?.addEventListener('click', () => startMatchmaking('blue'));
+
+document.getElementById('signOutBtn')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  signOut(auth).then(() => {
+    window.location.replace("../../login/login.html");
+  });
+});
+
