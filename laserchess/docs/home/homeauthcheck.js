@@ -23,14 +23,14 @@ async function startMatchmaking(color) {
   }
 
   try {
-    // 1. Get the JWT (ID Token). 
-    // Removed 'true' so it uses the fast cached token unless expired!
+    // 1. Obtain the JWT (ID Token) from Firebase.
+    // Zuplo will use this to verify the user identity server-side.
     const idToken = await user.getIdToken();
 
-    console.log("Requesting match for color:", color);
+    console.log(`Requesting match for color: ${color} (UID: ${user.uid})`);
 
     // 2. Call your Zuplo Gateway
-    // REPLACE 'your-zuplo-url' with your actual Zuplo Gateway URL
+    // REPLACE 'your-zuplo-url' with your actual Zuplo Gateway URL (e.g., https://laser-chess-api-main-abc123.zuplo.io/join-lobby)
     const response = await fetch("https://your-zuplo-url.zuplo.io/join-lobby", {
       method: "POST",
       headers: {
@@ -45,17 +45,17 @@ async function startMatchmaking(color) {
     if (response.ok) {
       if (result.status === "matched") {
         console.log("MATCH FOUND!", result.matchId);
-        // Store the signed ticket for Gate B
+        // Store the signed ticket for future Gate B validation
         localStorage.setItem("match_ticket", result.ticket);
-        alert(`Match Found! Room: ${result.matchId}`);
-        // window.location.href = `../game/game.html?id=${result.matchId}`;
+        alert(`Match Found! Room ID: ${result.matchId}`);
+        // Optional: window.location.href = `../game/game.html?id=${result.matchId}`;
       } else {
         console.log("Searching...", result.message);
-        alert("Added to lobby. Waiting for an opponent...");
+        alert("Searching for opponent... You are now in the lobby.");
       }
     } else {
-      console.error("Matchmaking error:", result.error);
-      alert("Matchmaking failed. Check console.");
+      console.error("Matchmaking error:", result.error || result);
+      alert("Matchmaking failed. Check the console for details.");
     }
   } catch (error) {
     console.error("Connection error:", error);
@@ -65,28 +65,3 @@ async function startMatchmaking(color) {
 
 // --- GATEKEEPER LOGIC ---
 onAuthStateChanged(auth, (user) => {
-  if (user && (user.emailVerified || user.providerData[0]?.providerId === 'google.com')) {
-    // 1. Set user email/UID in header
-    const emailLink = document.getElementById('userEmail');
-    if (emailLink) emailLink.textContent = user.email;
-    
-    // 2. Reveal the body
-    document.body.style.display = "block";
-  } else {
-    // 3. Not logged in or not verified
-    window.location.replace("../../login/login.html");
-  }
-});
-
-// --- ONE-TIME EVENT LISTENERS ---
-// Attached safely outside the observer so they don't multiply!
-document.getElementById('btnPlayRed')?.addEventListener('click', () => startMatchmaking('red'));
-document.getElementById('btnPlayBlue')?.addEventListener('click', () => startMatchmaking('blue'));
-
-// Sign out listener
-document.getElementById('signOutBtn')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  signOut(auth).then(() => {
-    window.location.replace("../../login/login.html");
-  });
-});
