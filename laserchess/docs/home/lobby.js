@@ -1,44 +1,24 @@
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+// Inside lobby.js
+async function creatematchrequest(event) {
+    const isBlue = document.getElementById('sideToggle').checked;
+    const playBtn = event.currentTarget;
+    
+    // 1. Visual Feedback (Instant feel)
+    playBtn.disabled = true;
+    playBtn.innerText = "Finding Strategist...";
 
-window.creatematchrequest = async (event) => {
-    if (event) event.preventDefault();
+    // 2. The Worker Handshake
+    const response = await fetch('https://your-laser-chess-worker.pages.dev/api/matchmake', {
+        method: 'POST',
+        body: JSON.stringify({ 
+            side: isBlue ? 'blue' : 'red',
+            uid: getAuth().currentUser.uid 
+        })
+    });
 
-    const auth = getAuth();
-    const user = auth.currentUser;
+    const { matchId } = await response.json();
 
-    if (!user) {
-        console.error("❌ Auth not ready.");
-        return;
-    }
-
-    // 1. Define the contents
-    const objectContent = {
-        COLOR: document.getElementById('sideToggle')?.checked ? "blue" : "red",
-        TIME: Date.now(),
-        TYPE: "standard"
-    };
-
-    // 2. Define the payload (using the UID as the Key)
-    const finalPayload = {
-        [user.uid]: objectContent
-    };
-
-    // 3. Log it (No more ReferenceError)
-    console.log("--- SENDING TO WORKER ---");
-    console.log(finalPayload);
-
-    try {
-        // 4. Send to Worker
-        const response = await fetch("https://laserchessnexus-matchmanager-v-alpha.later5143.workers.dev", {
-            method: "POST",
-            headers: { "Content-Type": "text/plain" },
-            body: JSON.stringify(finalPayload)
-        });
-
-        const result = await response.text();
-        console.log("✅ Worker Response:", result);
-
-    } catch (err) {
-        console.error("❌ Network Error:", err);
-    }
-};
+    // 3. TRIGGER THE REAL-TIME READ
+    // Now that we have a matchId, we open the connection slot (1/100)
+    startRealtimeSync(matchId);
+}
