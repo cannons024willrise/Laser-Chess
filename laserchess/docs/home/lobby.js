@@ -2,30 +2,33 @@
 import { db, auth } from "./homeauthcheck.js";
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Attach to window so the HTML onclick can find it
 window.creatematchrequest = function(event) {
     const user = auth.currentUser;
     if (!user) {
-        console.error("RTR TEST: User not found in Auth state.");
+        console.error("RTR ERROR: No authenticated user.");
         return;
     }
 
-    console.log("RTR TEST: Starting listener for UID:", user.uid);
-    
-    // The specific branch for this user
-    const myQueueRef = ref(db, `queue/${user.uid}`);
+    console.log("RTR INITIATED: Listening to ALL data at queue/" + user.uid);
 
-    // The Real-time Read (RTR)
-    onValue(myQueueRef, (snapshot) => {
+    // This points to the UID folder itself
+    const myFullBranchRef = ref(db, `queue/${user.uid}`);
+
+    // onValue on the branch captures the ENTIRE object
+    onValue(myFullBranchRef, (snapshot) => {
         const data = snapshot.val();
-        console.log("--- RTR DATA RECEIVED ---");
-        console.log("Location: queue/" + user.uid);
-        console.log("Content:", data);
-
+        
         if (data) {
-            alert(`RTR SUCCESS!\nColor: ${data.COLOR}\nType: ${data.TYPE}`);
+            console.log("--- FULL BRANCH DATA RECEIVED ---");
+            // This logs the entire object (COLOR, TIME, TYPE, etc.)
+            console.log(data); 
+            
+            // Visual confirmation of everything found
+            alert("RTR Received Full Branch:\n" + JSON.stringify(data, null, 2));
+        } else {
+            console.log("Branch is currently empty.");
         }
     }, (error) => {
-        console.error("RTR TEST FAILED (Rules?):", error);
+        console.error("RTR Permission Error:", error);
     });
 };
