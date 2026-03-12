@@ -4,17 +4,32 @@ import { ref, get, onValue, off } from "https://www.gstatic.com/firebasejs/10.8.
 
 window.creatematchrequest = async function(event) {
     const user = auth.currentUser;
-    if (!user) return; // Verified accounts only
+    if (!user) return; 
 
     const myQueueRef = ref(db, `queue/${user.uid}`);
 
-    // 1. THE PING (Uses standard Read rules)
     console.log("Checking for branch existence...");
     const snapshot = await get(myQueueRef);
 
     if (!snapshot.exists()) {
-        console.warn("RTR BLOCKED: Branch does not exist for UID:", user.uid);
-        alert("You aren't in the queue yet. No listener started.");
+        console.warn("Branch missing. Triggering Worker to initialize queue...");
+        
+        // --- THE TRIGGER ---
+        // This tells the Worker: "I want to play, but I can't write to my own branch."
+        try {
+            await fetch("https://your-worker-name.pages.dev/initialize", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    uid: user.uid,
+                    action: "CREATE_NODE" 
+                })
+            });
+            console.log("Worker notified. Try clicking 'Play' again in a second.");
+        } catch (err) {
+            console.error("Worker trigger failed:", err);
+        }
+        
         return; 
     }
 
@@ -26,10 +41,9 @@ window.creatematchrequest = async function(event) {
         if (data) {
             console.log("--- LIVE DATA ---", data);
             
-            // If we find a specific key that means "Match Ready", we kill the RTR
             if (data.MATCH_ID) {
                 console.log("Match ID found! Killing listener...");
-                off(myQueueRef); // Frees the slot immediately
+                off(myQueueRef); 
             }
         }
     });
