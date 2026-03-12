@@ -1,33 +1,31 @@
-// lobby.js - Targeted RTR Test on current UID
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+// laserchess/docs/home/lobby.js
+import { db, auth } from "./homeauthcheck.js";
+import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-const db = getDatabase();
-const auth = getAuth();
-
+// Attach to window so the HTML onclick can find it
 window.creatematchrequest = function(event) {
     const user = auth.currentUser;
     if (!user) {
-        console.error("TEST FAILED: No authenticated user found.");
+        console.error("RTR TEST: User not found in Auth state.");
         return;
     }
 
-    // 1. Target: https://laserchess-web-free-default-rtdb.firebaseio.com/queue/[YOUR_UID]
-    const testBranchRef = ref(db, `queue/${user.uid}`);
+    console.log("RTR TEST: Starting listener for UID:", user.uid);
+    
+    // The specific branch for this user
+    const myQueueRef = ref(db, `queue/${user.uid}`);
 
-    console.log("TEST START: Listening for changes at queue/" + user.uid);
-
-    // 2. The Raw RTR
-    onValue(testBranchRef, (snapshot) => {
+    // The Real-time Read (RTR)
+    onValue(myQueueRef, (snapshot) => {
         const data = snapshot.val();
-        
-        console.log("--- REAL-TIME DATA RECEIVED ---");
-        console.log("UID:", user.uid);
-        console.log("Data:", data);
-        
+        console.log("--- RTR DATA RECEIVED ---");
+        console.log("Location: queue/" + user.uid);
+        console.log("Content:", data);
+
         if (data) {
-            // This will show you the COLOR, TIME, and TYPE you've set
-            alert(`RTR Update!\nColor: ${data.COLOR}\nType: ${data.TYPE}`);
+            alert(`RTR SUCCESS!\nColor: ${data.COLOR}\nType: ${data.TYPE}`);
         }
+    }, (error) => {
+        console.error("RTR TEST FAILED (Rules?):", error);
     });
 };
