@@ -1,5 +1,7 @@
+// laserchess/docs/home/homeauthcheck.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBuT7P1iTdXcZW-y05DX-kseuLrPGmaWSs",
@@ -7,14 +9,17 @@ const firebaseConfig = {
   projectId: "laserchess-web-free",
   storageBucket: "laserchess-web-free.firebasestorage.app",
   messagingSenderId: "887464510754",
-  appId: "1:887464510754:web:aee6938681543602a4517b"
+  appId: "1:887464510754:web:aee6938681543602a4517b",
+  databaseURL: "https://laserchess-web-free-default-rtdb.firebaseio.com/"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// EXPORT these so lobby.js can see them
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getDatabase(app);
+
 let currentUID = null;
 
-// --- GATEKEEPER ---
 onAuthStateChanged(auth, (user) => {
   if (user && (user.emailVerified || user.providerData[0]?.providerId === 'google.com')) {
     currentUID = user.uid; 
@@ -30,35 +35,11 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// --- SIGN OUT LOGIC ---
-// We attach the listener directly to the ID from your HTML
+// Sign Out Logic...
 const signOutBtn = document.getElementById('signOutBtn');
 if (signOutBtn) {
   signOutBtn.addEventListener('click', (e) => {
-    e.preventDefault(); // Stop the '#' link from jumping the page
-    console.log("Sign Out Button clicked. Triggering Firebase SignOut...");
-    
-    signOut(auth)
-      .then(() => {
-        console.log("Successfully signed out of Firebase.");
-        window.location.replace("../../login/login.html");
-      })
-      .catch((error) => {
-        console.error("Error during sign out:", error);
-      });
-  });
-} else {
-  console.error("Could not find the 'signOutBtn' element in the HTML.");
-}
-
-// --- MATCHMAKING STUB ---
-// Keeping this here so your play button doesn't break, 
-// but focusing only on the event connection.
-const playBtn = document.getElementById('btnSendRequest');
-if (playBtn) {
-  playBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    console.log("Match request button clicked for UID:", currentUID);
-    // Add your matchmaking fetch here when ready
+    signOut(auth).then(() => window.location.replace("../../login/login.html"));
   });
 }
