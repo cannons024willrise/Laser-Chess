@@ -1,4 +1,4 @@
-// lobby.js - RAW RTR TEST
+// lobby.js - Targeted RTR Test on current UID
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
@@ -12,21 +12,22 @@ window.creatematchrequest = function(event) {
         return;
     }
 
-    console.log("TEST START: Listening to requests/" + user.uid);
+    // 1. Target: https://laserchess-web-free-default-rtdb.firebaseio.com/queue/[YOUR_UID]
+    const testBranchRef = ref(db, `queue/${user.uid}`);
 
-    // 1. Point directly to the branch named after the UID
-    const testRef = ref(db, `requests/${user.uid}`);
+    console.log("TEST START: Listening for changes at queue/" + user.uid);
 
-    // 2. The Raw Listener
-    onValue(testRef, (snapshot) => {
+    // 2. The Raw RTR
+    onValue(testBranchRef, (snapshot) => {
         const data = snapshot.val();
         
-        console.log("--- RTR UPDATE DETECTED ---");
-        console.log("Path: requests/" + user.uid);
-        console.log("Data received:", data);
+        console.log("--- REAL-TIME DATA RECEIVED ---");
+        console.log("UID:", user.uid);
+        console.log("Data:", data);
         
         if (data) {
-            alert("RTR SUCCESS! Received: " + JSON.stringify(data));
+            // This will show you the COLOR, TIME, and TYPE you've set
+            alert(`RTR Update!\nColor: ${data.COLOR}\nType: ${data.TYPE}`);
         }
     });
 };
