@@ -7,8 +7,8 @@
 }
 
 [class*="bg-indigo"], [class*="bg-blue-600"], .discord-banner {
-    background-color: rgba(88, 101, 242, 0.15) !important;
-    border: 1px solid rgba(88, 101, 242, 0.3) !important;
+    background-color: rgba(88, 101, 242, 0.1) !important;
+    border: 1px solid rgba(88, 101, 242, 0.2) !important;
 }
 
 [class*="text-gray-900"], .text-black {
@@ -16,13 +16,13 @@
 }
 
 /* ============================================================
-   2. REFINED TRANSLUCENT TOGGLE (Lower Opacity & Dimmer)
+   2. BRUTALIST GEOMETRIC TOGGLE (Sharp Corners Only)
    ============================================================ */
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 64px;
+  height: 28px;
 }
 
 .switch input {
@@ -35,47 +35,36 @@
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  /* DARKER & MORE TRANSPARENT TRACK */
-  background-color: rgba(0, 0, 0, 0.3) !important; 
-  transition: .4s;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(239, 68, 68, 0.1) !important; 
+  transition: .3s;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  /* DIMMED KNOB: No longer pure white */
-  background-color: rgba(200, 200, 200, 0.8); 
-  transition: .4s;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  height: 20px;
+  width: 28px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ef4444; /* Sharp Red Thumb */
+  transition: .3s;
+  box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
 }
 
 input:checked + .slider {
-  /* SUBTLE CYAN ON STATE */
-  background-color: rgba(3, 233, 244, 0.2) !important;
+  background-color: rgba(3, 233, 244, 0.1) !important;
   border: 1px solid rgba(3, 233, 244, 0.3);
 }
 
 input:checked + .slider:before {
-  transform: translateX(26px);
-  background-color: #03e9f4; /* Knob turns cyan when active */
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.5);
-}
-
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
+  transform: translateX(28px);
+  background-color: #03e9f4; /* Sharp Cyan Thumb */
+  box-shadow: 0 0 10px rgba(3, 233, 244, 0.6);
 }
 
 /* ============================================================
-   3. CORE STYLES & BACKGROUND
+   3. CORE STYLES & PULSE EFFECT
    ============================================================ */
 @font-face {
   font-family: customfont;
@@ -85,7 +74,7 @@ input:checked + .slider:before {
 html {
   height: 100%;
   background: 
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), 
+    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), 
     url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed;
   background-size: cover;
 }
@@ -97,6 +86,16 @@ body {
   background: transparent;
   color: white;
   min-height: 100%;
+}
+
+.lobby-pulse {
+  animation: neon-pulse 2s infinite ease-in-out;
+}
+
+@keyframes neon-pulse {
+  0% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
+  50% { border-color: rgba(3, 233, 244, 0.6); box-shadow: 0 0 20px rgba(3, 233, 244, 0.3); }
+  100% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
 }
 
 /* ============================================================
@@ -122,8 +121,8 @@ body {
 .play-now-btn:hover {
   background: #03e9f4;
   color: #fff;
-  border-radius: 5px;
-  box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0 100px #03e9f4;
+  border-radius: 2px;
+  box-shadow: 0 0 25px #03e9f4, 0 0 50px #03e9f4;
 }
 
 .play-now-btn span { position: absolute; display: block; background: #03e9f4; }
@@ -136,5 +135,3 @@ body {
 @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
 @keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
 @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
-
-
