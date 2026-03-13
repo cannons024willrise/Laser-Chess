@@ -12,7 +12,7 @@
   <script type="module" src="lobby.js"></script>
 </head>
 
-<body class="min-h-screen text-gray-900 flex flex-col">
+<body class="min-h-screen flex flex-col">
   <header class="flex justify-between items-center p-4 bg-white shadow">
     <div class="flex items-center space-x-4">
       <h1 class="text-2xl font-bold">Laser Chess</h1>
@@ -45,7 +45,7 @@
       
       <div id="lobbyStatus" class="w-full p-6 rounded-lg bg-black/40 border border-cyan-400/30 backdrop-blur-sm text-center shadow-lg">
         <p id="statusText" class="text-cyan-400 tracking-widest uppercase text-sm mb-2">
-          Scanning Neural Link...
+          Scanning Lobby...
         </p>
         <div id="oppPreview" class="text-white text-lg font-bold">
           Lobby: <span class="text-gray-400">Empty</span>
@@ -56,7 +56,7 @@
         
         <button id="mainActionBtn" class="play-now-btn w-full" onclick="handleMatchmaking()">
           <span></span><span></span><span></span><span></span>
-          <span id="btnText" class="pointer-events-none">PIONEER MATCH</span>
+          PIONEER MATCH
         </button>
 
         <button id="followBtn" class="hidden text-xs text-gray-400 hover:text-cyan-400 transition-colors uppercase tracking-widest cursor-pointer mt-2" onclick="pioneerNewRequest()">
