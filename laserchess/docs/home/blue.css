@@ -1,14 +1,15 @@
 /* ============================================================
-   1. TAILWIND BANNER OVERRIDES
+   1. GLOBAL SYSTEM OVERRIDES
    ============================================================ */
 [class*="bg-white"] {
-    background-color: rgba(0, 0, 0, 0.4) !important;
-    border-bottom: 1px solid rgba(3, 233, 244, 0.3) !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border-bottom: 1px solid rgba(3, 233, 244, 0.4) !important;
+    backdrop-filter: blur(10px);
 }
 
-[class*="bg-indigo"], [class*="bg-blue-600"], .discord-banner {
-    background-color: rgba(88, 101, 242, 0.1) !important;
-    border: 1px solid rgba(88, 101, 242, 0.2) !important;
+[class*="bg-indigo"], .discord-banner {
+    background-color: rgba(3, 233, 244, 0.05) !important;
+    border-bottom: 1px solid rgba(3, 233, 244, 0.2) !important;
 }
 
 [class*="text-gray-900"], .text-black {
@@ -16,13 +17,13 @@
 }
 
 /* ============================================================
-   2. BRUTALIST GEOMETRIC TOGGLE (Sharp Corners Only)
+   2. BRUTALIST GEOMETRIC TOGGLE (Sharp / Non-Goofy)
    ============================================================ */
 .switch {
   position: relative;
   display: inline-block;
-  width: 64px;
-  height: 28px;
+  width: 70px;
+  height: 32px;
 }
 
 .switch input {
@@ -36,35 +37,35 @@
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(239, 68, 68, 0.1) !important; 
-  transition: .3s;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  transition: .3s cubic-bezier(0.19, 1, 0.22, 1);
+  border: 2px solid rgba(239, 68, 68, 0.4);
 }
 
 .slider:before {
   position: absolute;
   content: "";
   height: 20px;
-  width: 28px;
-  left: 3px;
-  bottom: 3px;
-  background-color: #ef4444; /* Sharp Red Thumb */
-  transition: .3s;
-  box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+  width: 30px;
+  left: 4px;
+  bottom: 4px;
+  background-color: #ef4444; 
+  transition: .3s cubic-bezier(0.19, 1, 0.22, 1);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
 }
 
 input:checked + .slider {
   background-color: rgba(3, 233, 244, 0.1) !important;
-  border: 1px solid rgba(3, 233, 244, 0.3);
+  border: 2px solid rgba(3, 233, 244, 0.4);
 }
 
 input:checked + .slider:before {
-  transform: translateX(28px);
-  background-color: #03e9f4; /* Sharp Cyan Thumb */
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.6);
+  transform: translateX(30px);
+  background-color: #03e9f4; 
+  box-shadow: 0 0 15px rgba(3, 233, 244, 0.6);
 }
 
 /* ============================================================
-   3. CORE STYLES & PULSE EFFECT
+   3. CORE STYLES & NEON PULSE
    ============================================================ */
 @font-face {
   font-family: customfont;
@@ -74,7 +75,7 @@ input:checked + .slider:before {
 html {
   height: 100%;
   background: 
-    linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), 
+    linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.9)), 
     url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed;
   background-size: cover;
 }
@@ -82,20 +83,28 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: customfont;
+  font-family: customfont, sans-serif;
   background: transparent;
   color: white;
-  min-height: 100%;
 }
 
 .lobby-pulse {
-  animation: neon-pulse 2s infinite ease-in-out;
+  animation: neon-pulse 1.5s infinite ease-in-out;
 }
 
 @keyframes neon-pulse {
-  0% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
-  50% { border-color: rgba(3, 233, 244, 0.6); box-shadow: 0 0 20px rgba(3, 233, 244, 0.3); }
-  100% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
+  0% { 
+    border-color: rgba(3, 233, 244, 0.2) !important; 
+    box-shadow: 0 0 5px rgba(3, 233, 244, 0.1), inset 0 0 5px rgba(3, 233, 244, 0.05); 
+  }
+  50% { 
+    border-color: rgba(3, 233, 244, 1) !important; 
+    box-shadow: 0 0 25px rgba(3, 233, 244, 0.5), inset 0 0 15px rgba(3, 233, 244, 0.3); 
+  }
+  100% { 
+    border-color: rgba(3, 233, 244, 0.2) !important; 
+    box-shadow: 0 0 5px rgba(3, 233, 244, 0.1), inset 0 0 5px rgba(3, 233, 244, 0.05); 
+  }
 }
 
 /* ============================================================
@@ -104,32 +113,29 @@ body {
 .play-now-btn {
   position: relative;
   display: inline-block;
-  padding: 12px 24px;
   color: #03e9f4;
-  font-weight: bold;
+  font-weight: 900;
   text-transform: uppercase;
   overflow: hidden;
   transition: 0.5s;
-  letter-spacing: 4px;
-  background: rgba(0, 0, 0, 0.6);
+  letter-spacing: 6px;
+  background: rgba(0, 0, 0, 0.8);
   border: none;
   cursor: pointer;
   z-index: 1;
-  margin-top: 40px;
 }
 
 .play-now-btn:hover {
   background: #03e9f4;
-  color: #fff;
-  border-radius: 2px;
-  box-shadow: 0 0 25px #03e9f4, 0 0 50px #03e9f4;
+  color: #000;
+  box-shadow: 0 0 30px #03e9f4, 0 0 60px #03e9f4;
 }
 
 .play-now-btn span { position: absolute; display: block; background: #03e9f4; }
-.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #03e9f4); animation: btn-anim1 1s linear infinite; }
-.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, #03e9f4); animation: btn-anim2 1s linear infinite; animation-delay: .25s; }
-.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, #03e9f4); animation: btn-anim3 1s linear infinite; animation-delay: .5s; }
-.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, #03e9f4); animation: btn-anim4 1s linear infinite; animation-delay: .75s; }
+.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 3px; background: linear-gradient(90deg, transparent, #03e9f4); animation: btn-anim1 1.2s linear infinite; }
+.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 3px; height: 100%; background: linear-gradient(180deg, transparent, #03e9f4); animation: btn-anim2 1.2s linear infinite; animation-delay: .3s; }
+.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 3px; background: linear-gradient(270deg, transparent, #03e9f4); animation: btn-anim3 1.2s linear infinite; animation-delay: .6s; }
+.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 3px; height: 100%; background: linear-gradient(360deg, transparent, #03e9f4); animation: btn-anim4 1.2s linear infinite; animation-delay: .9s; }
 
 @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
 @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
