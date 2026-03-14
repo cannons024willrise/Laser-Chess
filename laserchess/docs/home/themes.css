@@ -81,11 +81,12 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (Velocity-Locked Logic)
+   5. THE BUTTON (Single-Path Continuous Streak)
    ============================================================ */
 .play-now-btn {
   position: relative; 
   height: 65px; 
+  width: 300px; /* Adjust to your button's width */
   background: rgba(15, 15, 15, 0.95) !important;
   border: 1px solid rgba(255,255,255,0.05) !important; 
   cursor: pointer; 
@@ -94,71 +95,54 @@ input:checked + .slider:before {
   justify-content: center; 
   transition: all 0.4s ease;
   color: var(--theme-color); 
-  overflow: visible !important;
+  overflow: hidden; /* Important: clips the streak */
 }
 
 #mainBtnLabel { letter-spacing: 6px; font-weight: 900 !important; text-transform: uppercase; font-size: 14px; }
 .play-now-btn:hover { background: var(--theme-color) !important; color: #000 !important; box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color); }
 
-.btn-clipper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-.btn-clipper span { position: absolute; display: block; background: var(--theme-color); }
-
-/* THE MATH (Based on a ~300x65px button):
-   Top/Bottom Distance: 300px
-   Side Distance: 65px
-   Total Perimeter: 730px
-   Total Cycle: 2.5 seconds
-*/
-
-/* 1. TOP - Horizontal (Slow & Steady) */
-.btn-clipper span:nth-child(1) {
-  top: 0; left: -100%; width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--theme-color));
-  animation: anim-top 2.5s linear infinite;
-}
-@keyframes anim-top {
-  0% { left: -100%; }
-  40% { left: 100%; }  /* 40% of time for the long side (1.0s) */
-  100% { left: 100%; }
+/* We only need ONE span for a perfectly smooth loop */
+.btn-clipper { position: absolute; inset: 0; pointer-events: none; }
+.btn-clipper span {
+  position: absolute;
+  background: var(--theme-color);
+  box-shadow: 0 0 10px var(--theme-color);
+  animation: streak-loop 3s linear infinite;
 }
 
-/* 2. RIGHT - Vertical (Slowed down to match Top) */
-.btn-clipper span:nth-child(2) {
-  top: -100%; right: 0; width: 2px; height: 100%;
-  background: linear-gradient(180deg, transparent, var(--theme-color));
-  animation: anim-right 2.5s linear infinite;
-  animation-delay: 1.0s; /* Starts exactly when Top finishes */
-}
-@keyframes anim-right {
-  0% { top: -100%; }
-  10% { top: 100%; }   /* ONLY 10% of time for the short side (0.25s) */
-  100% { top: 100%; }
-}
-
-/* 3. BOTTOM - Horizontal */
-.btn-clipper span:nth-child(3) {
-  bottom: 0; right: -100%; width: 100%; height: 2px;
-  background: linear-gradient(270deg, transparent, var(--theme-color));
-  animation: anim-bottom 2.5s linear infinite;
-  animation-delay: 1.25s; /* 1.0s + 0.25s */
-}
-@keyframes anim-bottom {
-  0% { right: -100%; }
-  40% { right: 100%; }
-  100% { right: 100%; }
-}
-
-/* 4. LEFT - Vertical */
-.btn-clipper span:nth-child(4) {
-  bottom: -100%; left: 0; width: 2px; height: 100%;
-  background: linear-gradient(360deg, transparent, var(--theme-color));
-  animation: anim-left 2.5s linear infinite;
-  animation-delay: 2.25s; /* 1.25s + 1.0s */
-}
-@keyframes anim-left {
-  0% { bottom: -100%; }
-  10% { bottom: 100%; }
-  100% { bottom: 100%; }
+/* THE MAGIC: The streak changes its shape and position in one thread */
+@keyframes streak-loop {
+  /* 1. TOP: Move right */
+  0% { 
+    top: 0; left: -100%; width: 100%; height: 2px; 
+  }
+  25% { 
+    top: 0; left: 0; width: 100%; height: 2px; 
+  }
+  /* 2. RIGHT: Move down (Transition corner) */
+  25.01% { 
+    top: -100%; right: 0; width: 2px; height: 100%; left: auto; 
+  }
+  40% { 
+    top: 0; right: 0; width: 2px; height: 100%; left: auto;
+  }
+  /* 3. BOTTOM: Move left */
+  40.01% { 
+    bottom: 0; right: -100%; width: 100%; height: 2px; top: auto;
+  }
+  65% { 
+    bottom: 0; right: 0; width: 100%; height: 2px; top: auto;
+  }
+  /* 4. LEFT: Move up */
+  65.01% { 
+    bottom: -100%; left: 0; width: 2px; height: 100%; right: auto;
+  }
+  80% { 
+    bottom: 0; left: 0; width: 2px; height: 100%; right: auto;
+  }
+  100% { 
+    bottom: 100%; left: 0; width: 2px; height: 100%; 
+  }
 }
 /* ============================================================
    6. TACTICAL CARD SYSTEM
