@@ -64,7 +64,7 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   3. CORE STYLES & PULSE EFFECT
+   3. CORE STYLES & THEME-AWARE PULSE
    ============================================================ */
 @font-face {
   font-family: customfont;
@@ -80,22 +80,36 @@ html {
 }
 
 body {
-  margin: 0;
-  padding: 0;
+  margin: 0; padding: 0;
   font-family: customfont;
   background: transparent;
   color: white;
   min-height: 100%;
 }
 
+/* THE PULSE BOX - Defaulting to Blue */
 .lobby-pulse {
-  animation: neon-pulse 2s infinite ease-in-out;
+  border: 1px solid rgba(3, 233, 244, 0.2);
+  animation: pulse-blue 2s infinite ease-in-out;
 }
 
-@keyframes neon-pulse {
+/* Red Pulse override: Only triggers when the toggle adds 'red-mode' to the element */
+.lobby-pulse.red-mode {
+  animation: pulse-red 2s infinite ease-in-out;
+}
+
+/* BLUE ANIMATION */
+@keyframes pulse-blue {
   0% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
   50% { border-color: rgba(3, 233, 244, 0.6); box-shadow: 0 0 20px rgba(3, 233, 244, 0.3); }
   100% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
+}
+
+/* RED ANIMATION */
+@keyframes pulse-red {
+  0% { border-color: rgba(244, 67, 54, 0.2); box-shadow: 0 0 5px rgba(244, 67, 54, 0.1); }
+  50% { border-color: rgba(244, 67, 54, 0.6); box-shadow: 0 0 20px rgba(244, 67, 54, 0.3); }
+  100% { border-color: rgba(244, 67, 54, 0.2); box-shadow: 0 0 5px rgba(244, 67, 54, 0.1); }
 }
 
 /* ============================================================
