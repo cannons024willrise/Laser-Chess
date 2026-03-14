@@ -14,7 +14,7 @@ html body {
   font-family: 'customfont', sans-serif !important;
   /* Removed !important so JS can override this default */
   background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed;
-  background-size: cover !important;
+  background-size: cover; background-position: center; background-attachment: fixed;
   color: white;
   overflow-x: hidden;
 }
