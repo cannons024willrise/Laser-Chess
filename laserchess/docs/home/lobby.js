@@ -1,41 +1,47 @@
-// --- IMPROVED THEME SWAPPER ---
-document.addEventListener("DOMContentLoaded", () => {
+// lobby.js - Integrated Theme & Matchmaking
+import { db, auth } from "./homeauthcheck.js";
+import { ref, get, onValue, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+// --- TOGGLE DRIVEN THEME SWAPPER ---
+function initTheme() {
     const sideToggle = document.getElementById('sideToggle');
     const mainActionBtn = document.getElementById('mainActionBtn');
 
-    if (!sideToggle || !mainActionBtn) {
-        console.error("Theme elements missing! Check your IDs.");
-        return;
-    }
+    if (!sideToggle || !mainActionBtn) return;
 
-    const updateButtonTheme = () => {
+    const syncTheme = () => {
         if (sideToggle.checked) {
-            console.log("Switching to BLUE");
+            // Checkbox ON = BLUE
             mainActionBtn.classList.remove('red-mode');
             mainActionBtn.classList.add('blue-mode');
         } else {
-            console.log("Switching to RED");
+            // Checkbox OFF = RED
             mainActionBtn.classList.remove('blue-mode');
             mainActionBtn.classList.add('red-mode');
         }
     };
 
-    // Listen for clicks on the toggle
-    sideToggle.addEventListener('change', updateButtonTheme);
+    // Trigger on every flip
+    sideToggle.addEventListener('change', syncTheme);
+    // Trigger on page load
+    syncTheme();
+}
 
-    // Run once on load to sync with the current toggle state
-    updateButtonTheme();
-});
+// Run init
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+} else {
+    initTheme();
+}
 
 // --- MATCHMAKING LOGIC ---
 window.handleMatchmaking = async function() {
     const user = auth.currentUser;
-    const sideToggle = document.getElementById('sideToggle'); // Get state at time of click
-    
-    if (!user) {
-        alert("Please wait for account sync...");
-        return;
-    }
+    const sideToggle = document.getElementById('sideToggle');
+    if (!user || !sideToggle) return; 
 
     const selectedColor = sideToggle.checked ? "blue" : "red";
-    // ... rest of your matchmaking code ...
+    const myQueueRef = ref(db, `queue/${user.uid}`);
+
+    // ... (rest of your existing worker fetch logic)
+};
