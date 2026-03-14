@@ -1,72 +1,95 @@
-/* ============================================================
-   1. TAILWIND & CORE OVERRIDES
-   ============================================================ */
-[class*="bg-white"] {
-    background-color: rgba(0, 0, 0, 0.4) !important;
-    border-bottom: 1px solid rgba(3, 233, 244, 0.3) !important;
+/* 1. FORCE THE BACKGROUND & FONT */
+@font-face {
+  font-family: 'customfont';
+  src: url('c.otf');
 }
 
-[class*="bg-indigo"], [class*="bg-blue-600"], .discord-banner {
-    background-color: rgba(88, 101, 242, 0.1) !important;
-    border: 1px solid rgba(88, 101, 242, 0.2) !important;
-}
-
-/* ============================================================
-   2. BRUTALIST TOGGLE
-   ============================================================ */
-.switch { position: relative; display: inline-block; width: 64px; height: 28px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider {
-  position: absolute; cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(239, 68, 68, 0.1) !important; 
-  transition: .3s; border: 1px solid rgba(239, 68, 68, 0.3);
-}
-.slider:before {
-  position: absolute; content: ""; height: 20px; width: 28px;
-  left: 3px; bottom: 3px; background-color: #ef4444; transition: .3s;
-}
-input:checked + .slider { background-color: rgba(3, 233, 244, 0.1) !important; }
-input:checked + .slider:before { transform: translateX(28px); background-color: #03e9f4; }
-
-/* ============================================================
-   3. PULSE & ANIMATIONS
-   ============================================================ */
-@font-face { font-family: customfont; src: url(c.otf); }
-html {
+html, body {
+  margin: 0;
+  padding: 0;
   height: 100%;
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), 
-              url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed;
-  background-size: cover;
+  font-family: 'customfont', sans-serif !important;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), 
+              url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
+  background-size: cover !important;
+  color: white;
 }
-body { margin: 0; padding: 0; font-family: customfont; background: transparent; color: white; min-height: 100%; }
 
-.lobby-pulse { border: 1px solid rgba(3, 233, 244, 0.2); animation: pulse-blue 2s infinite ease-in-out; }
-.red-mode.lobby-pulse { animation: pulse-red 2s infinite ease-in-out !important; }
+/* 2. HEADER & ACCOUNT SYNC */
+header {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-bottom: 1px solid #03e9f4;
+  transition: border-color 0.4s;
+}
+
+.red-theme header {
+  border-bottom: 1px solid #f44336;
+}
+
+/* 3. THE BUTTON ENGINE (STRICT REVERT) */
+.play-now-btn {
+  position: relative;
+  display: inline-block;
+  padding: 15px 30px;
+  background: rgba(0, 0, 0, 0.7);
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: #03e9f4;
+  overflow: hidden;
+  transition: 0.5s;
+  border: none;
+  cursor: pointer;
+  --btn-color: #03e9f4;
+}
+
+.play-now-btn.red-mode {
+  color: #f44336;
+  --btn-color: #f44336;
+}
+
+.play-now-btn:hover {
+  background: var(--btn-color);
+  color: #fff;
+  box-shadow: 0 0 5px var(--btn-color), 0 0 25px var(--btn-color);
+}
+
+.play-now-btn span { position: absolute; display: block; }
+
+.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--btn-color)); animation: btn-anim1 1s linear infinite; }
+.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--btn-color)); animation: btn-anim2 1s linear infinite; animation-delay: 0.25s; }
+.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--btn-color)); animation: btn-anim3 1s linear infinite; animation-delay: 0.5s; }
+.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--btn-color)); animation: btn-anim4 1s linear infinite; animation-delay: 0.75s; }
+
+@keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
+@keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
+@keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
+@keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
+
+/* 4. LOBBY PULSE */
+.lobby-pulse {
+  border: 1px solid #03e9f4;
+  animation: pulse-blue 2s infinite ease-in-out;
+}
+
+.red-mode.lobby-pulse {
+  border: 1px solid #f44336;
+  animation: pulse-red 2s infinite ease-in-out;
+}
 
 @keyframes pulse-blue {
-  0%, 100% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
-  50% { border-color: rgba(3, 233, 244, 0.6); box-shadow: 0 0 20px rgba(3, 233, 244, 0.3); }
+  0%, 100% { box-shadow: 0 0 5px rgba(3, 233, 244, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(3, 233, 244, 0.5); border-color: rgba(3, 233, 244, 0.8); }
 }
+
 @keyframes pulse-red {
-  0%, 100% { border-color: rgba(244, 67, 54, 0.2); box-shadow: 0 0 5px rgba(244, 67, 54, 0.1); }
-  50% { border-color: rgba(244, 67, 54, 0.6); box-shadow: 0 0 20px rgba(244, 67, 54, 0.3); }
+  0%, 100% { box-shadow: 0 0 5px rgba(244, 67, 54, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(244, 67, 54, 0.5); border-color: rgba(244, 67, 54, 0.8); }
 }
 
-/* ============================================================
-   4. THE BUTTONS (WORKING LOGIC)
-   ============================================================ */
-.play-now-btn {
-  position: relative; display: inline-block; padding: 12px 24px;
-  text-transform: uppercase; overflow: hidden; transition: 0.5s;
-  letter-spacing: 4px; background: rgba(0, 0, 0, 0.6); border: none; cursor: pointer;
-}
-.play-now-btn span:not(#mainBtnLabel) { position: absolute; display: block; pointer-events: none; }
-#mainBtnLabel { position: relative; z-index: 10; display: block; }
-
-.play-now-btn.blue-mode { color: #03e9f4; --btn-color: #03e9f4; }
-.play-now-btn.blue-mode:hover { background: #03e9f4; color: #fff; box-shadow: 0 0 25px #03e9f4; }
-.play-now-btn.red-mode { color: #f44336; --btn-color: #f44336; }
-.play-now-btn.red-mode:hover { background: #f44336; color: #fff; box-shadow: 0 0 25px #f44336; }
-
-.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background:
+/* 5. TOGGLE SLIDER */
+.switch { position: relative; display: inline-block; width: 60px; height: 30px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border: 1px solid #555; }
+.slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 3px; background-color: #f44336; transition: .4s; }
+input:checked + .slider:before { transform: translateX(30px); background-color: #03e9f4; }
