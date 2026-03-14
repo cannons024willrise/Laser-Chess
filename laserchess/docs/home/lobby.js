@@ -15,20 +15,20 @@ document.addEventListener('DOMContentLoaded', () => {
             mainActionBtn.classList.remove('red-mode');
             mainActionBtn.classList.add('blue-mode');
             
-            // Labels
-            userEmail.style.color = "#03e9f4";
-            statusText.style.color = "#03e9f4";
-            statusValue.style.color = "#4b5563"; // gray-600
+            // Override Tailwind via direct Style
+            userEmail.style.setProperty('color', '#03e9f4', 'important');
+            statusText.style.setProperty('color', '#03e9f4', 'important');
+            statusValue.style.setProperty('color', '#4b5563', 'important');
         } else {
             document.body.classList.add('red-theme');
             lobbyStatus.classList.add('red-mode');
             mainActionBtn.classList.remove('blue-mode');
             mainActionBtn.classList.add('red-mode');
             
-            // Labels
-            userEmail.style.color = "#f44336";
-            statusText.style.color = "#f44336";
-            statusValue.style.color = "#f44336";
+            // Override Tailwind via direct Style
+            userEmail.style.setProperty('color', '#f44336', 'important');
+            statusText.style.setProperty('color', '#f44336', 'important');
+            statusValue.style.setProperty('color', '#f44336', 'important');
         }
     }
 
