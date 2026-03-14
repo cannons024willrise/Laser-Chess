@@ -7,31 +7,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const userEmail = document.getElementById('userEmail');
 
     function applyTheme() {
-        const isBlue = sideToggle.checked;
-
-        if (isBlue) {
-            document.body.classList.remove('red-theme');
+        if (sideToggle.checked) {
+            // BLUE MODE
             lobbyStatus.classList.remove('red-mode');
-            mainActionBtn.classList.remove('red-mode');
-            mainActionBtn.classList.add('blue-mode');
+            mainActionBtn.classList.replace('red-mode', 'blue-mode');
             
-            // Override Tailwind via direct Style
-            userEmail.style.setProperty('color', '#03e9f4', 'important');
-            statusText.style.setProperty('color', '#03e9f4', 'important');
-            statusValue.style.setProperty('color', '#4b5563', 'important');
+            // Swap Tailwind Text Colors
+            userEmail.classList.replace('text-red-500', 'text-cyan-400');
+            statusText.classList.replace('text-red-500', 'text-cyan-400');
+            statusValue.classList.replace('text-red-600', 'text-gray-600');
         } else {
-            document.body.classList.add('red-theme');
+            // RED MODE
             lobbyStatus.classList.add('red-mode');
-            mainActionBtn.classList.remove('blue-mode');
             mainActionBtn.classList.add('red-mode');
+            mainActionBtn.classList.remove('blue-mode');
             
-            // Override Tailwind via direct Style
-            userEmail.style.setProperty('color', '#f44336', 'important');
-            statusText.style.setProperty('color', '#f44336', 'important');
-            statusValue.style.setProperty('color', '#f44336', 'important');
+            // Swap Tailwind Text Colors
+            userEmail.classList.replace('text-cyan-400', 'text-red-500');
+            statusText.classList.replace('text-cyan-400', 'text-red-500');
+            statusValue.classList.replace('text-gray-600', 'text-red-600');
         }
     }
 
+    // Initial run
+    if (!mainActionBtn.classList.contains('blue-mode') && !mainActionBtn.classList.contains('red-mode')) {
+        mainActionBtn.classList.add('blue-mode');
+    }
     applyTheme();
     sideToggle.addEventListener('change', applyTheme);
 });
