@@ -1,17 +1,39 @@
-// lobby.js - Verified Auth RTR Test
+// lobby.js - Integrated Theme & Matchmaking
 import { db, auth } from "./homeauthcheck.js";
 import { ref, get, onValue, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-window.creatematchrequest = async function(event) {
+// --- UI THEME LOGIC ---
+const sideToggle = document.getElementById('sideToggle');
+const mainActionBtn = document.getElementById('mainActionBtn');
+
+function updateButtonTheme() {
+    if (sideToggle.checked) {
+        mainActionBtn.classList.remove('red-mode');
+        mainActionBtn.classList.add('blue-mode');
+    } else {
+        mainActionBtn.classList.remove('blue-mode');
+        mainActionBtn.classList.add('red-mode');
+    }
+}
+
+// Initialize theme on load and on toggle change
+if (sideToggle) {
+    sideToggle.addEventListener('change', updateButtonTheme);
+    updateButtonTheme(); // Run once to set initial state
+}
+
+// --- MATCHMAKING LOGIC ---
+window.handleMatchmaking = async function() {
     const user = auth.currentUser;
     if (!user) return; 
 
+    // Determine color based on toggle state
+    const selectedColor = sideToggle.checked ? "blue" : "red";
     const myQueueRef = ref(db, `queue/${user.uid}`);
 
-    console.log("Checking for branch existence...");
+    console.log(`Checking queue for ${user.uid} as ${selectedColor}...`);
     const snapshot = await get(myQueueRef);
 
-    // --- SECOND PATH: Branch doesn't exist ---
     if (!snapshot.exists()) {
         console.warn("Branch missing. Triggering Worker...");
         
@@ -21,13 +43,12 @@ window.creatematchrequest = async function(event) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     uid: user.uid,
-                    color: "white" // You can pull this from a UI toggle later
+                    color: selectedColor // Dynamic color from UI
                 })
             });
 
             if (response.ok) {
-                console.log("Worker initialized the node! Please click 'Play' again.");
-                // Optional: You could call creatematchrequest(event) again automatically here
+                console.log("Worker initialized the node!");
             } else {
                 console.error("Worker rejected the request.");
             }
@@ -37,18 +58,14 @@ window.creatematchrequest = async function(event) {
         return; 
     }
 
-    // --- FIRST PATH (Existing Branch) / AFTER WORKER INITIALIZES ---
+    // Existing Branch / After Worker init
     console.log("Branch verified. Starting RTR...");
     onValue(myQueueRef, (snapshot) => {
         const data = snapshot.val();
-        
-        if (data) {
-            console.log("--- LIVE DATA ---", data);
-            
-            if (data.MATCH_ID) {
-                console.log("Match ID found! Killing listener...");
-                off(myQueueRef); 
-            }
+        if (data && data.MATCH_ID) {
+            console.log("Match ID found! Killing listener...");
+            off(myQueueRef); 
+            // Add redirect to game here later
         }
     });
 };
