@@ -22,18 +22,20 @@ body {
   min-height: 100%;
 }
 
-[class*="bg-white"] {
-    background-color: rgba(0, 0, 0, 0.4) !important;
-    border-bottom: 1px solid rgba(3, 233, 244, 0.3) !important;
+/* Header Background & Border Logic */
+header {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border-bottom: 1px solid rgba(3, 233, 244, 0.3);
+    transition: border-color 0.5s;
+}
+
+.red-theme header {
+    border-bottom: 1px solid rgba(244, 67, 54, 0.3);
 }
 
 [class*="bg-indigo"], [class*="bg-blue-600"], .discord-banner {
     background-color: rgba(88, 101, 242, 0.1) !important;
     border: 1px solid rgba(88, 101, 242, 0.2) !important;
-}
-
-[class*="text-gray-900"], .text-black {
-    color: #ffffff !important;
 }
 
 /* ============================================================
@@ -45,9 +47,7 @@ body {
   width: 64px;
   height: 28px;
 }
-
 .switch input { opacity: 0; width: 0; height: 0; }
-
 .slider {
   position: absolute;
   cursor: pointer;
@@ -56,7 +56,6 @@ body {
   transition: .3s;
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -66,12 +65,10 @@ body {
   transition: .3s;
   box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
 }
-
 input:checked + .slider {
   background-color: rgba(3, 233, 244, 0.1) !important;
   border: 1px solid rgba(3, 233, 244, 0.3);
 }
-
 input:checked + .slider:before {
   transform: translateX(28px);
   background-color: #03e9f4;
@@ -79,17 +76,13 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   3. LOBBY STATUS PULSE (RED & BLUE)
+   3. LOBBY STATUS PULSE
    ============================================================ */
 .lobby-pulse {
   border: 1px solid rgba(3, 233, 244, 0.2);
-  transition: all 0.5s ease;
   animation: pulse-blue 2s infinite ease-in-out;
 }
-
-/* Class triggered by JS when toggle is RED */
-.lobby-pulse.red-mode {
-  border: 1px solid rgba(244, 67, 54, 0.2);
+.red-mode.lobby-pulse {
   animation: pulse-red 2s infinite ease-in-out !important;
 }
 
@@ -98,7 +91,6 @@ input:checked + .slider:before {
   50% { border-color: rgba(3, 233, 244, 0.6); box-shadow: 0 0 20px rgba(3, 233, 244, 0.3); }
   100% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
 }
-
 @keyframes pulse-red {
   0% { border-color: rgba(244, 67, 54, 0.2); box-shadow: 0 0 5px rgba(244, 67, 54, 0.1); }
   50% { border-color: rgba(244, 67, 54, 0.6); box-shadow: 0 0 20px rgba(244, 67, 54, 0.3); }
@@ -111,8 +103,7 @@ input:checked + .slider:before {
 .play-now-btn {
   position: relative;
   display: inline-block;
-  font-weight: bold;
-  text-transform: uppercase;
+  padding: 12px 24px;
   overflow: hidden;
   transition: 0.5s;
   letter-spacing: 4px;
@@ -121,52 +112,19 @@ input:checked + .slider:before {
   cursor: pointer;
   z-index: 1;
 }
-
-.play-now-btn span:not(#mainBtnLabel) { 
-  position: absolute; 
-  display: block; 
-  pointer-events: none;
-}
-
+.play-now-btn span:not(#mainBtnLabel) { position: absolute; display: block; pointer-events: none; }
 #mainBtnLabel { position: relative; z-index: 10; display: block; }
 
-/* THEME STATES */
 .play-now-btn.blue-mode { color: #03e9f4; --btn-color: #03e9f4; }
-.play-now-btn.blue-mode:hover { 
-  background: #03e9f4; color: #fff;
-  box-shadow: 0 0 25px #03e9f4; 
-}
+.play-now-btn.blue-mode:hover { background: #03e9f4; color: #fff; box-shadow: 0 0 25px #03e9f4; }
 
 .play-now-btn.red-mode { color: #f44336; --btn-color: #f44336; }
-.play-now-btn.red-mode:hover { 
-  background: #f44336; color: #fff;
-  box-shadow: 0 0 25px #f44336; 
-}
+.play-now-btn.red-mode:hover { background: #f44336; color: #fff; box-shadow: 0 0 25px #f44336; }
 
-/* COMET BEAMS (Synced to Login Page Timing) */
-.play-now-btn span:nth-child(1) {
-  top: 0; left: -100%; width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--btn-color));
-  animation: btn-anim1 1s linear infinite;
-}
-.play-now-btn span:nth-child(2) {
-  top: -100%; right: 0; width: 2px; height: 100%;
-  background: linear-gradient(180deg, transparent, var(--btn-color));
-  animation: btn-anim2 1s linear infinite;
-  animation-delay: 0.25s !important;
-}
-.play-now-btn span:nth-child(3) {
-  bottom: 0; right: -100%; width: 100%; height: 2px;
-  background: linear-gradient(270deg, transparent, var(--btn-color));
-  animation: btn-anim3 1s linear infinite;
-  animation-delay: 0.5s !important;
-}
-.play-now-btn span:nth-child(4) {
-  bottom: -100%; left: 0; width: 2px; height: 100%;
-  background: linear-gradient(360deg, transparent, var(--btn-color));
-  animation: btn-anim4 1s linear infinite;
-  animation-delay: 0.75s !important;
-}
+.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--btn-color)); animation: btn-anim1 1s linear infinite; }
+.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--btn-color)); animation: btn-anim2 1s linear infinite; animation-delay: 0.25s !important; }
+.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--btn-color)); animation: btn-anim3 1s linear infinite; animation-delay: 0.5s !important; }
+.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--btn-color)); animation: btn-anim4 1s linear infinite; animation-delay: 0.75s !important; }
 
 @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
 @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
