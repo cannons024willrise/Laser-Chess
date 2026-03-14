@@ -9,18 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const isBlue = sideToggle.checked;
         const color = isBlue ? "#03e9f4" : "#f44336";
 
-        // Update Button
         mainBtn.className = `play-now-btn w-full ${isBlue ? 'blue-mode' : 'red-mode'}`;
         
-        // Update pulsing card
         lobbyStatus.style.setProperty('--theme-color', color);
-        
-        // Update Text & Header
         userEmail.style.color = color;
         statusText.style.color = color;
-        document.querySelector('header').style.borderColor = color;
+        
+        const header = document.querySelector('header');
+        if (header) header.style.borderColor = color;
     }
 
     sideToggle.addEventListener('change', applyTheme);
-    applyTheme(); // Run on init
+    applyTheme();
 });
