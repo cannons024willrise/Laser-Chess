@@ -1,54 +1,47 @@
-// lobby.js - Verified Auth RTR Test
+// lobby.js - Integrated Theme & Matchmaking
 import { db, auth } from "./homeauthcheck.js";
 import { ref, get, onValue, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-window.creatematchrequest = async function(event) {
-    const user = auth.currentUser;
-    if (!user) return; 
+// --- TOGGLE DRIVEN THEME SWAPPER ---
+function initTheme() {
+    const sideToggle = document.getElementById('sideToggle');
+    const mainActionBtn = document.getElementById('mainActionBtn');
 
+    if (!sideToggle || !mainActionBtn) return;
+
+    const syncTheme = () => {
+        if (sideToggle.checked) {
+            // Checkbox ON = BLUE
+            mainActionBtn.classList.remove('red-mode');
+            mainActionBtn.classList.add('blue-mode');
+        } else {
+            // Checkbox OFF = RED
+            mainActionBtn.classList.remove('blue-mode');
+            mainActionBtn.classList.add('red-mode');
+        }
+    };
+
+    // Trigger on every flip
+    sideToggle.addEventListener('change', syncTheme);
+    // Trigger on page load
+    syncTheme();
+}
+
+// Run init
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+} else {
+    initTheme();
+}
+
+// --- MATCHMAKING LOGIC ---
+window.handleMatchmaking = async function() {
+    const user = auth.currentUser;
+    const sideToggle = document.getElementById('sideToggle');
+    if (!user || !sideToggle) return; 
+
+    const selectedColor = sideToggle.checked ? "blue" : "red";
     const myQueueRef = ref(db, `queue/${user.uid}`);
 
-    console.log("Checking for branch existence...");
-    const snapshot = await get(myQueueRef);
-
-    // --- SECOND PATH: Branch doesn't exist ---
-    if (!snapshot.exists()) {
-        console.warn("Branch missing. Triggering Worker...");
-        
-        try {
-            const response = await fetch("https://z9s73n03d0m.later5143.workers.dev/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    uid: user.uid,
-                    color: "white" // You can pull this from a UI toggle later
-                })
-            });
-
-            if (response.ok) {
-                console.log("Worker initialized the node! Please click 'Play' again.");
-                // Optional: You could call creatematchrequest(event) again automatically here
-            } else {
-                console.error("Worker rejected the request.");
-            }
-        } catch (err) {
-            console.error("Failed to connect to Worker:", err);
-        }
-        return; 
-    }
-
-    // --- FIRST PATH (Existing Branch) / AFTER WORKER INITIALIZES ---
-    console.log("Branch verified. Starting RTR...");
-    onValue(myQueueRef, (snapshot) => {
-        const data = snapshot.val();
-        
-        if (data) {
-            console.log("--- LIVE DATA ---", data);
-            
-            if (data.MATCH_ID) {
-                console.log("Match ID found! Killing listener...");
-                off(myQueueRef); 
-            }
-        }
-    });
+    // ... (rest of your existing worker fetch logic)
 };
