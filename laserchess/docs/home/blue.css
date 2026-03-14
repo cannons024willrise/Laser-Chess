@@ -5,14 +5,13 @@
 
 :root {
   --theme-color: #03e9f4;
-  --theme-rgb: 3, 233, 244;
   --red-theme: #f44336;
 }
 
 html body {
   margin: 0; padding: 0; min-height: 100vh;
   font-family: 'customfont', sans-serif !important;
-  background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), 
+  background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.75)), 
               url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
   background-size: cover !important;
   color: white;
@@ -21,47 +20,34 @@ html body {
 
 header {
   background: rgba(10, 10, 10, 0.95) !important;
-  border-bottom: 1px solid rgba(var(--theme-rgb), 0.3);
+  border-bottom: 1px solid var(--theme-color);
   transition: border-color 0.4s ease;
 }
 
-/* ============================================================
-   2. DYNAMIC THEME UTILITIES (The Magic Fix)
-   ============================================================ */
-.text-theme { color: var(--theme-color); transition: color 0.4s ease; }
-.bg-theme { background-color: var(--theme-color); transition: background-color 0.4s ease; }
-.border-theme { border-color: var(--theme-color) !important; transition: border-color 0.4s ease; }
-
-.hover-text-theme:hover { color: var(--theme-color) !important; }
-.hover-border-theme:hover { border-color: var(--theme-color) !important; }
-
-/* Dynamic Opacity Backgrounds & Borders */
-.bg-theme-10 { background-color: rgba(var(--theme-rgb), 0.05); transition: background-color 0.4s ease; }
-.border-theme-20 { border-color: rgba(var(--theme-rgb), 0.2) !important; transition: border-color 0.4s ease; }
-.shadow-theme { box-shadow: 0 0 15px rgba(var(--theme-rgb), 0.5); transition: box-shadow 0.4s ease; }
-
-/* Dynamic Gradient Line for Card 03 */
-.gradient-line-theme {
-  background: linear-gradient(90deg, transparent, var(--theme-color), transparent);
-  transition: background 0.4s ease;
+.discord-banner {
+  width: 100%;
+  padding: 12px 0;
+  background: rgba(88, 101, 242, 0.1);
+  border-bottom: 1px solid rgba(88, 101, 242, 0.2);
+  text-align: center;
 }
 
 /* ============================================================
-   3. THE LOBBY PULSE (Status Card)
+   2. THE LOBBY PULSE (Status Card)
    ============================================================ */
 .lobby-pulse {
-  border: 1px solid rgba(var(--theme-rgb), 0.3) !important;
+  border: 1px solid var(--theme-color) !important;
   transition: all 0.4s ease;
   animation: neon-pulse 3s infinite ease-in-out;
 }
 
 @keyframes neon-pulse {
-  0%, 100% { box-shadow: 0 0 15px rgba(0,0,0,0.5); }
-  50% { box-shadow: 0 0 40px rgba(var(--theme-rgb), 0.4); }
+  0%, 100% { box-shadow: 0 0 15px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.1) !important; }
+  50% { box-shadow: 0 0 50px var(--theme-color); border-color: var(--theme-color) !important; }
 }
 
 /* ============================================================
-   4. THE TOGGLE (Dual Glow)
+   3. THE TOGGLE (Dual Glow)
    ============================================================ */
 .switch { position: relative; display: inline-block; width: 65px; height: 22px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -69,31 +55,70 @@ header {
   position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; 
   background-color: #0a0a0a !important; border: 1px solid #333; transition: 0.3s; 
 }
+
+/* Default Red Side Glow */
 .slider:before {
-  position: absolute; content: ""; height: 12px; width: 26px; left: 4px; bottom: 4px;
-  background-color: var(--red-theme); box-shadow: 0 0 15px var(--red-theme); 
+  position: absolute; content: "";
+  height: 12px; width: 26px;
+  left: 4px; bottom: 4px;
+  background-color: var(--red-theme);
+  box-shadow: 0 0 15px var(--red-theme); /* Red Glow Added */
   transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-input:not(:checked) + .slider { border-color: rgba(244, 67, 54, 0.4); }
-input:checked + .slider { border-color: rgba(3, 233, 244, 0.4); }
+
+/* Slider border color shift based on selection */
+input:not(:checked) + .slider {
+  border-color: rgba(244, 67, 54, 0.4);
+}
+
+input:checked + .slider {
+  border-color: rgba(3, 233, 244, 0.4);
+}
+
+/* Blue Side Glow */
 input:checked + .slider:before {
-  transform: translateX(31px); background-color: var(--theme-color); box-shadow: 0 0 15px var(--theme-color);
+  transform: translateX(31px);
+  background-color: var(--theme-color);
+  box-shadow: 0 0 15px var(--theme-color);
 }
 
 /* ============================================================
-   5. THE BUTTON (Neon Action)
+   4. THE BUTTON (Neon Action)
    ============================================================ */
 .play-now-btn {
-  position: relative; height: 65px; background: rgba(15, 15, 15, 0.95) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important; cursor: pointer; display: flex;
-  align-items: center; justify-content: center; transition: all 0.4s ease;
-  color: var(--theme-color); overflow: visible !important;
+  position: relative;
+  height: 65px;
+  background: rgba(15, 15, 15, 0.95) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+  color: var(--theme-color);
+  overflow: visible !important;
 }
-#mainBtnLabel { letter-spacing: 6px; font-weight: 900 !important; text-transform: uppercase; font-size: 14px; }
-.play-now-btn:hover { background: var(--theme-color) !important; color: #000 !important; box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color); }
 
-.btn-clipper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-.btn-clipper span { position: absolute; display: block; background: var(--theme-color); transition: background 0.4s ease; }
+#mainBtnLabel {
+  letter-spacing: 6px;
+  font-weight: 900 !important;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.play-now-btn:hover {
+  background: var(--theme-color) !important;
+  color: #000 !important;
+  box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color);
+}
+
+/* Animated Border Lines */
+.btn-clipper {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden; pointer-events: none;
+}
+
+.btn-clipper span { position: absolute; display: block; background: var(--theme-color); }
 .btn-clipper span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--theme-color)); animation: anim1 1.5s linear infinite; }
 .btn-clipper span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--theme-color)); animation: anim2 1.5s linear infinite; animation-delay: 0.3s; }
 .btn-clipper span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--theme-color)); animation: anim3 1.5s linear infinite; animation-delay: 0.7s; }
@@ -105,23 +130,73 @@ input:checked + .slider:before {
 @keyframes anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
 
 /* ============================================================
-   6. TACTICAL CARD SYSTEM
+   5. DYNAMIC THEME UTILITIES
+   ============================================================ */
+/* These classes hook directly into the --theme-color variable 
+   controlled by your sideToggle JS */
+
+.text-theme {
+  color: var(--theme-color);
+  transition: color 0.4s ease;
+}
+
+.bg-theme {
+  background-color: var(--theme-color);
+  transition: background-color 0.4s ease;
+}
+
+.border-theme {
+  border-color: var(--theme-color) !important;
+  transition: border-color 0.4s ease;
+}
+
+.hover-text-theme:hover {
+  color: var(--theme-color) !important;
+}
+
+.hover-border-theme:hover {
+  border-color: var(--theme-color) !important;
+}
+
+/* ============================================================
+   6. TACTICAL CARD SYSTEM (RULES)
    ============================================================ */
 .rule-card {
-  background: rgba(20, 20, 20, 0.6);
+  background: rgba(25, 25, 25, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
 }
+
 .rule-card:hover {
-  border-color: rgba(var(--theme-rgb), 0.5);
-  box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.9), 
-              0 0 25px -5px rgba(var(--theme-rgb), 0.3);
+  border-color: var(--theme-color);
+  box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.8), 
+              0 0 20px -5px var(--theme-color);
   transform: translateY(-5px);
 }
+
+/* The neon laser line that appears on top of the card on hover */
 .rule-card-accent {
-  position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+  position: absolute;
+  top: 0; left: 0; 
+  width: 100%; height: 2px;
   background: linear-gradient(90deg, transparent, var(--theme-color), transparent);
-  opacity: 0; transition: opacity 0.4s ease;
+  opacity: 0; 
+  transition: opacity 0.4s ease;
 }
-.rule-card:hover .rule-card-accent { opacity: 1; }
+
+.rule-card:hover .rule-card-accent {
+  opacity: 1;
+}
+
+/* Sync the lobby pulse with the active theme color perfectly */
+.lobby-pulse {
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  transition: all 0.4s ease;
+  animation: theme-pulse 3s infinite ease-in-out;
+}
+
+@keyframes theme-pulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.1) !important; }
+  50% { box-shadow: 0 0 40px var(--theme-color); border-color: var(--theme-color) !important; }
+}
