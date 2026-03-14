@@ -8,13 +8,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="blue.css">
 
-  <!-- Logic Modules -->
   <script type="module" src="homeauthcheck.js"></script>
   <script type="module" src="lobby.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col">
-  <!-- Navigation Header -->
   <header class="lobby-header z-50">
     <h1 class="logo-text">LASER CHESS</h1>
     <div class="user-meta">
@@ -23,24 +21,19 @@
     </div>
   </header>
 
-  <!-- Community Banner -->
   <section class="discord-bar z-40">
     <a href="https://discord.gg/mbEuNMee">Join Our Discord Community</a>
   </section>
 
-  <!-- Main Content -->
   <main class="lobby-main z-30">
     
-    <!-- Hero Header -->
     <div class="hero-section">
       <h1 class="hero-title">READY FOR BATTLE?</h1>
       <p class="hero-subtitle">Select your side and enter the queue</p>
     </div>
 
-    <!-- The Dual-Zone Layout (Grid-based for stability) -->
     <div class="battle-grid">
       
-      <!-- ZONE LEFT: LOBBY STATUS -->
       <div class="zone-left">
         <div id="lobbyStatus" class="status-card">
           <p id="statusText" class="label">Scanning Lobby...</p>
@@ -50,9 +43,7 @@
         </div>
       </div>
 
-      <!-- ZONE RIGHT: MATCH CONTROLS -->
       <div class="zone-right">
-        <!-- Toggle Component -->
         <div class="theme-selector">
           <span class="red-label">RED</span>
           <label class="switch">
@@ -62,7 +53,6 @@
           <span class="blue-label">BLUE</span>
         </div>
 
-        <!-- Action Component -->
         <div class="action-wrapper">
           <button id="mainActionBtn" class="primary-btn">
             <div class="glow-border">
@@ -80,7 +70,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="lobby-footer">
     ALPHA BUILD v1.0 // <a href="mailto:later5143@gmail.com">REPORT_GLITCH</a>
   </footer>
