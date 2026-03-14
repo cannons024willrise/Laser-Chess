@@ -81,8 +81,12 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (The Visual Deception Sync)
+   5. THE BUTTON (Master Clock - 100-Unit Sync)
    ============================================================ */
+:root {
+  --anim-speed: 2.5s;
+}
+
 .play-now-btn {
   position: relative; 
   height: 65px; 
@@ -94,65 +98,59 @@ input:checked + .slider:before {
   justify-content: center; 
   transition: all 0.4s ease;
   color: var(--theme-color); 
-  overflow: hidden; /* This is key */
+  overflow: hidden; 
 }
 
 .btn-clipper span { position: absolute; display: block; background: var(--theme-color); }
 
-/* THE NEW LOGIC:
-   We use a 2.0s total cycle.
-   Top/Bottom = 0.7s travel
-   Right/Left = 0.3s travel
+/* TIMELINE RATIO (Based on distance):
+  Top: 0% -> 35%
+  Right: 35% -> 50%
+  Bottom: 50% -> 85%
+  Left: 85% -> 100%
 */
 
 /* 1. TOP */
 .btn-clipper span:nth-child(1) {
   top: 0; left: -100%; width: 100%; height: 2px;
   background: linear-gradient(90deg, transparent, var(--theme-color));
-  animation: anim-top 2s linear infinite;
+  animation: move-top var(--anim-speed) linear infinite;
 }
-@keyframes anim-top {
+@keyframes move-top {
   0% { left: -100%; }
-  35% { left: 100%; } /* Travels 0.7s */
-  100% { left: 100%; }
+  35%, 100% { left: 100%; }
 }
 
 /* 2. RIGHT */
 .btn-clipper span:nth-child(2) {
   top: -100%; right: 0; width: 2px; height: 100%;
   background: linear-gradient(180deg, transparent, var(--theme-color));
-  animation: anim-right 2s linear infinite;
-  animation-delay: 0.68s; /* Tiny 0.02s overlap to kill the gap */
+  animation: move-right var(--anim-speed) linear infinite;
 }
-@keyframes anim-right {
-  0% { top: -100%; }
-  15% { top: 100%; } /* Travels 0.3s */
-  100% { top: 100%; }
+@keyframes move-right {
+  0%, 34.5% { top: -100%; } /* Starts 0.5% early to prevent gap */
+  50%, 100% { top: 100%; }
 }
 
 /* 3. BOTTOM */
 .btn-clipper span:nth-child(3) {
   bottom: 0; right: -100%; width: 100%; height: 2px;
   background: linear-gradient(270deg, transparent, var(--theme-color));
-  animation: anim-bottom 2s linear infinite;
-  animation-delay: 0.98s; /* (0.7 + 0.3) - 0.02 overlap */
+  animation: move-bottom var(--anim-speed) linear infinite;
 }
-@keyframes anim-bottom {
-  0% { right: -100%; }
-  35% { right: 100%; }
-  100% { right: 100%; }
+@keyframes move-bottom {
+  0%, 49.5% { right: -100%; }
+  85%, 100% { right: 100%; }
 }
 
 /* 4. LEFT */
 .btn-clipper span:nth-child(4) {
   bottom: -100%; left: 0; width: 2px; height: 100%;
   background: linear-gradient(360deg, transparent, var(--theme-color));
-  animation: anim-left 2s linear infinite;
-  animation-delay: 1.68s; /* (0.7 + 0.3 + 0.7) - 0.02 overlap */
+  animation: move-left var(--anim-speed) linear infinite;
 }
-@keyframes anim-left {
-  0% { bottom: -100%; }
-  15% { bottom: 100%; }
+@keyframes move-left {
+  0%, 84.5% { bottom: -100%; }
   100% { bottom: 100%; }
 }
 
