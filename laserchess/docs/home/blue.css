@@ -99,7 +99,7 @@ body {
 }
 
 /* ============================================================
-   4. THEME-AWARE BUTTONS (BLUE & RED) - HOVER FIX
+   4. THEME-AWARE BUTTONS (BLUE & RED) - FINAL LOGIC FIX
    ============================================================ */
 .play-now-btn {
   position: relative;
@@ -115,60 +115,68 @@ body {
   cursor: pointer;
   z-index: 1;
   margin-top: 40px;
+  /* Default Variable */
+  --btn-color: #03e9f4;
 }
 
-/* BUGFIX: No-block Spans */
+/* Ensure spans are visible and above the background */
 .play-now-btn span:not(#mainBtnLabel) { 
   position: absolute; 
   display: block; 
-  pointer-events: none; 
+  pointer-events: none;
+  z-index: 2; 
 }
 
 #mainBtnLabel { position: relative; z-index: 10; display: block; }
 
-/* --- BLUE MODE --- */
-.play-now-btn.blue-mode { color: #03e9f4; }
+/* --- THEME DEFINITIONS --- */
+.play-now-btn.blue-mode { 
+  color: #03e9f4; 
+  --btn-color: #03e9f4; 
+}
 .play-now-btn.blue-mode:hover { 
-  background: rgba(3, 233, 244, 0.1); /* Slight tint instead of solid white */
+  background: rgba(3, 233, 244, 0.1);
   box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4; 
 }
 
-/* --- RED MODE --- */
-.play-now-btn.red-mode { color: #f44336; }
+.play-now-btn.red-mode { 
+  color: #f44336; 
+  --btn-color: #f44336; 
+}
 .play-now-btn.red-mode:hover { 
-  background: rgba(244, 67, 54, 0.1); /* Slight tint instead of solid white */
+  background: rgba(244, 67, 54, 0.1);
   box-shadow: 0 0 5px #f44336, 0 0 25px #f44336, 0 0 50px #f44336, 0 0 100px #f44336; 
 }
 
-/* --- LOGIC: FAST COMET BEAMS (1s Loop) --- */
+/* --- COMET BEAMS (1s SPEED + FADE TAILS) --- */
 .play-now-btn span:nth-child(1) {
   top: 0; left: -100%; width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, currentColor);
+  background: linear-gradient(90deg, transparent, var(--btn-color));
   animation: btn-anim1 1s linear infinite;
 }
 .play-now-btn span:nth-child(2) {
   top: -100%; right: 0; width: 2px; height: 100%;
-  background: linear-gradient(180deg, transparent, currentColor);
+  background: linear-gradient(180deg, transparent, var(--btn-color));
   animation: btn-anim2 1s linear infinite;
   animation-delay: 0.25s;
 }
 .play-now-btn span:nth-child(3) {
   bottom: 0; right: -100%; width: 100%; height: 2px;
-  background: linear-gradient(270deg, transparent, currentColor);
+  background: linear-gradient(270deg, transparent, var(--btn-color));
   animation: btn-anim3 1s linear infinite;
   animation-delay: 0.5s;
 }
 .play-now-btn span:nth-child(4) {
   bottom: -100%; left: 0; width: 2px; height: 100%;
-  background: linear-gradient(360deg, transparent, currentColor);
+  background: linear-gradient(360deg, transparent, var(--btn-color));
   animation: btn-anim4 1s linear infinite;
   animation-delay: 0.75s;
 }
 
+/* --- ANIMATION ENGINE --- */
 @keyframes btn-anim1 { 0% { left: -100%; } 100% { left: 100%; } }
 @keyframes btn-anim2 { 0% { top: -100%; } 100% { top: 100%; } }
 @keyframes btn-anim3 { 0% { right: -100%; } 100% { right: 100%; } }
 @keyframes btn-anim4 { 0% { bottom: -100%; } 100% { bottom: 100%; } }
-
 
 
