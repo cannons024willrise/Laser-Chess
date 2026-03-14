@@ -128,3 +128,75 @@ input:checked + .slider:before {
 @keyframes anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
 @keyframes anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
 @keyframes anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
+
+/* ============================================================
+   5. DYNAMIC THEME UTILITIES
+   ============================================================ */
+/* These classes hook directly into the --theme-color variable 
+   controlled by your sideToggle JS */
+
+.text-theme {
+  color: var(--theme-color);
+  transition: color 0.4s ease;
+}
+
+.bg-theme {
+  background-color: var(--theme-color);
+  transition: background-color 0.4s ease;
+}
+
+.border-theme {
+  border-color: var(--theme-color) !important;
+  transition: border-color 0.4s ease;
+}
+
+.hover-text-theme:hover {
+  color: var(--theme-color) !important;
+}
+
+.hover-border-theme:hover {
+  border-color: var(--theme-color) !important;
+}
+
+/* ============================================================
+   6. TACTICAL CARD SYSTEM (RULES)
+   ============================================================ */
+.rule-card {
+  background: rgba(25, 25, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.rule-card:hover {
+  border-color: var(--theme-color);
+  box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.8), 
+              0 0 20px -5px var(--theme-color);
+  transform: translateY(-5px);
+}
+
+/* The neon laser line that appears on top of the card on hover */
+.rule-card-accent {
+  position: absolute;
+  top: 0; left: 0; 
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--theme-color), transparent);
+  opacity: 0; 
+  transition: opacity 0.4s ease;
+}
+
+.rule-card:hover .rule-card-accent {
+  opacity: 1;
+}
+
+/* Sync the lobby pulse with the active theme color perfectly */
+.lobby-pulse {
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  transition: all 0.4s ease;
+  animation: theme-pulse 3s infinite ease-in-out;
+}
+
+@keyframes theme-pulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.1) !important; }
+  50% { box-shadow: 0 0 40px var(--theme-color); border-color: var(--theme-color) !important; }
+}
