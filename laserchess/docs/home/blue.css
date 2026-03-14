@@ -125,7 +125,22 @@ body {
   box-shadow: 0 0 25px #03e9f4, 0 0 50px #03e9f4;
 }
 
-.play-now-btn span { position: absolute; display: block; background: #03e9f4; }
+/* THE FIX: Target ONLY the 4 animation spans, NOT the text label */
+.play-now-btn span:not(#mainBtnLabel) { 
+  position: absolute; 
+  display: block; 
+  background: #03e9f4; 
+  pointer-events: none; /* Stops the lines from intercepting your mouse clicks */
+}
+
+/* Protect the text label so it stays centered and visible */
+#mainBtnLabel {
+  position: relative;
+  z-index: 10;
+  display: block;
+}
+
+/* The Animations */
 .play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #03e9f4); animation: btn-anim1 1s linear infinite; }
 .play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, #03e9f4); animation: btn-anim2 1s linear infinite; animation-delay: .25s; }
 .play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, #03e9f4); animation: btn-anim3 1s linear infinite; animation-delay: .5s; }
