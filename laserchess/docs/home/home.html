@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="scroll-behavior: smooth;">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,34 +8,29 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="blue.css">
 
-  <!-- Logic Modules -->
   <script type="module" src="homeauthcheck.js"></script>
   <script type="module" src="lobby.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col overflow-x-hidden">
-  <!-- Navigation Header -->
   <header class="flex justify-between items-center p-4 z-20">
     <div class="flex items-center space-x-4">
       <h1 class="text-2xl font-black tracking-tighter italic">LASER CHESS</h1>
     </div>
     <div class="flex items-center space-x-6 text-[10px] tracking-widest uppercase">
-      <span id="userEmail" class="text-cyan-400 font-bold">ACCOUNT_SYNCING...</span>
+      <span id="userEmail" class="text-theme font-bold">ACCOUNT_SYNCING...</span>
       <button id="signOutBtn" class="opacity-50 hover:opacity-100 transition-opacity font-bold">Sign Out</button>
     </div>
   </header>
 
-  <!-- Community Banner -->
   <section class="discord-banner z-10">
-    <a href="https://discord.gg/mbEuNMee" class="text-[9px] font-bold tracking-[0.5em] uppercase hover:text-cyan-400 transition-colors">
+    <a href="https://discord.gg/mbEuNMee" class="text-[9px] font-bold tracking-[0.5em] uppercase hover-text-theme transition-colors">
       Join Our Discord Community
     </a>
   </section>
 
-  <!-- Main Matchmaking Section -->
   <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-screen h-full overflow-hidden">
     
-    <!-- Title Area with padding/margin below it -->
     <div class="text-center mt-4 mb-16 lg:mb-24">
       <h1 class="text-6xl md:text-8xl lg:text-6xl font-black text-white tracking-[0.25em] uppercase italic">
         READY FOR BATTLE?
@@ -43,15 +38,16 @@
       <p class="text-gray-500 text-xs md:text-sm tracking-[0.8em] uppercase mt-6 opacity-80">
         Select your side and enter the queue
       </p>
+      <a href="#the-rules" class="inline-block mt-8 text-[10px] tracking-[0.4em] text-gray-400 hover-text-theme transition-all uppercase border-b border-gray-600 hover-border-theme pb-1">
+        Read the rules
+      </a>
     </div>
 
-    <!-- The Split Layout Container -->
     <div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0">
       
-      <!-- LEFT SIDE: Status Card -->
       <div class="w-full lg:w-[450px] transform lg:-translate-x-12">
-        <div id="lobbyStatus" class="p-16 bg-black/90 backdrop-blur-2xl lobby-pulse border-2 border-cyan-400/30 text-center shadow-[0_0_50px_rgba(0,0,0,0.8)]">
-          <p id="statusText" class="text-cyan-400 tracking-[0.5em] uppercase text-xs mb-8 opacity-70">
+        <div id="lobbyStatus" class="p-16 bg-black/90 backdrop-blur-2xl lobby-pulse border-2 text-center shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+          <p id="statusText" class="text-theme tracking-[0.5em] uppercase text-xs mb-8 opacity-70">
             SCANNING LOBBY...
           </p>
           <div id="oppPreview" class="text-white text-4xl lg:text-5xl font-black tracking-widest uppercase italic leading-tight">
@@ -61,16 +57,15 @@
         </div>
       </div>
 
-      <!-- RIGHT SIDE: Controls Grouped Together -->
       <div class="w-full lg:w-[500px] flex flex-col items-center space-y-16 transform lg:translate-x-12">
         
         <div class="flex items-center space-x-12 scale-110 lg:scale-125">
-          <span class="text-red-600 font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">RED</span>
+          <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(244,67,54,0.5)]">RED</span>
           <label class="switch">
             <input type="checkbox" id="sideToggle">
             <span class="slider"></span>
           </label>
-          <span class="text-cyan-400 font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">BLUE</span>
+          <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(3,233,244,0.5)]">BLUE</span>
         </div>
 
         <div class="w-full space-y-6">
@@ -89,14 +84,158 @@
       </div>
     </div>
 
-    <!-- Bottom buffer to ensure content doesn't hit the fixed footer -->
     <div class="h-32 lg:h-24"></div>
   </main>
 
-  <!-- Fixed Footer: Pins to bottom without affecting layout flow -->
+  <section id="the-rules" class="relative z-10 w-full bg-black/95 border-t border-white/5 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_50px_rgba(0,0,0,0.8)]">
+    <div class="max-w-7xl mx-auto">
+      
+      <div class="mb-24 text-left border-l-4 border-theme pl-8">
+        <h2 class="text-5xl md:text-7xl lg:text-8xl font-black italic tracking-tighter uppercase leading-none">THE RULES</h2>
+        <p class="text-theme text-[10px] md:text-xs tracking-[0.8em] uppercase mt-4 font-bold">Tactical_Operation_Guide</p>
+      </div>
+
+      <div class="mb-32">
+        <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-12 border-b border-white/10 pb-4 text-white flex items-center">
+          <span class="text-theme mr-4 opacity-50">01</span> THE_PIECES
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          <div class="rule-card relative p-8">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg">KING</h4>
+              <span class="text-[9px] text-gray-600 font-mono border border-gray-800 px-2 py-1 bg-black/50">TARGET</span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+              The main target. No mirrors, no shields. If any laser beam hits any of its four sides, that King is removed and the game is over instantly.
+            </p>
+            <div class="mt-6 pt-4 border-t border-white/5 text-[9px] text-[#f44336] font-bold tracking-[0.3em]">VULNERABILITY: 100%</div>
+          </div>
+
+          <div class="rule-card relative p-8">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg">SWITCH</h4>
+              <span class="text-[9px] text-gray-600 font-mono border border-gray-800 px-2 py-1 bg-black/50">UTILITY</span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+              Mirrored on both sides. It cannot be eliminated. <span class="text-white">Special:</span> Can swap positions with an adjacent Defender or Deflector without rotating.
+            </p>
+            <div class="mt-6 pt-4 border-t border-white/5 text-[9px] text-theme font-bold tracking-[0.3em]">STATUS: INVULNERABLE</div>
+          </div>
+
+          <div class="rule-card relative p-8">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg">DEFENDER</h4>
+              <span class="text-[9px] text-gray-600 font-mono border border-gray-800 px-2 py-1 bg-black/50">SHIELD</span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+              Equipped with a shielded front that safely blocks lasers. It remains in play if hit on the shield, but is destroyed if hit on the sides or back.
+            </p>
+            <div class="mt-6 pt-4 border-t border-white/5 text-[9px] text-gray-500 font-bold tracking-[0.3em]">VULNERABILITY: SIDE/REAR</div>
+          </div>
+
+          <div class="rule-card relative p-8">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg">DEFLECTOR</h4>
+              <span class="text-[9px] text-gray-600 font-mono border border-gray-800 px-2 py-1 bg-black/50">MIRROR</span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+              The main tactical unit. One side reflects the beam at exactly 90°. If struck on any of the other three non-mirrored sides, it is eliminated.
+            </p>
+            <div class="mt-6 pt-4 border-t border-white/5 text-[9px] text-gray-500 font-bold tracking-[0.3em]">VULNERABILITY: 3_SIDES</div>
+          </div>
+
+          <div class="rule-card relative p-8">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg">LASER</h4>
+              <span class="text-[9px] text-gray-600 font-mono border border-gray-800 px-2 py-1 bg-black/50">SOURCE</span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+              Permanent beam source located in the corner. It cannot move or be removed. It can be rotated to fire down the first column or across the first row.
+            </p>
+            <div class="mt-6 pt-4 border-t border-white/5 text-[9px] text-theme font-bold tracking-[0.3em]">STATUS: PERMANENT</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="mb-32 grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div class="rule-card relative p-10 lg:p-12">
+          <div class="rule-card-accent"></div>
+          <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 text-white flex items-center">
+            <span class="text-theme mr-4 opacity-50">02</span> YOUR_TURN
+          </h3>
+          <p class="text-gray-500 text-xs mb-8 uppercase tracking-widest">Perform one of three actions:</p>
+          <div class="space-y-6">
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-[0_0_10px_var(--theme-color)]"></div>
+              <div>
+                <p class="text-[12px] font-bold text-white uppercase tracking-widest mb-1">MOVE</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">Shift any piece one square in any direction (including diagonals). Orientation remains the same.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-[0_0_10px_var(--theme-color)]"></div>
+              <div>
+                <p class="text-[12px] font-bold text-white uppercase tracking-widest mb-1">ROTATE</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">Turn any piece 90° clockwise or counter-clockwise on its current square.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-[0_0_10px_var(--theme-color)]"></div>
+              <div>
+                <p class="text-[12px] font-bold text-white uppercase tracking-widest mb-1">SWAP</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">The Switch may change places with an adjacent Defender or Deflector of either color.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rule-card relative p-10 lg:p-12 bg-[#1a0505]/50 border-[#f44336]/20">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#f44336] to-transparent opacity-50"></div>
+          <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 text-[#f44336] flex items-center">
+            <span class="mr-4 opacity-50 text-white">03</span> SYSTEM_LOCKS
+          </h3>
+          <div class="space-y-8">
+            <div class="flex items-start gap-5 p-4 bg-[#f44336]/10 border border-[#f44336]/20">
+              <span class="text-[#f44336] text-xl font-black leading-none">!</span>
+              <p class="text-[11px] text-gray-300 uppercase tracking-widest leading-relaxed">
+                Blue pieces cannot enter squares marked with <span class="text-[#f44336] font-bold">Red Helix symbols</span>. Red pieces cannot enter squares marked with <span class="text-[#03e9f4] font-bold">Blue Helix symbols</span>.
+              </p>
+            </div>
+            <div class="flex items-start gap-5 p-4 bg-[#f44336]/10 border border-[#f44336]/20">
+              <span class="text-[#f44336] text-xl font-black leading-none">!</span>
+              <p class="text-[11px] text-gray-300 uppercase tracking-widest leading-relaxed">
+                No test firing. Once you remove your hand from a piece, the move is locked permanently and the laser must be fired.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rule-card relative p-12 lg:p-16 text-center overflow-hidden">
+        <div class="absolute inset-0 bg-theme opacity-5 z-0"></div>
+        <div class="rule-card-accent bottom-0 top-auto"></div>
+        <div class="relative z-10">
+          <h3 class="text-3xl font-black tracking-[0.3em] uppercase mb-6 text-theme">04 // AUTO_FIRE_SEQUENCE</h3>
+          <div class="w-24 h-1 bg-theme mx-auto mb-8 shadow-[0_0_15px_var(--theme-color)]"></div>
+          <p class="max-w-3xl mx-auto text-[12px] text-white uppercase tracking-[0.25em] leading-loose">
+            After every turn, your laser automatically fires. The beam bounces off mirrors until it leaves the board or hits a piece. Any piece struck on a non-mirrored side is instantly removed. <span class="text-[#f44336] font-bold block mt-4 text-sm">FRIENDLY FIRE COUNTS. WATCH YOUR OWN BEAM.</span>
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <footer class="fixed bottom-0 left-0 w-full p-6 text-center text-gray-600 text-[9px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/60 backdrop-blur-md z-50">
     ALPHA BUILD v1.0 // 
-    <a href="mailto:later5143@gmail.com" class="hover:text-cyan-400 transition-colors">
+    <a href="mailto:later5143@gmail.com" class="hover-text-theme transition-colors">
       REPORT GLITCH OR SUGGEST FEATURE.
     </a>
   </footer>
