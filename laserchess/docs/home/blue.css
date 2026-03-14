@@ -11,69 +11,92 @@ html body {
               url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
   background-size: cover !important;
   color: white;
-  overflow-x: hidden;
 }
 
-/* ============================================================
-   2. FIXED HEADER & BANNER
-   ============================================================ */
 header {
   background: rgba(10, 10, 10, 0.9) !important;
   border-bottom: 1px solid var(--theme-color, #03e9f4);
-  padding: 1.5rem 2rem;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-/* The "Ready for Battle" or Discord Banner */
-.discord-banner {
-  width: 100%;
-  padding: 15px 0;
-  background: rgba(88, 101, 242, 0.2);
-  border-bottom: 1px solid rgba(88, 101, 242, 0.5);
-  text-align: center;
-  letter-spacing: 5px;
-  font-size: 0.8rem;
-  margin-bottom: 50px;
-}
-
 /* ============================================================
-   3. THE LAYOUT (STATUS LEFT | CONTROLS RIGHT)
+   2. THE LAYOUT ENGINE (ABSOLUTE OVERRIDE)
    ============================================================ */
 main {
-  display: flex;
-  flex-direction: row;
-  justify-content: center; /* Centers the whole group */
-  align-items: center;    /* Vertically aligns Status with Button */
-  gap: 100px;             /* Massive gap between left and right */
-  padding: 40px;
-  max-width: 1400px;
-  margin: 0 auto;
+  position: relative !important;
+  width: 100vw;
+  height: calc(100vh - 80px); /* Subtract header height */
+  display: block !important; /* Disable previous flex/grid attempts */
 }
 
-/* Left Side: Status Card */
-.lobby-pulse {
-  flex: 0 1 450px;
-  padding: 50px;
-  background: rgba(15, 15, 15, 0.85) !important;
-  border: 1px solid var(--theme-color, #03e9f4) !important;
-  animation: pulse-engine 3s infinite ease-in-out;
+/* Discord Banner - Top center */
+.discord-banner {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  padding: 12px 0;
+  background: rgba(88, 101, 242, 0.2);
+  border-bottom: 1px solid rgba(88, 101, 242, 0.4);
   text-align: center;
+  letter-spacing: 4px;
+  font-size: 0.75rem;
 }
 
-/* Right Side: Wrapper for Toggle and Button */
-/* Since we can't change HTML, we use margins on the children to stack them */
+/* STATUS CARD - Fixed to the Left Side */
+.lobby-pulse {
+  position: absolute;
+  left: 15%; /* Adjust this to move the card further left/right */
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 40px;
+  background: rgba(15, 15, 15, 0.9) !important;
+  border: 1px solid var(--theme-color, #03e9f4) !important;
+  min-width: 380px;
+  text-align: center;
+  z-index: 10;
+}
+
+/* TOGGLE CONTAINER - Top Right (Above Button) */
 .toggle-container {
+  position: absolute;
+  right: 15%; /* Aligns with button right edge */
+  top: 42%;
+  transform: translateX(-50%); /* Centering logic relative to the button area */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 40px; /* Space above the button */
+  z-index: 11;
+  width: 420px; /* Match button width for centering */
+}
+
+/* CREATE MATCH BUTTON - Bottom Right (Below Toggle) */
+.play-now-btn {
+  position: absolute;
+  right: 15%;
+  top: 58%;
+  transform: translate(0, -50%);
+  width: 420px;
+  height: 65px;
+  background: rgba(15, 15, 15, 0.95) !important;
+  border: none !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+  color: var(--theme-color, #03e9f4);
+  overflow: visible !important;
+  z-index: 10;
 }
 
 /* ============================================================
-   4. THE TOGGLE (SLEEK RECTANGLE)
+   3. THE TOGGLE (SLEEK RECTANGLE)
    ============================================================ */
 .switch { position: relative; display: inline-block; width: 65px; height: 22px; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -97,23 +120,8 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (NEON GLOW)
+   4. BUTTON HOVER & ANIMATIONS
    ============================================================ */
-.play-now-btn {
-  position: relative;
-  width: 420px;
-  height: 65px;
-  background: rgba(15, 15, 15, 0.9) !important;
-  border: none !important;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.4s ease;
-  color: var(--theme-color, #03e9f4);
-  overflow: visible !important;
-}
-
 #mainBtnLabel {
   position: relative;
   z-index: 50;
@@ -125,15 +133,12 @@ input:checked + .slider:before {
 .play-now-btn:hover {
   background: var(--theme-color) !important;
   color: white !important;
-  box-shadow: 0 0 30px var(--theme-color), 0 0 80px var(--theme-color);
+  box-shadow: 0 0 40px var(--theme-color), 0 0 100px var(--theme-color);
 }
 
 .play-now-btn.blue-mode { --theme-color: #03e9f4; }
 .play-now-btn.red-mode { --theme-color: #f44336; }
 
-/* ============================================================
-   6. ANIMATIONS
-   ============================================================ */
 .btn-clipper {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
