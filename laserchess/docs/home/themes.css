@@ -81,80 +81,63 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (Frame-Perfect Overlap Sync)
+   5. THE BUTTON (True Velocity Sync)
    ============================================================ */
-.play-now-btn {
-  position: relative; 
-  height: 65px; 
-  background: rgba(15, 15, 15, 0.95) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important; 
-  cursor: pointer; 
-  display: flex;
-  align-items: center; 
-  justify-content: center; 
-  transition: all 0.4s ease;
-  color: var(--theme-color); 
-  overflow: visible !important;
-}
-
-#mainBtnLabel { letter-spacing: 6px; font-weight: 900 !important; text-transform: uppercase; font-size: 14px; }
-.play-now-btn:hover { background: var(--theme-color) !important; color: #000 !important; box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color); }
-
-.btn-clipper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-
-/* Global Span Logic: 
-   We set width/height to 110% to ensure they "overshoot" the corner 
-   slightly, preventing that micro-gap during handoff. */
 .btn-clipper span { position: absolute; display: block; background: var(--theme-color); }
 
-/* 1. TOP (Travels Left -> Right) */
+/* Total Cycle: 3 seconds. 
+   Top/Bottom get more time (1.1s) because they are longer.
+   Sides get less time (0.4s) because they are shorter.
+*/
+
+/* 1. TOP - The "Lead" */
 .btn-clipper span:nth-child(1) {
-  top: 0; left: -110%; width: 110%; height: 2px;
+  top: 0; left: -100%; width: 100%; height: 2px;
   background: linear-gradient(90deg, transparent, var(--theme-color));
   animation: anim-top 3s linear infinite;
 }
 @keyframes anim-top {
-  0%   { left: -110%; }
-  30%  { left: 100%; }  /* Finishing at 30% of 3s */
+  0% { left: -100%; }
+  36.6% { left: 100%; } /* Travels for 1.1s */
   100% { left: 100%; }
 }
 
-/* 2. RIGHT (Travels Top -> Bottom) */
+/* 2. RIGHT - Slowed down to match Top's speed */
 .btn-clipper span:nth-child(2) {
-  top: -110%; right: 0; width: 2px; height: 110%;
+  top: -100%; right: 0; width: 2px; height: 100%;
   background: linear-gradient(180deg, transparent, var(--theme-color));
   animation: anim-right 3s linear infinite;
-  animation-delay: 0.9s; /* 30% of 3s */
+  animation-delay: 1.1s; /* Starts exactly when Top hits the corner */
 }
 @keyframes anim-right {
-  0%   { top: -110%; }
-  20%  { top: 100%; }   /* Traveling a shorter distance (height) */
+  0% { top: -100%; }
+  13.4% { top: 100%; } /* Travels for 0.4s (The "Short" side) */
   100% { top: 100%; }
 }
 
-/* 3. BOTTOM (Travels Right -> Left) */
+/* 3. BOTTOM - Matches Top speed */
 .btn-clipper span:nth-child(3) {
-  bottom: 0; right: -110%; width: 110%; height: 2px;
+  bottom: 0; right: -100%; width: 100%; height: 2px;
   background: linear-gradient(270deg, transparent, var(--theme-color));
   animation: anim-bottom 3s linear infinite;
-  animation-delay: 1.5s; /* (30% + 20%) of 3s */
+  animation-delay: 1.5s; /* 1.1s (top) + 0.4s (right) */
 }
 @keyframes anim-bottom {
-  0%   { right: -110%; }
-  30%  { right: 100%; }
+  0% { right: -100%; }
+  36.6% { right: 100%; }
   100% { right: 100%; }
 }
 
-/* 4. LEFT (Travels Bottom -> Top) */
+/* 4. LEFT - Matches Right speed */
 .btn-clipper span:nth-child(4) {
-  bottom: -110%; left: 0; width: 2px; height: 110%;
+  bottom: -100%; left: 0; width: 2px; height: 100%;
   background: linear-gradient(360deg, transparent, var(--theme-color));
   animation: anim-left 3s linear infinite;
-  animation-delay: 2.4s; /* (30% + 20% + 30%) of 3s */
+  animation-delay: 2.6s; /* 1.5s + 1.1s */
 }
 @keyframes anim-left {
-  0%   { bottom: -110%; }
-  20%  { bottom: 100%; }
+  0% { bottom: -100%; }
+  13.4% { bottom: 100%; }
   100% { bottom: 100%; }
 }
 /* ============================================================
