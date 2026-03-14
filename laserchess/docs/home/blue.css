@@ -1,69 +1,69 @@
 /* ============================================================
-   1. LAYOUT & RESET (REMOVING THE GAPS)
+   1. LAYOUT & HEADER FIXES
    ============================================================ */
 @font-face { font-family: 'customfont'; src: url('c.otf'); }
 
 html body {
   margin: 0; padding: 0; height: 100%;
   font-family: 'customfont', sans-serif !important;
-  background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), 
+  background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), 
               url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
   background-size: cover !important;
   color: white;
 }
 
 header {
-  background: rgba(10, 10, 10, 0.9) !important;
-  border-bottom: 1px solid #03e9f4;
-  margin-bottom: 0 !important; /* Removes the thin bar gap */
-}
-
-.discord-banner {
-  margin-top: 0 !important;
-  border: none !important;
-  box-shadow: none !important; /* Cleans up the bar over the banner */
+  background: rgba(10, 10, 10, 0.95) !important;
+  border-bottom: 1px solid var(--theme-color, #03e9f4);
+  transition: border-color 0.3s;
 }
 
 /* ============================================================
-   2. THE BUTTON ENGINE (FIXING INTERNALS)
+   2. THE BUTTON (HOVER & COMETS RESTORED)
    ============================================================ */
 .play-now-btn {
   position: relative;
   width: 100%;
   max-width: 400px;
-  height: 60px;
-  background: rgba(0, 0, 0, 0.6) !important;
+  height: 55px; /* Fixed height for consistency */
+  background: rgba(20, 20, 20, 0.6) !important;
   border: none !important;
   cursor: pointer;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: 0.3s;
 }
 
-/* Force the text to stay on top of the animations */
+.play-now-btn.blue-mode { --theme-color: #03e9f4; color: #03e9f4; }
+.play-now-btn.red-mode { --theme-color: #f44336; color: #f44336; }
+
+/* The Hover Fix: Use the variable to override the background */
+.play-now-btn:hover {
+  background: var(--theme-color) !important;
+  color: white !important;
+  box-shadow: 0 0 20px var(--theme-color);
+}
+
 #mainBtnLabel {
   position: relative;
   z-index: 50;
-  pointer-events: none;
   letter-spacing: 5px;
+  font-weight: bold;
 }
 
-/* RESETTING SPAN ANIMATIONS */
+/* COMET SPANS */
 .play-now-btn span:not(#mainBtnLabel) {
   position: absolute !important;
   display: block !important;
   z-index: 10;
 }
 
-.play-now-btn.blue-mode { color: #03e9f4; --btn-color: #03e9f4; }
-.play-now-btn.red-mode { color: #f44336; --btn-color: #f44336; }
-
-/* THE COMET ANIMATIONS */
-.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--btn-color)); animation: btn-anim1 1s linear infinite; }
-.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--btn-color)); animation: btn-anim2 1s linear infinite; animation-delay: 0.25s; }
-.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--btn-color)); animation: btn-anim3 1s linear infinite; animation-delay: 0.5s; }
-.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--btn-color)); animation: btn-anim4 1s linear infinite; animation-delay: 0.75s; }
+.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--theme-color)); animation: btn-anim1 1s linear infinite; }
+.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--theme-color)); animation: btn-anim2 1s linear infinite; animation-delay: 0.25s; }
+.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--theme-color)); animation: btn-anim3 1s linear infinite; animation-delay: 0.5s; }
+.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--theme-color)); animation: btn-anim4 1s linear infinite; animation-delay: 0.75s; }
 
 @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
 @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
@@ -71,58 +71,49 @@ header {
 @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
 
 /* ============================================================
-   3. THE TOGGLE & STATUS BOX (FIXED)
+   3. THE TOGGLE (SLIMMED DOWN)
    ============================================================ */
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 30px;
-  flex-shrink: 0;
+  width: 50px; /* Reduced width */
+  height: 24px; /* Reduced height */
 }
 
 .slider {
   position: absolute;
   cursor: pointer;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #222 !important;
-  border: 1px solid #444;
-  transition: 0.4s;
+  background-color: #111 !important;
+  border: 1px solid #333;
+  transition: 0.3s;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 22px; width: 22px;
+  height: 16px; /* Smaller thumb */
+  width: 16px;
   left: 4px; bottom: 3px;
   background-color: #f44336;
-  transition: 0.4s;
-  box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+  transition: 0.3s;
 }
 
 input:checked + .slider:before {
-  transform: translateX(28px);
+  transform: translateX(26px);
   background-color: #03e9f4;
-  box-shadow: 0 0 10px rgba(3, 233, 244, 0.5);
+  box-shadow: 0 0 8px #03e9f4;
 }
 
-/* PULSE ENGINE */
+/* ============================================================
+   4. STATUS PULSE
+   ============================================================ */
 .lobby-pulse {
-  border: 1px solid #03e9f4 !important;
-  animation: pulse-blue 2s infinite ease-in-out !important;
+  border: 1px solid var(--theme-color, #03e9f4) !important;
+  animation: pulse-engine 2s infinite ease-in-out;
 }
 
-.red-mode.lobby-pulse {
-  border: 1px solid #f44336 !important;
-  animation: pulse-red 2s infinite ease-in-out !important;
-}
-
-@keyframes pulse-blue {
-  0%, 100% { box-shadow: 0 0 5px rgba(3, 233, 244, 0.2); }
-  50% { box-shadow: 0 0 25px rgba(3, 233, 244, 0.5); }
-}
-
-@keyframes pulse-red {
-  0%, 100% { box-shadow: 0 0 5px rgba(244, 67, 54, 0.2); }
-  50% { box-shadow: 0 0 25px rgba(244, 67, 54, 0.5); }
+@keyframes pulse-engine {
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); opacity: 0.8; }
+  50% { box-shadow: 0 0 20px var(--theme-color); opacity: 1; }
 }
