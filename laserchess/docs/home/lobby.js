@@ -28,16 +28,18 @@ document.addEventListener('DOMContentLoaded', () => {
             statusValue.style.color = color;
         }
 
+
+        
+        // Use the full 'background' property to ensure the JS overrides the CSS cleanly
+        document.body.style.background = `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.92)), url('${bgImage}') no-repeat center center fixed`;
+        document.body.style.backgroundSize = 'cover';
+        
         // CORRECT PLACEMENT: Inside the function so it knows what "isBlue" is
         const bgImage = isBlue ? 'Gemini_Generated_Image_tjcevutjcevutjce.png' : 'Gemini_Generated_Image_atb53oatb53oatb5.jpg';
         
-        document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.92)), url('${bgImage}')`;
-        // Make sure it stays fixed and covers the screen
+        // Use the full 'background' property to ensure the JS overrides the CSS cleanly
+        document.body.style.background = `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.92)), url('${bgImage}') no-repeat center center fixed`;
         document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundPosition = 'center center';
-        document.body.style.backgroundAttachment = 'fixed';
-    }
-
-    sideToggle.addEventListener('change', applyTheme);
-    applyTheme(); // Initialize on load
+        
+    } // <-- End of applyTheme function
 });
