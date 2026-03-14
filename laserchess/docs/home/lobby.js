@@ -1,47 +1,39 @@
-// lobby.js - Integrated Theme & Matchmaking
-import { db, auth } from "./homeauthcheck.js";
-import { ref, get, onValue, off } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-// --- TOGGLE DRIVEN THEME SWAPPER ---
-function initTheme() {
+// Ensure this code is in your lobby.js file
+document.addEventListener('DOMContentLoaded', () => {
     const sideToggle = document.getElementById('sideToggle');
+    const lobbyStatus = document.getElementById('lobbyStatus');
+    const statusText = document.getElementById('statusText');
+    const statusValue = document.getElementById('statusValue');
     const mainActionBtn = document.getElementById('mainActionBtn');
 
-    if (!sideToggle || !mainActionBtn) return;
+    function applyTheme() {
+        const isBlue = sideToggle.checked;
 
-    const syncTheme = () => {
-        if (sideToggle.checked) {
-            // Checkbox ON = BLUE
+        if (isBlue) {
+            // --- BLUE MODE ---
+            lobbyStatus.classList.remove('red-mode');
+            
             mainActionBtn.classList.remove('red-mode');
             mainActionBtn.classList.add('blue-mode');
+            
+            statusText.classList.replace('text-red-500', 'text-cyan-400');
+            statusValue.classList.replace('text-red-600', 'text-gray-600');
         } else {
-            // Checkbox OFF = RED
+            // --- RED MODE ---
+            lobbyStatus.classList.add('red-mode');
+            
             mainActionBtn.classList.remove('blue-mode');
             mainActionBtn.classList.add('red-mode');
+            
+            // Switch Tailwind colors on text
+            statusText.classList.replace('text-cyan-400', 'text-red-500');
+            statusValue.classList.replace('text-gray-600', 'text-red-600');
         }
-    };
+    }
 
-    // Trigger on every flip
-    sideToggle.addEventListener('change', syncTheme);
-    // Trigger on page load
-    syncTheme();
-}
+    // Initialize on load
+    applyTheme();
 
-// Run init
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTheme);
-} else {
-    initTheme();
-}
-
-// --- MATCHMAKING LOGIC ---
-window.handleMatchmaking = async function() {
-    const user = auth.currentUser;
-    const sideToggle = document.getElementById('sideToggle');
-    if (!user || !sideToggle) return; 
-
-    const selectedColor = sideToggle.checked ? "blue" : "red";
-    const myQueueRef = ref(db, `queue/${user.uid}`);
-
-    // ... (rest of your existing worker fetch logic)
-};
+    // Listen for toggle changes
+    sideToggle.addEventListener('change', applyTheme);
+});
