@@ -5,6 +5,7 @@
 
 :root {
   --theme-color: #03e9f4;
+  --red-theme: #f44336;
 }
 
 html body {
@@ -46,7 +47,7 @@ header {
 }
 
 /* ============================================================
-   3. THE TOGGLE (Sleek Rectangular Thumb)
+   3. THE TOGGLE (Dual Glow)
    ============================================================ */
 .switch { position: relative; display: inline-block; width: 65px; height: 22px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -55,18 +56,30 @@ header {
   background-color: #0a0a0a !important; border: 1px solid #333; transition: 0.3s; 
 }
 
+/* Default Red Side Glow */
 .slider:before {
   position: absolute; content: "";
   height: 12px; width: 26px;
   left: 4px; bottom: 4px;
-  background-color: #f44336;
+  background-color: var(--red-theme);
+  box-shadow: 0 0 15px var(--red-theme); /* Red Glow Added */
   transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Slider border color shift based on selection */
+input:not(:checked) + .slider {
+  border-color: rgba(244, 67, 54, 0.4);
+}
+
+input:checked + .slider {
+  border-color: rgba(3, 233, 244, 0.4);
+}
+
+/* Blue Side Glow */
 input:checked + .slider:before {
   transform: translateX(31px);
-  background-color: #03e9f4;
-  box-shadow: 0 0 15px #03e9f4;
+  background-color: var(--theme-color);
+  box-shadow: 0 0 15px var(--theme-color);
 }
 
 /* ============================================================
