@@ -13,88 +13,76 @@
   <script type="module" src="lobby.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col overflow-x-hidden">
+<body class="min-h-screen flex flex-col">
   <!-- Navigation Header -->
-  <header class="flex justify-between items-center p-4 z-20">
-    <div class="flex items-center space-x-4">
-      <h1 class="text-2xl font-black tracking-tighter italic">LASER CHESS</h1>
-    </div>
-    <div class="flex items-center space-x-6 text-[10px] tracking-widest uppercase">
-      <span id="userEmail" class="text-cyan-400 font-bold">ACCOUNT_SYNCING...</span>
-      <button id="signOutBtn" class="opacity-50 hover:opacity-100 transition-opacity font-bold">Sign Out</button>
+  <header class="lobby-header z-50">
+    <h1 class="logo-text">LASER CHESS</h1>
+    <div class="user-meta">
+      <span id="userEmail">ACCOUNT_SYNCING...</span>
+      <button id="signOutBtn">Sign Out</button>
     </div>
   </header>
 
   <!-- Community Banner -->
-  <section class="discord-banner z-10">
-    <a href="https://discord.gg/mbEuNMee" class="text-[9px] font-bold tracking-[0.5em] uppercase hover:text-cyan-400 transition-colors">
-      Join Our Discord Community
-    </a>
+  <section class="discord-bar z-40">
+    <a href="https://discord.gg/mbEuNMee">Join Our Discord Community</a>
   </section>
 
-  <!-- Main Matchmaking Section -->
-  <main class="flex-grow flex flex-col items-center justify-center p-6 relative z-10">
+  <!-- Main Content -->
+  <main class="lobby-main z-30">
     
-    <!-- Title Section -->
-    <div class="text-center mb-12 lg:mb-20">
-      <h1 class="text-5xl md:text-7xl font-black text-white tracking-[0.2em] uppercase italic">
-        READY FOR BATTLE?
-      </h1>
-      <p class="text-gray-500 text-[10px] tracking-[0.6em] uppercase mt-4">Select your side and enter the queue</p>
+    <!-- Hero Header -->
+    <div class="hero-section">
+      <h1 class="hero-title">READY FOR BATTLE?</h1>
+      <p class="hero-subtitle">Select your side and enter the queue</p>
     </div>
 
-    <!-- THE SPLIT LAYOUT (Crucial Change) -->
-    <div class="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-32">
+    <!-- The Dual-Zone Layout (Grid-based for stability) -->
+    <div class="battle-grid">
       
-      <!-- LEFT SIDE: Status Card -->
-      <div id="lobbyStatus" class="w-full max-w-md p-12 bg-black/80 backdrop-blur-xl lobby-pulse border border-cyan-400/20 text-center shadow-2xl">
-        <p id="statusText" class="text-cyan-400 tracking-[0.4em] uppercase text-[9px] mb-6 opacity-60">
-          Scanning Lobby...
-        </p>
-        <div id="oppPreview" class="text-white text-3xl font-black tracking-widest uppercase italic">
-          STATUS: <span id="statusValue" class="text-gray-600">IDLE</span>
+      <!-- ZONE LEFT: LOBBY STATUS -->
+      <div class="zone-left">
+        <div id="lobbyStatus" class="status-card">
+          <p id="statusText" class="label">Scanning Lobby...</p>
+          <div class="status-indicator">
+            STATUS: <span id="statusValue">IDLE</span>
+          </div>
         </div>
       </div>
 
-      <!-- RIGHT SIDE: Controls Grouped Together -->
-      <div class="w-full max-w-md flex flex-col items-center space-y-12">
-        
-        <!-- Toggle -->
-        <div class="flex items-center space-x-10">
-          <span class="text-red-600 font-black tracking-widest uppercase text-xl">RED</span>
+      <!-- ZONE RIGHT: MATCH CONTROLS -->
+      <div class="zone-right">
+        <!-- Toggle Component -->
+        <div class="theme-selector">
+          <span class="red-label">RED</span>
           <label class="switch">
             <input type="checkbox" id="sideToggle">
             <span class="slider"></span>
           </label>
-          <span class="text-cyan-400 font-black tracking-widest uppercase text-xl">BLUE</span>
+          <span class="blue-label">BLUE</span>
         </div>
 
-        <!-- Button Area -->
-        <div class="w-full space-y-4">
-          <button id="mainActionBtn" class="play-now-btn w-full">
-            <div class="btn-clipper">
+        <!-- Action Component -->
+        <div class="action-wrapper">
+          <button id="mainActionBtn" class="primary-btn">
+            <div class="glow-border">
               <span></span><span></span><span></span><span></span>
             </div>
-            <span id="mainBtnLabel" class="relative z-20">CREATE MATCH</span>
+            <span id="mainBtnLabel">CREATE MATCH</span>
           </button>
           
-          <button id="followBtn" class="hidden w-full text-[9px] text-gray-500 hover:text-cyan-400 transition-all uppercase tracking-[0.4em] cursor-pointer text-center">
+          <button id="followBtn" class="hidden alt-btn">
             Host new match instead
           </button>
         </div>
-
       </div>
+
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="p-8 text-center text-gray-600 mt-auto text-[9px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/40 backdrop-blur-md">
-    ALPHA BUILD v1.0 // 
-    <a href="mailto:later5143@gmail.com" class="hover:text-cyan-400 transition-colors">
-      REPORT_GLITCH
-    </a>
+  <footer class="lobby-footer">
+    ALPHA BUILD v1.0 // <a href="mailto:later5143@gmail.com">REPORT_GLITCH</a>
   </footer>
-
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>
