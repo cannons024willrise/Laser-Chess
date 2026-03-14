@@ -13,7 +13,7 @@
   <script type="module" src="lobby.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col bg-black overflow-x-hidden">
+<body class="min-h-screen flex flex-col">
   <!-- Navigation Header -->
   <header class="lobby-header z-50">
     <h1 class="logo-text">LASER CHESS</h1>
@@ -28,50 +28,50 @@
     <a href="https://discord.gg/mbEuNMee">Join Our Discord Community</a>
   </section>
 
-  <!-- Main Content Area -->
-  <main class="lobby-container z-30">
+  <!-- Main Content -->
+  <main class="lobby-main z-30">
     
-    <!-- Title Section -->
-    <div class="hero-text-block">
+    <!-- Hero Header -->
+    <div class="hero-section">
       <h1 class="hero-title">READY FOR BATTLE?</h1>
       <p class="hero-subtitle">Select your side and enter the queue</p>
     </div>
 
-    <!-- UI WRAPPER: This holds the two sides apart -->
-    <div class="battle-station-wrapper">
+    <!-- The Dual-Zone Layout (Grid-based for stability) -->
+    <div class="battle-grid">
       
-      <!-- LEFT SIDE: STATUS -->
-      <div class="status-side">
-        <div id="lobbyStatus" class="status-box">
-          <p id="statusText" class="status-top-label">Scanning Lobby...</p>
-          <div class="status-main-display">
+      <!-- ZONE LEFT: LOBBY STATUS -->
+      <div class="zone-left">
+        <div id="lobbyStatus" class="status-card">
+          <p id="statusText" class="label">Scanning Lobby...</p>
+          <div class="status-indicator">
             STATUS: <span id="statusValue">IDLE</span>
           </div>
         </div>
       </div>
 
-      <!-- RIGHT SIDE: CONTROLS -->
-      <div class="controls-side">
-        <!-- Theme Toggle Row -->
-        <div class="selector-row">
-          <span class="side-label side-red">RED</span>
+      <!-- ZONE RIGHT: MATCH CONTROLS -->
+      <div class="zone-right">
+        <!-- Toggle Component -->
+        <div class="theme-selector">
+          <span class="red-label">RED</span>
           <label class="switch">
             <input type="checkbox" id="sideToggle">
             <span class="slider"></span>
           </label>
-          <span class="side-label side-blue">BLUE</span>
+          <span class="blue-label">BLUE</span>
         </div>
 
-        <!-- Create Button Row -->
-        <div class="button-row">
-          <button id="mainActionBtn" class="battle-btn">
-            <div class="btn-glow-lines">
+        <!-- Action Component -->
+        <div class="action-wrapper">
+          <button id="mainActionBtn" class="primary-btn">
+            <div class="glow-border">
               <span></span><span></span><span></span><span></span>
             </div>
             <span id="mainBtnLabel">CREATE MATCH</span>
           </button>
           
-          <button id="followBtn" class="hidden ghost-btn">
+          <button id="followBtn" class="hidden alt-btn">
             Host new match instead
           </button>
         </div>
