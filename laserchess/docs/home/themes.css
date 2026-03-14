@@ -81,51 +81,81 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (The Flawless SVG Engine)
+   5. THE BUTTON (The "Snake" Border Engine)
    ============================================================ */
 .play-now-btn {
-  position: relative; 
-  height: 65px; 
-  background: rgba(15, 15, 15, 0.95) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important; 
-  cursor: pointer; 
+  position: relative;
+  width: 100%;
+  height: 64px;
+  background: #0a0a0a; /* Solid dark base */
+  color: var(--theme-color);
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 4px;
+  border: none;
+  cursor: pointer;
+  overflow: hidden; /* This now works for the internal shine */
   display: flex;
-  align-items: center; 
-  justify-content: center; 
-  transition: all 0.4s ease;
-  color: var(--theme-color); 
-  /* CRITICAL: overflow: hidden; MUST BE REMOVED so it doesn't clip the laser */
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1;
 }
 
-#mainBtnLabel { 
-  letter-spacing: 6px; 
-  font-weight: 900 !important; 
-  text-transform: uppercase; 
-  font-size: 14px; 
+/* The Animated Border "Snake" */
+.btn-border-animation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
 
-.play-now-btn:hover { 
-  background: var(--theme-color) !important; 
-  color: #000 !important; 
-  box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color); 
+.btn-border-animation::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    transparent, 
+    var(--theme-color), 
+    transparent 30%
+  );
+  top: -50%;
+  left: -50%;
+  animation: rotate-border 4s linear infinite;
 }
 
-/* The SVG Laser */
-.laser-rect {
-  fill: none;
-  stroke: var(--theme-color);
-  stroke-width: 4px; /* Thicker, bolder beam */
-  /* 20 units of solid beam, 80 units of empty space = 100 total pathLength */
-  stroke-dasharray: 20 80; 
-  stroke-dashoffset: 100;
-  animation: svg-laser-loop 3s linear infinite;
-  /* The neon glow applied directly to the vector path */
-  filter: drop-shadow(0 0 8px var(--theme-color));
+/* This creates the "hollow" look by masking the center */
+.btn-border-animation::after {
+  content: '';
+  position: absolute;
+  inset: 2px; /* This is your border thickness */
+  background: #0a0a0a;
+  z-index: -1;
 }
 
-@keyframes svg-laser-loop {
-  0% { stroke-dashoffset: 100; }
-  100% { stroke-dashoffset: 0; } /* Animates backwards to 0 to travel clockwise */
+/* Hover States */
+.play-now-btn:hover {
+  color: #000;
+  background: var(--theme-color);
+  box-shadow: 0 0 20px var(--theme-color);
+}
+
+.play-now-btn:hover .btn-border-animation::after {
+  background: var(--theme-color); /* Matches the hover bg */
+}
+
+@keyframes rotate-border {
+  100% { transform: rotate(360deg); }
+}
+
+#mainBtnLabel {
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
 }
 
 /* ============================================================
