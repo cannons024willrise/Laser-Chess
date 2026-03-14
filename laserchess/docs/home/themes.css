@@ -85,6 +85,7 @@ input:checked + .slider:before {
    ============================================================ */
 .play-now-btn {
   position: relative; 
+  height: 65px; 
   background: rgba(15, 15, 15, 0.95) !important;
   border: 1px solid rgba(255,255,255,0.05) !important; 
   cursor: pointer; 
@@ -93,27 +94,38 @@ input:checked + .slider:before {
   justify-content: center; 
   transition: all 0.4s ease;
   color: var(--theme-color); 
+  /* CRITICAL: overflow: hidden; MUST BE REMOVED so it doesn't clip the laser */
 }
 
-#mainBtnLabel { letter-spacing: 6px; font-weight: 900 !important; text-transform: uppercase; font-size: 14px; z-index: 10; }
-.play-now-btn:hover { background: var(--theme-color) !important; color: #000 !important; box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color); }
+#mainBtnLabel { 
+  letter-spacing: 6px; 
+  font-weight: 900 !important; 
+  text-transform: uppercase; 
+  font-size: 14px; 
+}
+
+.play-now-btn:hover { 
+  background: var(--theme-color) !important; 
+  color: #000 !important; 
+  box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color); 
+}
 
 /* The SVG Laser */
 .laser-rect {
   fill: none;
   stroke: var(--theme-color);
-  stroke-width: 3px;
-  /* 25 is the laser length, 75 is the empty gap. Combined equals the 100 pathLength */
-  stroke-dasharray: 25 75; 
+  stroke-width: 4px; /* Thicker, bolder beam */
+  /* 20 units of solid beam, 80 units of empty space = 100 total pathLength */
+  stroke-dasharray: 20 80; 
   stroke-dashoffset: 100;
   animation: svg-laser-loop 3s linear infinite;
-  /* Adds a massive neon glow directly to the stroke */
+  /* The neon glow applied directly to the vector path */
   filter: drop-shadow(0 0 8px var(--theme-color));
 }
 
 @keyframes svg-laser-loop {
   0% { stroke-dashoffset: 100; }
-  100% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 0; } /* Animates backwards to 0 to travel clockwise */
 }
 
 /* ============================================================
