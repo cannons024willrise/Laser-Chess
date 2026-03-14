@@ -3,106 +3,56 @@
    ============================================================ */
 @font-face { font-family: 'customfont'; src: url('c.otf'); }
 
+:root {
+  --theme-color: #03e9f4;
+}
+
 html body {
   margin: 0; padding: 0; min-height: 100vh;
   font-family: 'customfont', sans-serif !important;
-  font-weight: 400 !important;
-  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.6)), 
+  background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.75)), 
               url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
   background-size: cover !important;
   color: white;
+  overflow-x: hidden;
 }
 
 header {
-  background: rgba(10, 10, 10, 0.9) !important;
-  border-bottom: 1px solid var(--theme-color, #03e9f4);
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: rgba(10, 10, 10, 0.95) !important;
+  border-bottom: 1px solid var(--theme-color);
+  transition: border-color 0.4s ease;
 }
 
-/* ============================================================
-   2. THE LAYOUT ENGINE (ABSOLUTE OVERRIDE)
-   ============================================================ */
-main {
-  position: relative !important;
-  width: 100vw;
-  height: calc(100vh - 80px); /* Subtract header height */
-  display: block !important; /* Disable previous flex/grid attempts */
-}
-
-/* Discord Banner - Top center */
 .discord-banner {
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
   width: 100%;
   padding: 12px 0;
-  background: rgba(88, 101, 242, 0.2);
-  border-bottom: 1px solid rgba(88, 101, 242, 0.4);
+  background: rgba(88, 101, 242, 0.1);
+  border-bottom: 1px solid rgba(88, 101, 242, 0.2);
   text-align: center;
-  letter-spacing: 4px;
-  font-size: 0.75rem;
-}
-
-/* STATUS CARD - Fixed to the Left Side */
-.lobby-pulse {
-  position: absolute;
-  left: 15%; /* Adjust this to move the card further left/right */
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 40px;
-  background: rgba(15, 15, 15, 0.9) !important;
-  border: 1px solid var(--theme-color, #03e9f4) !important;
-  min-width: 380px;
-  text-align: center;
-  z-index: 10;
-}
-
-/* TOGGLE CONTAINER - Top Right (Above Button) */
-.toggle-container {
-  position: absolute;
-  right: 15%; /* Aligns with button right edge */
-  top: 42%;
-  transform: translateX(-50%); /* Centering logic relative to the button area */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  z-index: 11;
-  width: 420px; /* Match button width for centering */
-}
-
-/* CREATE MATCH BUTTON - Bottom Right (Below Toggle) */
-.play-now-btn {
-  position: absolute;
-  right: 15%;
-  top: 58%;
-  transform: translate(0, -50%);
-  width: 420px;
-  height: 65px;
-  background: rgba(15, 15, 15, 0.95) !important;
-  border: none !important;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.4s ease;
-  color: var(--theme-color, #03e9f4);
-  overflow: visible !important;
-  z-index: 10;
 }
 
 /* ============================================================
-   3. THE TOGGLE (SLEEK RECTANGLE)
+   2. THE LOBBY PULSE (Status Card)
    ============================================================ */
-.switch { position: relative; display: inline-block; width: 65px; height: 22px; }
+.lobby-pulse {
+  border: 1px solid var(--theme-color) !important;
+  transition: all 0.4s ease;
+  animation: neon-pulse 3s infinite ease-in-out;
+}
+
+@keyframes neon-pulse {
+  0%, 100% { box-shadow: 0 0 15px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.1) !important; }
+  50% { box-shadow: 0 0 50px var(--theme-color); border-color: var(--theme-color) !important; }
+}
+
+/* ============================================================
+   3. THE TOGGLE (Sleek Rectangular Thumb)
+   ============================================================ */
+.switch { position: relative; display: inline-block; width: 65px; height: 22px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { 
   position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; 
-  background-color: #111 !important; border: 1px solid #444; transition: 0.3s; 
+  background-color: #0a0a0a !important; border: 1px solid #333; transition: 0.3s; 
 }
 
 .slider:before {
@@ -120,43 +70,48 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   4. BUTTON HOVER & ANIMATIONS
+   4. THE BUTTON (Neon Action)
    ============================================================ */
-#mainBtnLabel {
+.play-now-btn {
   position: relative;
-  z-index: 50;
+  height: 65px;
+  background: rgba(15, 15, 15, 0.95) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+  color: var(--theme-color);
+  overflow: visible !important;
+}
+
+#mainBtnLabel {
   letter-spacing: 6px;
-  font-weight: 400 !important;
+  font-weight: 900 !important;
   text-transform: uppercase;
+  font-size: 14px;
 }
 
 .play-now-btn:hover {
   background: var(--theme-color) !important;
-  color: white !important;
-  box-shadow: 0 0 40px var(--theme-color), 0 0 100px var(--theme-color);
+  color: #000 !important;
+  box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color);
 }
 
-.play-now-btn.blue-mode { --theme-color: #03e9f4; }
-.play-now-btn.red-mode { --theme-color: #f44336; }
-
+/* Animated Border Lines */
 .btn-clipper {
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  overflow: hidden; pointer-events: none; z-index: 5;
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden; pointer-events: none;
 }
 
-.btn-clipper span { position: absolute !important; display: block !important; }
-.btn-clipper span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--theme-color)); animation: btn-anim1 1.5s linear infinite; }
-.btn-clipper span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--theme-color)); animation: btn-anim2 1.5s linear infinite; animation-delay: 0.3s; }
-.btn-clipper span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--theme-color)); animation: btn-anim3 1.5s linear infinite; animation-delay: 0.7s; }
-.btn-clipper span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--theme-color)); animation: btn-anim4 1.5s linear infinite; animation-delay: 1.1s; }
+.btn-clipper span { position: absolute; display: block; background: var(--theme-color); }
+.btn-clipper span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--theme-color)); animation: anim1 1.5s linear infinite; }
+.btn-clipper span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--theme-color)); animation: anim2 1.5s linear infinite; animation-delay: 0.3s; }
+.btn-clipper span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--theme-color)); animation: anim3 1.5s linear infinite; animation-delay: 0.7s; }
+.btn-clipper span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--theme-color)); animation: anim4 1.5s linear infinite; animation-delay: 1.1s; }
 
-@keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
-@keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
-@keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
-@keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
-
-@keyframes pulse-engine {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.05); }
-  50% { box-shadow: 0 0 40px var(--theme-color); }
-}
+@keyframes anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
+@keyframes anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
+@keyframes anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
+@keyframes anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
