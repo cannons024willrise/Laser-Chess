@@ -1,5 +1,28 @@
 /* ============================================================
-   1. BUTTON ENGINE (MANDATORY - DO NOT MOVE)
+   1. CRITICAL TAILWIND & ELEMENT OVERRIDES
+   ============================================================ */
+#userEmail {
+    transition: color 0.5s ease;
+}
+
+header {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border-bottom: 1px solid rgba(3, 233, 244, 0.3) !important;
+    transition: border-color 0.5s;
+}
+
+/* Red Theme Header Override */
+.red-theme header {
+    border-bottom: 1px solid rgba(244, 67, 54, 0.3) !important;
+}
+
+/* Force override standard Tailwind backgrounds */
+[class*="bg-white"] {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ============================================================
+   2. BUTTON ENGINE (SEALED)
    ============================================================ */
 .play-now-btn {
   position: relative;
@@ -10,8 +33,8 @@
   overflow: hidden;
   transition: 0.5s;
   letter-spacing: 4px;
-  background: rgba(0, 0, 0, 0.6);
-  border: none;
+  background: rgba(0, 0, 0, 0.6) !important;
+  border: none !important;
   cursor: pointer;
   z-index: 1;
   margin-top: 40px;
@@ -23,22 +46,16 @@
   pointer-events: none;
 }
 
-#mainBtnLabel { position: relative; z-index: 10; display: block; }
+#mainBtnLabel { position: relative; z-index: 10; display: block; color: #fff !important; }
 
-/* Theme Colors for Buttons */
-.play-now-btn.blue-mode { color: #03e9f4; --btn-color: #03e9f4; }
-.play-now-btn.blue-mode:hover { 
-  background: #03e9f4; color: #fff;
-  box-shadow: 0 0 25px #03e9f4; 
-}
+/* Theme States */
+.play-now-btn.blue-mode { color: #03e9f4 !important; --btn-color: #03e9f4; }
+.play-now-btn.blue-mode:hover { background: #03e9f4 !important; color: #fff !important; box-shadow: 0 0 25px #03e9f4; }
 
-.play-now-btn.red-mode { color: #f44336; --btn-color: #f44336; }
-.play-now-btn.red-mode:hover { 
-  background: #f44336; color: #fff;
-  box-shadow: 0 0 25px #f44336; 
-}
+.play-now-btn.red-mode { color: #f44336 !important; --btn-color: #f44336; }
+.play-now-btn.red-mode:hover { background: #f44336 !important; color: #fff !important; box-shadow: 0 0 25px #f44336; }
 
-/* COMET ANIMATIONS (Verified Sync) */
+/* Comet Beams */
 .play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--btn-color)); animation: btn-anim1 1s linear infinite; }
 .play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--btn-color)); animation: btn-anim2 1s linear infinite; animation-delay: 0.25s !important; }
 .play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--btn-color)); animation: btn-anim3 1s linear infinite; animation-delay: 0.5s !important; }
@@ -48,3 +65,24 @@
 @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
 @keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
 @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
+
+/* ============================================================
+   3. BRUTALIST TOGGLE & PULSE
+   ============================================================ */
+.lobby-pulse { border: 1px solid rgba(3, 233, 244, 0.2) !important; animation: pulse-blue 2s infinite ease-in-out; }
+.lobby-pulse.red-mode { animation: pulse-red 2s infinite ease-in-out !important; }
+
+@keyframes pulse-blue {
+  0%, 100% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
+  50% { border-color: rgba(3, 233, 244, 0.6); box-shadow: 0 0 20px rgba(3, 233, 244, 0.3); }
+}
+@keyframes pulse-red {
+  0%, 100% { border-color: rgba(244, 67, 54, 0.2); box-shadow: 0 0 5px rgba(244, 67, 54, 0.1); }
+  50% { border-color: rgba(244, 67, 54, 0.6); box-shadow: 0 0 20px rgba(244, 67, 54, 0.3); }
+}
+
+/* Toggle Styles */
+.switch { position: relative; display: inline-block; width: 64px; height: 28px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(239, 68, 68, 0.1) !important; transition: .3s; border: 1px solid rgba(239, 68, 68, 0.3); }
+.slider:before { position: absolute; content: ""; height: 20
