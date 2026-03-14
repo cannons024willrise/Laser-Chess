@@ -11,20 +11,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // BLUE THEME
             document.body.classList.remove('red-theme');
             lobbyStatus.classList.remove('red-mode');
-            mainBtn.classList.replace('red-mode', 'blue-mode');
+            mainBtn.classList.remove('red-mode');
+            mainBtn.classList.add('blue-mode');
             
-            userEmail.style.color = "#03e9f4";
-            statusText.style.color = "#03e9f4";
-            statusValue.style.color = "#fff";
+            userEmail.style.setProperty('color', '#03e9f4', 'important');
+            statusText.style.setProperty('color', '#03e9f4', 'important');
+            statusValue.style.setProperty('color', '#9ca3af', 'important'); // Gray
         } else {
             // RED THEME
             document.body.classList.add('red-theme');
             lobbyStatus.classList.add('red-mode');
-            mainBtn.classList.replace('blue-mode', 'red-mode');
+            mainBtn.classList.remove('blue-mode');
+            mainBtn.classList.add('red-mode');
             
-            userEmail.style.color = "#f44336";
-            statusText.style.color = "#f44336";
-            statusValue.style.color = "#f44336";
+            userEmail.style.setProperty('color', '#f44336', 'important');
+            statusText.style.setProperty('color', '#f44336', 'important');
+            statusValue.style.setProperty('color', '#f44336', 'important');
         }
     }
 
