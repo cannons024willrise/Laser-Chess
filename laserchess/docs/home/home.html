@@ -1,64 +1,100 @@
-<!-- Main Matchmaking Section - Forced Wide Grid -->
-<header class="flex justify-between items-center px-8 py-3 z-20 bg-black/40 backdrop-blur-md border-b border-white/5">
-  <div class="flex items-center">
-    <h1 class="text-xl font-black tracking-tighter italic">LASER CHESS</h1>
-  </div>
-  <div class="flex items-center space-x-6 text-[9px] tracking-widest uppercase">
-    <span id="userEmail" class="text-cyan-400 font-bold">ACCOUNT_SYNCING...</span>
-    <button id="signOutBtn" class="opacity-50 hover:opacity-100 transition-opacity font-bold">Sign Out</button>
-  </div>
-</header>
-
-<section class="discord-banner z-10 border-b border-white/5">
-  <a href="https://discord.gg/mbEuNMee" class="text-[9px] font-bold tracking-[0.5em] uppercase hover:text-cyan-400 transition-colors">
-    Join Our Discord Community
-  </a>
-</section>
-
-<main class="flex-grow flex flex-col items-center justify-start mt-16 lg:mt-24 p-6 relative z-10">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Laser Chess | Lobby</title>
   
-  <div class="text-center mb-16 lg:mb-24">
-    <h1 class="text-5xl md:text-7xl font-black text-white tracking-[0.2em] uppercase italic">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="blue.css">
+
+  <!-- Logic Modules -->
+  <script type="module" src="homeauthcheck.js"></script>
+  <script type="module" src="lobby.js"></script>
+</head>
+
+<body class="min-h-screen flex flex-col overflow-x-hidden">
+  <!-- Navigation Header -->
+  <header class="flex justify-between items-center p-4 z-20">
+    <div class="flex items-center space-x-4">
+      <h1 class="text-2xl font-black tracking-tighter italic">LASER CHESS</h1>
+    </div>
+    <div class="flex items-center space-x-6 text-[10px] tracking-widest uppercase">
+      <span id="userEmail" class="text-cyan-400 font-bold">ACCOUNT_SYNCING...</span>
+      <button id="signOutBtn" class="opacity-50 hover:opacity-100 transition-opacity font-bold">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Community Banner -->
+  <section class="discord-banner z-10">
+    <a href="https://discord.gg/mbEuNMee" class="text-[9px] font-bold tracking-[0.5em] uppercase hover:text-cyan-400 transition-colors">
+      Join Our Discord Community
+    </a>
+  </section>
+
+ <main class="flex-grow flex flex-col justify-between items-center py-12 relative z-10 w-screen h-full overflow-hidden">
+  
+  <div class="text-center mt-8">
+    <h1 class="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-[0.25em] uppercase italic">
       READY FOR BATTLE?
     </h1>
-    <p class="text-gray-500 text-[10px] tracking-[0.6em] uppercase mt-4">Select your side and enter the queue</p>
+    <p class="text-gray-500 text-xs md:text-sm tracking-[0.8em] uppercase mt-6 opacity-80">
+      Select your side and enter the queue
+    </p>
   </div>
 
-  <div class="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-32">
+  <div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0 mt-auto mb-auto">
     
-    <div id="lobbyStatus" class="w-full max-w-md p-12 bg-black/80 backdrop-blur-xl lobby-pulse border border-cyan-400/20 text-center shadow-2xl">
-      <p id="statusText" class="text-cyan-400 tracking-[0.4em] uppercase text-[9px] mb-6 opacity-60">
-        Scanning Lobby...
-      </p>
-      <div id="oppPreview" class="text-white text-3xl font-black tracking-widest uppercase italic">
-        STATUS: <span id="statusValue" class="text-gray-600">IDLE</span>
+    <div class="w-full lg:w-[450px] transform lg:-translate-x-12">
+      <div id="lobbyStatus" class="p-16 bg-black/90 backdrop-blur-2xl lobby-pulse border-2 border-cyan-400/30 text-center shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+        <p id="statusText" class="text-cyan-400 tracking-[0.5em] uppercase text-xs mb-8 opacity-70">
+          SCANNING LOBBY...
+        </p>
+        <div id="oppPreview" class="text-white text-4xl lg:text-5xl font-black tracking-widest uppercase italic leading-tight">
+          STATUS: <br>
+          <span id="statusValue" class="text-gray-600 block mt-2">IDLE</span>
+        </div>
       </div>
     </div>
 
-    <div class="w-full max-w-md flex flex-col items-center space-y-12">
+    <div class="w-full lg:w-[500px] flex flex-col items-center space-y-16 transform lg:translate-x-12">
       
-      <div class="flex items-center space-x-10">
-        <span class="text-red-600 font-black tracking-widest uppercase text-xl">RED</span>
+      <div class="flex items-center space-x-12 scale-110 lg:scale-125">
+        <span class="text-red-600 font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">RED</span>
         <label class="switch">
           <input type="checkbox" id="sideToggle">
           <span class="slider"></span>
         </label>
-        <span class="text-cyan-400 font-black tracking-widest uppercase text-xl">BLUE</span>
+        <span class="text-cyan-400 font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">BLUE</span>
       </div>
 
-      <div class="w-full space-y-4">
-        <button id="mainActionBtn" class="play-now-btn w-full">
+      <div class="w-full space-y-6">
+        <button id="mainActionBtn" class="play-now-btn w-full h-24 lg:h-28 text-xl lg:text-2xl font-black tracking-[0.4em]">
           <div class="btn-clipper">
             <span></span><span></span><span></span><span></span>
           </div>
           <span id="mainBtnLabel" class="relative z-20">CREATE MATCH</span>
         </button>
         
-        <button id="followBtn" class="hidden w-full text-[9px] text-gray-400 hover:text-cyan-400 transition-all uppercase tracking-[0.4em] cursor-pointer text-center">
+        <button id="followBtn" class="hidden w-full text-xs text-gray-400 hover:text-white transition-all uppercase tracking-[0.5em] cursor-pointer text-center font-bold">
           Host new match instead
         </button>
       </div>
 
     </div>
   </div>
+
+  <div class="mb-12"></div>
 </main>
+
+  <!-- Footer -->
+  <footer class="p-8 text-center text-gray-600 mt-auto text-[9px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/40 backdrop-blur-md">
+    ALPHA BUILD v1.0 // 
+    <a href="mailto:later5143@gmail.com" class="hover:text-cyan-400 transition-colors">
+      REPORT_GLITCH
+    </a>
+  </footer>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</body>
+</html>
