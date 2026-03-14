@@ -1,79 +1,69 @@
 /* ============================================================
-   1. GLOBAL RESET & BACKGROUND (OVERRIDING TAILWIND)
+   1. LAYOUT & RESET (REMOVING THE GAPS)
    ============================================================ */
-@font-face {
-  font-family: 'customfont';
-  src: url('c.otf');
-}
+@font-face { font-family: 'customfont'; src: url('c.otf'); }
 
-/* Using 'html body' doubles the specificity to beat Tailwind's base reset */
 html body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
+  margin: 0; padding: 0; height: 100%;
   font-family: 'customfont', sans-serif !important;
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), 
+  background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9)), 
               url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
   background-size: cover !important;
   color: white;
 }
 
 header {
-  background: rgba(0, 0, 0, 0.8) !important;
-  border-bottom: 1px solid #03e9f4 !important;
+  background: rgba(10, 10, 10, 0.9) !important;
+  border-bottom: 1px solid #03e9f4;
+  margin-bottom: 0 !important; /* Removes the thin bar gap */
 }
 
-.red-theme header {
-  border-bottom: 1px solid #f44336 !important;
+.discord-banner {
+  margin-top: 0 !important;
+  border: none !important;
+  box-shadow: none !important; /* Cleans up the bar over the banner */
 }
 
 /* ============================================================
-   2. THE BUTTON ENGINE (STRICT RE-INTEGRATION)
+   2. THE BUTTON ENGINE (FIXING INTERNALS)
    ============================================================ */
-/* We use 'button.play-now-btn' to ensure it beats Tailwind's button styles */
-button.play-now-btn {
+.play-now-btn {
   position: relative;
-  display: inline-block;
-  padding: 15px 30px;
-  background: rgba(0, 0, 0, 0.7) !important;
-  font-size: 24px;
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  overflow: hidden;
-  transition: 0.5s;
+  width: 100%;
+  max-width: 400px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.6) !important;
   border: none !important;
   cursor: pointer;
-  z-index: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Blue State (Default/Active) */
-button.play-now-btn.blue-mode {
-  color: #03e9f4 !important;
-  --btn-color: #03e9f4;
+/* Force the text to stay on top of the animations */
+#mainBtnLabel {
+  position: relative;
+  z-index: 50;
+  pointer-events: none;
+  letter-spacing: 5px;
 }
 
-/* Red State */
-button.play-now-btn.red-mode {
-  color: #f44336 !important;
-  --btn-color: #f44336;
-}
-
-button.play-now-btn:hover {
-  background: var(--btn-color) !important;
-  color: #fff !important;
-  box-shadow: 0 0 10px var(--btn-color), 0 0 40px var(--btn-color);
-}
-
-/* THE COMET SPANS - Forced Display */
-button.play-now-btn span {
+/* RESETTING SPAN ANIMATIONS */
+.play-now-btn span:not(#mainBtnLabel) {
   position: absolute !important;
   display: block !important;
+  z-index: 10;
 }
 
-button.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--btn-color)); animation: btn-anim1 1s linear infinite; }
-button.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--btn-color)); animation: btn-anim2 1s linear infinite; animation-delay: 0.25s !important; }
-button.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--btn-color)); animation: btn-anim3 1s linear infinite; animation-delay: 0.5s !important; }
-button.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--btn-color)); animation: btn-anim4 1s linear infinite; animation-delay: 0.75s !important; }
+.play-now-btn.blue-mode { color: #03e9f4; --btn-color: #03e9f4; }
+.play-now-btn.red-mode { color: #f44336; --btn-color: #f44336; }
+
+/* THE COMET ANIMATIONS */
+.play-now-btn span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--btn-color)); animation: btn-anim1 1s linear infinite; }
+.play-now-btn span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--btn-color)); animation: btn-anim2 1s linear infinite; animation-delay: 0.25s; }
+.play-now-btn span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--btn-color)); animation: btn-anim3 1s linear infinite; animation-delay: 0.5s; }
+.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--btn-color)); animation: btn-anim4 1s linear infinite; animation-delay: 0.75s; }
 
 @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
 @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
@@ -81,8 +71,42 @@ button.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; heig
 @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
 
 /* ============================================================
-   3. LOBBY PULSE
+   3. THE TOGGLE & STATUS BOX (FIXED)
    ============================================================ */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #222 !important;
+  border: 1px solid #444;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 22px; width: 22px;
+  left: 4px; bottom: 3px;
+  background-color: #f44336;
+  transition: 0.4s;
+  box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+}
+
+input:checked + .slider:before {
+  transform: translateX(28px);
+  background-color: #03e9f4;
+  box-shadow: 0 0 10px rgba(3, 233, 244, 0.5);
+}
+
+/* PULSE ENGINE */
 .lobby-pulse {
   border: 1px solid #03e9f4 !important;
   animation: pulse-blue 2s infinite ease-in-out !important;
@@ -94,10 +118,11 @@ button.play-now-btn span:nth-child(4) { bottom: -100%; left: 0; width: 2px; heig
 }
 
 @keyframes pulse-blue {
-  0%, 100% { border-color: rgba(3, 233, 244, 0.4); box-shadow: 0 0 5px rgba(3, 233, 244, 0.2); }
-  50% { border-color: rgba(3, 233, 244, 1); box-shadow: 0 0 20px rgba(3, 233, 244, 0.6); }
+  0%, 100% { box-shadow: 0 0 5px rgba(3, 233, 244, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(3, 233, 244, 0.5); }
 }
 
 @keyframes pulse-red {
-  0%, 100% { border-color: rgba(244, 67, 54, 0.4); box-shadow: 0 0 5px rgba(244, 67, 54, 0.2); }
-  50% { border-color: rgba(244, 67, 54, 1); box-shadow: 0 0 20px rgba(244, 67,
+  0%, 100% { box-shadow: 0 0 5px rgba(244, 67, 54, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(244, 67, 54, 0.5); }
+}
