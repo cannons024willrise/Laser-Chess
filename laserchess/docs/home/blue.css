@@ -4,13 +4,14 @@
 @font-face { font-family: 'customfont'; src: url('c.otf'); }
 
 html body {
-  margin: 0; padding: 0; height: 100%;
+  margin: 0; padding: 0; min-height: 100vh;
   font-family: 'customfont', sans-serif !important;
   font-weight: 400 !important;
   background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.5)), 
               url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
   background-size: cover !important;
   color: white;
+  overflow-x: hidden;
 }
 
 header {
@@ -23,53 +24,58 @@ header {
 }
 
 /* ============================================================
-   2. THE GRID ENGINE (STATUS NEXT TO TOGGLE/BUTTON)
+   2. THE GRID ENGINE (HORIZONTAL SYNC)
    ============================================================ */
 main {
   display: grid !important;
-  grid-template-columns: auto auto; /* Two columns */
-  grid-template-rows: auto auto auto; /* Three potential rows */
-  gap: 40px 60px; /* Vertical gap, Horizontal gap */
-  justify-content: center;
-  align-items: center;
-  padding: 60px 20px;
+  /* Left column for Status, Right column for Controls */
+  grid-template-columns: minmax(350px, auto) minmax(400px, auto); 
+  grid-template-rows: auto 1fr;
+  gap: 30px 80px; /* Vertical gap, Horizontal gap */
+  justify-content: center; /* Centers the whole grid on screen */
+  align-items: center;    /* Vertically centers items in their rows */
+  padding: 80px 40px;
 }
 
-/* Force Discord to span across BOTH columns at the top */
+/* Force Discord to span across the top of both columns */
 .discord-banner {
   grid-column: 1 / span 2;
   width: 100%;
   margin-bottom: 20px;
 }
 
-/* Status Card sits in the Left Column, spanning two rows to match height */
+/* Status Card sits in Left Column */
 .lobby-pulse {
   grid-column: 1;
-  grid-row: 2 / span 2;
-  padding: 40px;
-  background: rgba(20, 20, 20, 0.8) !important;
+  grid-row: 2 / span 2; /* Keeps it aligned while right side stacks */
+  padding: 50px 40px;
+  background: rgba(20, 20, 20, 0.85) !important;
   border: 1px solid var(--theme-color, #03e9f4) !important;
   animation: pulse-engine 3s infinite ease-in-out;
-  min-width: 380px;
+  min-width: 400px;
   text-align: center;
 }
 
-/* Toggle sits in Right Column, Row 2 */
+/* Right Side Wrapper Logic */
+/* Note: Since we can't add a <div> to wrap the toggle and button, 
+   we align them manually to the same column. */
+
 .toggle-container {
   grid-column: 2;
   grid-row: 2;
   display: flex;
   align-items: center;
-  gap: 20px;
-  justify-self: start;
+  justify-content: center; /* Centers labels + switch as a group */
+  gap: 25px;
+  margin-bottom: -20px; /* Tightens space to button below */
 }
 
-/* Play Button sits in Right Column, Row 3 */
 .play-now-btn {
   grid-column: 2;
   grid-row: 3;
   width: 420px;
-  height: 60px;
+  height: 65px;
+  justify-self: center; /* Centers button in the right column */
   background: rgba(15, 15, 15, 0.9) !important;
   border: none !important;
   cursor: pointer;
@@ -79,15 +85,15 @@ main {
   transition: all 0.4s ease;
   color: var(--theme-color, #03e9f4);
   overflow: visible !important;
-  margin: 0 !important; /* Reset margins to let grid handle it */
 }
 
 /* ============================================================
    3. THE TOGGLE (SLEEK RECTANGLE)
    ============================================================ */
-.switch { position: relative; display: inline-block; width: 65px; height: 22px; }
+.switch { position: relative; display: inline-block; width: 65px; height: 22px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(17, 17, 17, 0.9) !important; border: 1px solid #444; transition: 0.3s; }
+
 .slider:before {
   position: absolute; content: "";
   height: 12px; width: 26px;
@@ -122,12 +128,25 @@ input:checked + .slider:before {
 .play-now-btn:hover {
   background: var(--theme-color) !important;
   color: white !important;
-  box-shadow: 0 0 25px var(--theme-color), 0 0 60px var(--theme-color), 0 0 100px var(--theme-color);
+  box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color);
 }
 
 .play-now-btn.blue-mode { --theme-color: #03e9f4; }
 .play-now-btn.red-mode { --theme-color: #f44336; }
 
+/* ANIMATION ENGINE */
 .btn-clipper span { position: absolute !important; display: block !important; }
 .btn-clipper span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--theme-color)); animation: btn-anim1 1.5s linear infinite; }
-.btn-clipper span:nth-child(2) { top: -100%; right: 0; width: 2px; height
+.btn-clipper span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--theme-color)); animation: btn-anim2 1.5s linear infinite; animation-delay: 0.3s; }
+.btn-clipper span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--theme-color)); animation: btn-anim3 1.5s linear infinite; animation-delay: 0.7s; }
+.btn-clipper span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--theme-color)); animation: btn-anim4 1.5s linear infinite; animation-delay: 1.1s; }
+
+@keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
+@keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
+@keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
+@keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
+
+@keyframes pulse-engine {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.05); }
+  50% { box-shadow: 0 0 40px var(--theme-color); }
+}
