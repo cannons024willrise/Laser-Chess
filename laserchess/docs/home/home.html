@@ -1,62 +1,64 @@
 <!-- Main Matchmaking Section - Forced Wide Grid -->
-<main class="flex-grow relative z-10 w-screen min-h-[80vh] grid grid-rows-[auto_1fr_auto] items-center overflow-x-hidden">
+<header class="flex justify-between items-center px-8 py-3 z-20 bg-black/40 backdrop-blur-md border-b border-white/5">
+  <div class="flex items-center">
+    <h1 class="text-xl font-black tracking-tighter italic">LASER CHESS</h1>
+  </div>
+  <div class="flex items-center space-x-6 text-[9px] tracking-widest uppercase">
+    <span id="userEmail" class="text-cyan-400 font-bold">ACCOUNT_SYNCING...</span>
+    <button id="signOutBtn" class="opacity-50 hover:opacity-100 transition-opacity font-bold">Sign Out</button>
+  </div>
+</header>
+
+<section class="discord-banner z-10 border-b border-white/5">
+  <a href="https://discord.gg/mbEuNMee" class="text-[9px] font-bold tracking-[0.5em] uppercase hover:text-cyan-400 transition-colors">
+    Join Our Discord Community
+  </a>
+</section>
+
+<main class="flex-grow flex flex-col items-center justify-start mt-16 lg:mt-24 p-6 relative z-10">
   
-  <!-- 1. The Massive Title Area (Top Row) -->
-  <div class="text-center w-full pt-12">
-    <h1 class="text-6xl md:text-8xl lg:text-[9rem] font-black text-white tracking-[0.25em] uppercase italic leading-none">
+  <div class="text-center mb-16 lg:mb-24">
+    <h1 class="text-5xl md:text-7xl font-black text-white tracking-[0.2em] uppercase italic">
       READY FOR BATTLE?
     </h1>
-    <p class="text-gray-500 text-xs md:text-sm tracking-[0.8em] uppercase mt-4 opacity-80">
-      Select your side and enter the queue
-    </p>
+    <p class="text-gray-500 text-[10px] tracking-[0.6em] uppercase mt-4">Select your side and enter the queue</p>
   </div>
 
-  <!-- 2. THE WIDE ARENA (Middle Row - Forced Stretch) -->
-  <div class="w-full flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 lg:px-32 xl:px-48">
+  <div class="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-32">
     
-    <!-- LEFT SIDE: Status Card -->
-    <div class="w-full lg:w-[500px] mb-12 lg:mb-0">
-      <div id="lobbyStatus" class="p-16 bg-black/95 backdrop-blur-3xl lobby-pulse border-2 border-cyan-400/30 text-center shadow-[0_0_80px_rgba(0,0,0,0.9)]">
-        <p id="statusText" class="text-cyan-400 tracking-[0.5em] uppercase text-xs mb-8 opacity-70">
-          SCANNING_SYSTEMS...
-        </p>
-        <div id="oppPreview" class="text-white text-4xl lg:text-6xl font-black tracking-widest uppercase italic leading-tight">
-          STATUS: <br>
-          <span id="statusValue" class="text-gray-600 block mt-4">IDLE</span>
-        </div>
+    <div id="lobbyStatus" class="w-full max-w-md p-12 bg-black/80 backdrop-blur-xl lobby-pulse border border-cyan-400/20 text-center shadow-2xl">
+      <p id="statusText" class="text-cyan-400 tracking-[0.4em] uppercase text-[9px] mb-6 opacity-60">
+        Scanning Lobby...
+      </p>
+      <div id="oppPreview" class="text-white text-3xl font-black tracking-widest uppercase italic">
+        STATUS: <span id="statusValue" class="text-gray-600">IDLE</span>
       </div>
     </div>
 
-    <!-- RIGHT SIDE: Controls Grouped -->
-    <div class="w-full lg:w-[550px] flex flex-col items-center lg:items-end space-y-16">
+    <div class="w-full max-w-md flex flex-col items-center space-y-12">
       
-      <!-- Side Selection Toggle (Scaled up further) -->
-      <div class="flex items-center space-x-12 scale-125 lg:scale-[1.4] origin-right">
-        <span class="text-red-600 font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_15px_rgba(220,38,38,0.6)]">RED</span>
+      <div class="flex items-center space-x-10">
+        <span class="text-red-600 font-black tracking-widest uppercase text-xl">RED</span>
         <label class="switch">
           <input type="checkbox" id="sideToggle">
           <span class="slider"></span>
         </label>
-        <span class="text-cyan-400 font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_15px_rgba(34,211,238,0.6)]">BLUE</span>
+        <span class="text-cyan-400 font-black tracking-widest uppercase text-xl">BLUE</span>
       </div>
 
-      <!-- Action Button Area -->
-      <div class="w-full space-y-8">
-        <button id="mainActionBtn" class="play-now-btn w-full h-28 lg:h-36 text-2xl lg:text-3xl font-black tracking-[0.4em] shadow-2xl">
+      <div class="w-full space-y-4">
+        <button id="mainActionBtn" class="play-now-btn w-full">
           <div class="btn-clipper">
             <span></span><span></span><span></span><span></span>
           </div>
           <span id="mainBtnLabel" class="relative z-20">CREATE MATCH</span>
         </button>
         
-        <button id="followBtn" class="hidden w-full text-xs text-gray-400 hover:text-white transition-all uppercase tracking-[0.6em] cursor-pointer text-center font-black">
-          HOST_NEW_BATTLE_SESSION
+        <button id="followBtn" class="hidden w-full text-[9px] text-gray-400 hover:text-cyan-400 transition-all uppercase tracking-[0.4em] cursor-pointer text-center">
+          Host new match instead
         </button>
       </div>
 
     </div>
   </div>
-
-  <!-- 3. Bottom Spacer (Bottom Row) -->
-  <div class="h-24"></div>
 </main>
