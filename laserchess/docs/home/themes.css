@@ -81,34 +81,52 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (Sub-Pixel Precision Sync)
+   5. THE BUTTON (The Visual Deception Sync)
    ============================================================ */
+.play-now-btn {
+  position: relative; 
+  height: 65px; 
+  background: rgba(15, 15, 15, 0.95) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important; 
+  cursor: pointer; 
+  display: flex;
+  align-items: center; 
+  justify-content: center; 
+  transition: all 0.4s ease;
+  color: var(--theme-color); 
+  overflow: hidden; /* This is key */
+}
+
 .btn-clipper span { position: absolute; display: block; background: var(--theme-color); }
 
-/* 1. TOP - Linear Horizontal */
+/* THE NEW LOGIC:
+   We use a 2.0s total cycle.
+   Top/Bottom = 0.7s travel
+   Right/Left = 0.3s travel
+*/
+
+/* 1. TOP */
 .btn-clipper span:nth-child(1) {
   top: 0; left: -100%; width: 100%; height: 2px;
   background: linear-gradient(90deg, transparent, var(--theme-color));
-  animation: anim-top 3s linear infinite;
+  animation: anim-top 2s linear infinite;
 }
 @keyframes anim-top {
   0% { left: -100%; }
-  36.6% { left: 100%; } /* Travels for 1.1s (The Long Side) */
+  35% { left: 100%; } /* Travels 0.7s */
   100% { left: 100%; }
 }
 
-/* 2. RIGHT - The Problem Side
-   We add a 2px top offset so it begins EXACTLY where the top span ends.
-*/
+/* 2. RIGHT */
 .btn-clipper span:nth-child(2) {
   top: -100%; right: 0; width: 2px; height: 100%;
   background: linear-gradient(180deg, transparent, var(--theme-color));
-  animation: anim-right 3s linear infinite;
-  animation-delay: 1.1s; /* Starts exactly when top hits the corner */
+  animation: anim-right 2s linear infinite;
+  animation-delay: 0.68s; /* Tiny 0.02s overlap to kill the gap */
 }
 @keyframes anim-right {
   0% { top: -100%; }
-  13.4% { top: 100%; } /* Travels for 0.4s (The Short Side) */
+  15% { top: 100%; } /* Travels 0.3s */
   100% { top: 100%; }
 }
 
@@ -116,12 +134,12 @@ input:checked + .slider:before {
 .btn-clipper span:nth-child(3) {
   bottom: 0; right: -100%; width: 100%; height: 2px;
   background: linear-gradient(270deg, transparent, var(--theme-color));
-  animation: anim-bottom 3s linear infinite;
-  animation-delay: 1.5s; /* 1.1s (top) + 0.4s (right) */
+  animation: anim-bottom 2s linear infinite;
+  animation-delay: 0.98s; /* (0.7 + 0.3) - 0.02 overlap */
 }
 @keyframes anim-bottom {
   0% { right: -100%; }
-  36.6% { right: 100%; }
+  35% { right: 100%; }
   100% { right: 100%; }
 }
 
@@ -129,12 +147,12 @@ input:checked + .slider:before {
 .btn-clipper span:nth-child(4) {
   bottom: -100%; left: 0; width: 2px; height: 100%;
   background: linear-gradient(360deg, transparent, var(--theme-color));
-  animation: anim-left 3s linear infinite;
-  animation-delay: 2.6s; /* 1.5s + 1.1s */
+  animation: anim-left 2s linear infinite;
+  animation-delay: 1.68s; /* (0.7 + 0.3 + 0.7) - 0.02 overlap */
 }
 @keyframes anim-left {
   0% { bottom: -100%; }
-  13.4% { bottom: 100%; }
+  15% { bottom: 100%; }
   100% { bottom: 100%; }
 }
 
