@@ -81,7 +81,7 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (Synchronized Perimeter Loop)
+   5. THE BUTTON (Frame-Perfect Overlap Sync)
    ============================================================ */
 .play-now-btn {
   position: relative; 
@@ -101,61 +101,60 @@ input:checked + .slider:before {
 .play-now-btn:hover { background: var(--theme-color) !important; color: #000 !important; box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color); }
 
 .btn-clipper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-.btn-clipper span { position: absolute; display: block; background: var(--theme-color); opacity: 1; }
 
-/* THE FIX: We use a 4-second total cycle. 
-   Each side is allocated a percentage of that 4s based on distance.
-   Top/Bottom = 1.4s | Sides = 0.6s
-*/
+/* Global Span Logic: 
+   We set width/height to 110% to ensure they "overshoot" the corner 
+   slightly, preventing that micro-gap during handoff. */
+.btn-clipper span { position: absolute; display: block; background: var(--theme-color); }
 
-/* 1. TOP */
+/* 1. TOP (Travels Left -> Right) */
 .btn-clipper span:nth-child(1) {
-  top: 0; left: -100%; width: 100%; height: 2px;
+  top: 0; left: -110%; width: 110%; height: 2px;
   background: linear-gradient(90deg, transparent, var(--theme-color));
-  animation: anim-top 4s linear infinite;
+  animation: anim-top 3s linear infinite;
 }
 @keyframes anim-top {
-  0% { left: -100%; }
-  35% { left: 100%; }  /* Travels for 1.4s (35% of 4s) */
+  0%   { left: -110%; }
+  30%  { left: 100%; }  /* Finishing at 30% of 3s */
   100% { left: 100%; }
 }
 
-/* 2. RIGHT */
+/* 2. RIGHT (Travels Top -> Bottom) */
 .btn-clipper span:nth-child(2) {
-  top: -100%; right: 0; width: 2px; height: 100%;
+  top: -110%; right: 0; width: 2px; height: 110%;
   background: linear-gradient(180deg, transparent, var(--theme-color));
-  animation: anim-right 4s linear infinite;
-  animation-delay: 1.4s; /* Starts exactly at 35% of 4s */
+  animation: anim-right 3s linear infinite;
+  animation-delay: 0.9s; /* 30% of 3s */
 }
 @keyframes anim-right {
-  0% { top: -100%; }
-  15% { top: 100%; }   /* Travels for 0.6s (15% of 4s) */
+  0%   { top: -110%; }
+  20%  { top: 100%; }   /* Traveling a shorter distance (height) */
   100% { top: 100%; }
 }
 
-/* 3. BOTTOM */
+/* 3. BOTTOM (Travels Right -> Left) */
 .btn-clipper span:nth-child(3) {
-  bottom: 0; right: -100%; width: 100%; height: 2px;
+  bottom: 0; right: -110%; width: 110%; height: 2px;
   background: linear-gradient(270deg, transparent, var(--theme-color));
-  animation: anim-bottom 4s linear infinite;
-  animation-delay: 2s;   /* Starts at 50% of 4s (1.4s + 0.6s) */
+  animation: anim-bottom 3s linear infinite;
+  animation-delay: 1.5s; /* (30% + 20%) of 3s */
 }
 @keyframes anim-bottom {
-  0% { right: -100%; }
-  35% { right: 100%; }
+  0%   { right: -110%; }
+  30%  { right: 100%; }
   100% { right: 100%; }
 }
 
-/* 4. LEFT */
+/* 4. LEFT (Travels Bottom -> Top) */
 .btn-clipper span:nth-child(4) {
-  bottom: -100%; left: 0; width: 2px; height: 100%;
+  bottom: -110%; left: 0; width: 2px; height: 110%;
   background: linear-gradient(360deg, transparent, var(--theme-color));
-  animation: anim-left 4s linear infinite;
-  animation-delay: 3.4s; /* Starts at 85% of 4s (1.4+0.6+1.4) */
+  animation: anim-left 3s linear infinite;
+  animation-delay: 2.4s; /* (30% + 20% + 30%) of 3s */
 }
 @keyframes anim-left {
-  0% { bottom: -100%; }
-  15% { bottom: 100%; }
+  0%   { bottom: -110%; }
+  20%  { bottom: 100%; }
   100% { bottom: 100%; }
 }
 /* ============================================================
