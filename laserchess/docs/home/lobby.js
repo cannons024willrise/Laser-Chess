@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isBlue = sideToggle.checked;
         const color = isBlue ? "#03e9f4" : "#f44336";
 
-        mainBtn.className = `play-now-btn w-full ${isBlue ? 'blue-mode' : 'red-mode'}`;
+        mainBtn.className = `play-now-btn ${isBlue ? 'blue-mode' : 'red-mode'}`;
         
         lobbyStatus.style.setProperty('--theme-color', color);
         userEmail.style.color = color;
