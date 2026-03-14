@@ -9,10 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyTheme() {
         const isBlue = sideToggle.checked;
         
-        // Base HEX colors
-        const color = isBlue ? "#03e9f4" : "#f44336";
-        // Base RGB colors (Allows for dynamic opacity in CSS)
-        const rgb = isBlue ? "3, 233, 244" : "244, 67, 54";
+        // VIBRANT NEON COLORS
+        const color = isBlue ? "#03e9f4" : "#ff3131";
+        const rgb = isBlue ? "3, 233, 244" : "255, 49, 49";
 
         // Update button appearance
         mainBtn.className = `play-now-btn w-full ${isBlue ? 'blue-mode' : 'red-mode'}`;
@@ -25,16 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
         userEmail.style.color = color;
         statusText.style.color = color;
         
-        // Optional: change the status text color when it's not IDLE
         if(statusValue.innerText !== "IDLE") {
             statusValue.style.color = color;
         }
+
+        // CORRECT PLACEMENT: Inside the function so it knows what "isBlue" is
+        const bgImage = isBlue ? 'Gemini_Generated_Image_tjcevutjcevutjce.png' : 'Gemini_Generated_Image_atb53oatb53oatb5.jpg';
+        
+        document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.92)), url('${bgImage}')`;
+        // Make sure it stays fixed and covers the screen
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center center';
+        document.body.style.backgroundAttachment = 'fixed';
     }
 
     sideToggle.addEventListener('change', applyTheme);
     applyTheme(); // Initialize on load
-
-    // Inside your applyTheme() function
-const bgImage = isBlue ? 'Gemini_Generated_Image_blue.png' : 'Gemini_Generated_Image_red.png';
-document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.92)), url('${bgImage}')`;
 });
