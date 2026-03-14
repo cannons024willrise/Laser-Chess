@@ -5,29 +5,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusValue = document.getElementById('statusValue');
     const mainActionBtn = document.getElementById('mainActionBtn');
     const userEmail = document.getElementById('userEmail');
-    const body = document.body;
 
     function applyTheme() {
         const isBlue = sideToggle.checked;
 
         if (isBlue) {
-            body.classList.remove('red-theme');
+            document.body.classList.remove('red-theme');
             lobbyStatus.classList.remove('red-mode');
-            mainActionBtn.classList.replace('red-mode', 'blue-mode');
+            mainActionBtn.classList.remove('red-mode');
+            mainActionBtn.classList.add('blue-mode');
             
-            // Account Label & Status Text
-            userEmail.classList.replace('text-red-500', 'text-cyan-400');
-            statusText.classList.replace('text-red-500', 'text-cyan-400');
-            statusValue.classList.replace('text-red-600', 'text-gray-600');
+            // Labels
+            userEmail.style.color = "#03e9f4";
+            statusText.style.color = "#03e9f4";
+            statusValue.style.color = "#4b5563"; // gray-600
         } else {
-            body.classList.add('red-theme');
+            document.body.classList.add('red-theme');
             lobbyStatus.classList.add('red-mode');
-            mainActionBtn.classList.replace('blue-mode', 'red-mode');
+            mainActionBtn.classList.remove('blue-mode');
+            mainActionBtn.classList.add('red-mode');
             
-            // Account Label & Status Text
-            userEmail.classList.replace('text-cyan-400', 'text-red-500');
-            statusText.classList.replace('text-cyan-400', 'text-red-500');
-            statusValue.classList.replace('text-gray-600', 'text-red-600');
+            // Labels
+            userEmail.style.color = "#f44336";
+            statusText.style.color = "#f44336";
+            statusValue.style.color = "#f44336";
         }
     }
 
