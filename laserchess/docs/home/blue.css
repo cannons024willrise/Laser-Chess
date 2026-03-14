@@ -64,7 +64,7 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   3. CORE STYLES & PULSE EFFECT
+   3. CORE STYLES & PULSE EFFECT (THEME-AWARE)
    ============================================================ */
 @font-face {
   font-family: customfont;
@@ -88,55 +88,40 @@ body {
   min-height: 100%;
 }
 
+/* --- THEME-AWARE PULSE LOGIC --- */
+
+/* Default / Blue Mode */
 .lobby-pulse {
+  --pulse-color: rgba(3, 233, 244, 0.6);
+  --pulse-glow: rgba(3, 233, 244, 0.3);
+  --pulse-border: rgba(3, 233, 244, 0.2);
+  border: 1px solid var(--pulse-border);
   animation: neon-pulse 2s infinite ease-in-out;
 }
 
+/* Red Mode Override */
+.red-mode .lobby-pulse {
+  --pulse-color: rgba(244, 67, 54, 0.6);
+  --pulse-glow: rgba(244, 67, 54, 0.3);
+  --pulse-border: rgba(244, 67, 54, 0.2);
+  border: 1px solid var(--pulse-border);
+}
+
 @keyframes neon-pulse {
-  0% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
-  50% { border-color: rgba(3, 233, 244, 0.6); box-shadow: 0 0 20px rgba(3, 233, 244, 0.3); }
-  100% { border-color: rgba(3, 233, 244, 0.2); box-shadow: 0 0 5px rgba(3, 233, 244, 0.1); }
+  0% { 
+    border-color: var(--pulse-border); 
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); 
+  }
+  50% { 
+    border-color: var(--pulse-color); 
+    box-shadow: 0 0 20px var(--pulse-glow); 
+  }
+  100% { 
+    border-color: var(--pulse-border); 
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); 
+  }
 }
 
-/* ============================================================
-   4. THEME-AWARE BUTTONS (BLUE & RED) - FIXED STAGGER
-   ============================================================ */
-.play-now-btn {
-  position: relative;
-  display: inline-block;
-  padding: 12px 24px;
-  font-weight: bold;
-  text-transform: uppercase;
-  overflow: hidden;
-  transition: 0.5s;
-  letter-spacing: 4px;
-  background: rgba(0, 0, 0, 0.6);
-  border: none;
-  cursor: pointer;
-  z-index: 1;
-  margin-top: 40px;
-}
-
-.play-now-btn span:not(#mainBtnLabel) { 
-  position: absolute; 
-  display: block; 
-  pointer-events: none;
-}
-
-#mainBtnLabel { position: relative; z-index: 10; display: block; }
-
-/* THEME COLORS */
-.play-now-btn.blue-mode { color: #03e9f4; --theme-color: #03e9f4; }
-.play-now-btn.blue-mode:hover { 
-  background: #03e9f4; color: #fff;
-  box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4; 
-}
-
-.play-now-btn.red-mode { color: #f44336; --theme-color: #f44336; }
-.play-now-btn.red-mode:hover { 
-  background: #f44336; color: #fff;
-  box-shadow: 0 0 5px #f44336, 0 0 25px #f44336, 0 0 50px #f44336, 0 0 100px #f44336; 
-}
 
 /* --- THE STAGGERED COMET LOGIC --- */
 
