@@ -83,12 +83,10 @@
           </div>
 
           <div class="w-full space-y-6 border-t border-white/10 pt-8">
-<button id="mainActionBtn" class="play-now-btn w-full h-24 text-xl font-black tracking-[0.4em]">
-              <svg class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible z-10" xmlns="http://www.w3.org/2000/svg">
-                <rect class="laser-rect" x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)" pathLength="100" />
-              </svg>
-              <span id="mainBtnLabel" class="relative z-20">CREATE MATCH</span>
-            </button>
+<button id="mainActionBtn" class="play-now-btn">
+  <span class="btn-border-animation"></span>
+  <span id="mainBtnLabel">CREATE MATCH</span>
+</button>
             <button id="followBtn" class="hidden w-full text-[10px] text-gray-500 hover:text-white transition-all uppercase tracking-[0.5em] font-mono">
               Host new match instead
             </button>
