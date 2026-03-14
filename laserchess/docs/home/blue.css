@@ -8,7 +8,7 @@ html body {
   font-family: 'customfont', sans-serif !important;
   font-weight: 400 !important;
   /* Reduced tint: alpha from 0.85/0.95 down to 0.4/0.6 */
-  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), 
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.5)), 
               url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
   background-size: cover !important;
   color: white;
