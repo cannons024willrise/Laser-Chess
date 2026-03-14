@@ -8,13 +8,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyTheme() {
         const isBlue = sideToggle.checked;
+        
+        // Base HEX colors
         const color = isBlue ? "#03e9f4" : "#f44336";
+        // Base RGB colors (Allows for dynamic opacity in CSS)
+        const rgb = isBlue ? "3, 233, 244" : "244, 67, 54";
 
         // Update button appearance
         mainBtn.className = `play-now-btn w-full ${isBlue ? 'blue-mode' : 'red-mode'}`;
         
-        // Update CSS variables for the components
+        // Update CSS variables for all components
         document.documentElement.style.setProperty('--theme-color', color);
+        document.documentElement.style.setProperty('--theme-rgb', rgb);
         
         // Manual color updates for specific text elements
         userEmail.style.color = color;
@@ -27,5 +32,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     sideToggle.addEventListener('change', applyTheme);
-    applyTheme();
+    applyTheme(); // Initialize on load
 });
