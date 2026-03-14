@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // CORRECT PLACEMENT: Inside the function so it knows what "isBlue" is
-        const bgImage = isBlue ? 'Gemini_Generated_Image_tjcevutjcevutjce.png' : 'Gemini_Generated_Image_atb53oatb53oatb5.jpg';
+        const bgImage = isBlue ? 'Gemini_Generated_Image_tjcevutjcevutjce.png' : 'Gemini_Generated_Image_atb53oatb53oatb5.png';
         
         document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.92)), url('${bgImage}')`;
         // Make sure it stays fixed and covers the screen
