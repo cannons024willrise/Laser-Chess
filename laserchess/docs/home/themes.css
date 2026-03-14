@@ -81,61 +81,85 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (Constant Velocity Integration)
+   5. THE BUTTON (Universal Responsive Velocity)
    ============================================================ */
+:root {
+  /* Set your button dimensions here - the math handles the rest */
+  --btn-w: 300px; 
+  --btn-h: 65px;
+  --speed: 500px; /* Pixels per second */
+  
+  /* Calculate duration for each side based on speed */
+  --t-w: calc(var(--btn-w) / var(--speed) * 1s);
+  --t-h: calc(var(--btn-h) / var(--speed) * 1s);
+  --t-total: calc((var(--t-w) * 2) + (var(--t-h) * 2));
+}
+
 .play-now-btn {
-  position: relative; height: 65px; background: rgba(15, 15, 15, 0.95) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important; cursor: pointer; display: flex;
-  align-items: center; justify-content: center; transition: all 0.4s ease;
-  color: var(--theme-color); overflow: visible !important;
+  position: relative; 
+  width: var(--btn-w);
+  height: var(--btn-h);
+  background: rgba(15, 15, 15, 0.95) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+  color: var(--theme-color);
+  overflow: visible !important;
 }
 
 #mainBtnLabel { letter-spacing: 6px; font-weight: 900 !important; text-transform: uppercase; font-size: 14px; }
 .play-now-btn:hover { background: var(--theme-color) !important; color: #000 !important; box-shadow: 0 0 30px var(--theme-color), 0 0 70px var(--theme-color); }
 
 .btn-clipper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
-.btn-clipper span { position: absolute; display: block; background: var(--theme-color); transition: background 0.4s ease; }
+.btn-clipper span { position: absolute; display: block; background: var(--theme-color); }
 
-/* VELOCITY CALCULATION (Total cycle ~2.0s for constant speed)
-   Top/Bottom (Long): 60% of time | Sides (Short): 40% of time
-*/
-
-/* Top - Travel 100% width */
-.btn-clipper span:nth-child(1) { 
-  top: 0; left: -100%; width: 100%; height: 2px; 
-  background: linear-gradient(90deg, transparent, var(--theme-color)); 
-  animation: anim1 2s linear infinite; 
+/* TOP */
+.btn-clipper span:nth-child(1) {
+  top: 0; left: -100%; width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--theme-color));
+  animation: anim-w var(--t-total) linear infinite;
+  animation-delay: 0s;
 }
 
-/* Right - Travel 100% height (Starts after Top finishes) */
-.btn-clipper span:nth-child(2) { 
-  top: -100%; right: 0; width: 2px; height: 100%; 
-  background: linear-gradient(180deg, transparent, var(--theme-color)); 
-  animation: anim2 2s linear infinite; 
-  animation-delay: 0.8s; /* Wait for Top (0.8s) */
+/* RIGHT */
+.btn-clipper span:nth-child(2) {
+  top: -100%; right: 0; width: 2px; height: 100%;
+  background: linear-gradient(180deg, transparent, var(--theme-color));
+  animation: anim-h var(--t-total) linear infinite;
+  animation-delay: var(--t-w); /* Starts after Top finishes */
 }
 
-/* Bottom - Travel 100% width (Starts after Right finishes) */
-.btn-clipper span:nth-child(3) { 
-  bottom: 0; right: -100%; width: 100%; height: 2px; 
-  background: linear-gradient(270deg, transparent, var(--theme-color)); 
-  animation: anim3 2s linear infinite; 
-  animation-delay: 1.0s; /* Wait for Top+Right (0.8 + 0.2) */
+/* BOTTOM */
+.btn-clipper span:nth-child(3) {
+  bottom: 0; right: -100%; width: 100%; height: 2px;
+  background: linear-gradient(270deg, transparent, var(--theme-color));
+  animation: anim-w var(--t-total) linear infinite;
+  animation-delay: calc(var(--t-w) + var(--t-h));
 }
 
-/* Left - Travel 100% height (Starts after Bottom finishes) */
-.btn-clipper span:nth-child(4) { 
-  bottom: -100%; left: 0; width: 2px; height: 100%; 
-  background: linear-gradient(360deg, transparent, var(--theme-color)); 
-  animation: anim4 2s linear infinite; 
-  animation-delay: 1.8s; /* Wait for Top+Right+Bottom (0.8 + 0.2 + 0.8) */
+/* LEFT */
+.btn-clipper span:nth-child(4) {
+  bottom: -100%; left: 0; width: 2px; height: 100%;
+  background: linear-gradient(360deg, transparent, var(--theme-color));
+  animation: anim-h var(--t-total) linear infinite;
+  animation-delay: calc((var(--t-w) * 2) + var(--t-h));
 }
 
-/* Keyframes adjusted for distance-over-time */
-@keyframes anim1 { 0% { left: -100%; } 40%, 100% { left: 100%; } }
-@keyframes anim2 { 0% { top: -100%; } 10%, 100% { top: 100%; } }
-@keyframes anim3 { 0% { right: -100%; } 40%, 100% { right: 100%; } }
-@keyframes anim4 { 0% { bottom: -100%; } 10%, 100% { bottom: 100%; } }
+/* KEYFRAMES: The 'active' movement time is a percentage of the total cycle */
+@keyframes anim-w {
+  0% { left: -100%; }
+  calc(var(--t-w) / var(--t-total) * 100%) { left: 100%; }
+  100% { left: 100%; }
+}
+
+@keyframes anim-h {
+  0% { top: -100%; }
+  calc(var(--t-h) / var(--t-total) * 100%) { top: 100%; }
+  100% { top: 100%; }
+}
 
 /* ============================================================
    6. TACTICAL CARD SYSTEM
