@@ -1,93 +1,66 @@
 /* ============================================================
-   1. GLOBAL & FONTS
+   1. GLOBAL, FONTS & VISIBLE BACKGROUND
    ============================================================ */
 @font-face { font-family: 'customfont'; src: url('c.otf'); }
 
 html body {
-  margin: 0; padding: 0; height: 100%;
+  margin: 0; padding: 0; min-height: 100vh;
   font-family: 'customfont', sans-serif !important;
   font-weight: 400 !important;
-  background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), 
+  /* Reduced tint (0.5) to let the BG image shine through */
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), 
               url('Gemini_Generated_Image_tjcevutjcevutjce.png') no-repeat center center fixed !important;
   background-size: cover !important;
   color: white;
 }
 
 /* ============================================================
-   2. THE BUTTON (NEON GLOW & RESTORED COMETS)
+   2. HEADER & BANNER FIX (ZERO GAPS)
    ============================================================ */
-.play-now-btn {
+header {
+  background: rgba(0, 0, 0, 0.85) !important;
+  border-bottom: 2px solid var(--theme-color, #03e9f4);
+  padding: 1rem 0;
   position: relative;
-  width: 100%;
-  max-width: 400px;
-  height: 55px;
-  background: rgba(15, 15, 15, 0.8) !important;
-  border: none !important;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  color: var(--theme-color, #03e9f4);
-  /* Ensure button itself isn't clipping the glow */
-  overflow: visible !important; 
+  z-index: 100;
 }
 
-/* The Clipper - trapped inside the button to hold comets */
-.btn-clipper {
-  position: absolute;
-  top: 0; left: 0; 
-  width: 100%; height: 100%;
-  overflow: hidden; /* This keeps comets inside */
-  pointer-events: none;
-  z-index: 5;
-}
-
-#mainBtnLabel {
-  position: relative;
-  z-index: 50;
-  letter-spacing: 5px;
-  font-weight: 400 !important;
-  text-transform: uppercase;
-}
-
-/* STRONG NEON GLOW HOVER */
-.play-now-btn:hover {
-  background: var(--theme-color) !important;
+.discord-banner {
+  background: #5865F2 !important;
   color: white !important;
-  /* Multi-layered shadow for "Stronger & Longer" bleed */
-  box-shadow: 
-    0 0 20px var(--theme-color), 
-    0 0 50px var(--theme-color), 
-    0 0 80px var(--theme-color);
-  transform: translateY(-2px);
+  text-align: center;
+  padding: 10px 0;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: none !important;
+  margin: 0 !important; /* Ensure it sits flush with header */
 }
-
-.play-now-btn.blue-mode { --theme-color: #03e9f4; }
-.play-now-btn.red-mode { --theme-color: #f44336; }
-
-/* ANIMATION ENGINE - Forced to render */
-.btn-clipper span {
-  position: absolute !important;
-  display: block !important;
-}
-
-.btn-clipper span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--theme-color)); animation: btn-anim1 1.5s linear infinite; }
-.btn-clipper span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--theme-color)); animation: btn-anim2 1.5s linear infinite; animation-delay: 0.375s; }
-.btn-clipper span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--theme-color)); animation: btn-anim3 1.5s linear infinite; animation-delay: 0.75s; }
-.btn-clipper span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--theme-color)); animation: btn-anim4 1.5s linear infinite; animation-delay: 1.125s; }
-
-@keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
-@keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
-@keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
-@keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
 
 /* ============================================================
-   3. THE TOGGLE (SLEEK RECTANGLE)
+   3. SPACING ENGINE (BREATHING ROOM)
+   ============================================================ */
+.main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 80px; /* Massive spacing between main blocks */
+  padding: 60px 20px;
+  align-items: center;
+}
+
+.toggle-section {
+  margin-bottom: 20px;
+}
+
+/* ============================================================
+   4. THE TOGGLE (SLEEK RECTANGLE)
    ============================================================ */
 .switch { position: relative; display: inline-block; width: 65px; height: 22px; }
 .switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #111 !important; border: 1px solid #333; transition: 0.3s; }
+.slider { 
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; 
+  background-color: rgba(20,20,20,0.9) !important; border: 1px solid #444; transition: 0.3s; 
+}
 .slider:before {
   position: absolute; content: "";
   height: 12px; width: 24px;
@@ -102,13 +75,67 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   4. STATUS PULSE
+   5. THE BUTTON (NEON BLEED)
+   ============================================================ */
+.play-now-btn {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: none !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+  color: var(--theme-color, #03e9f4);
+  overflow: visible !important;
+}
+
+.btn-clipper {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  overflow: hidden; pointer-events: none; z-index: 5;
+}
+
+#mainBtnLabel {
+  position: relative; z-index: 50; letter-spacing: 5px; font-weight: 400 !important;
+}
+
+.play-now-btn:hover {
+  background: var(--theme-color) !important;
+  color: white !important;
+  box-shadow: 0 0 25px var(--theme-color), 0 0 60px var(--theme-color), 0 0 100px var(--theme-color);
+  transform: scale(1.02);
+}
+
+.play-now-btn.blue-mode { --theme-color: #03e9f4; }
+.play-now-btn.red-mode { --theme-color: #f44336; }
+
+/* ANIMATION ENGINE */
+.btn-clipper span { position: absolute !important; display: block !important; }
+.btn-clipper span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--theme-color)); animation: btn-anim1 1.5s linear infinite; }
+.btn-clipper span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--theme-color)); animation: btn-anim2 1.5s linear infinite; animation-delay: 0.3s; }
+.btn-clipper span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, var(--theme-color)); animation: btn-anim3 1s linear infinite; animation-delay: 0.6s; }
+.btn-clipper span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, var(--theme-color)); animation: btn-anim4 1s linear infinite; animation-delay: 0.9s; }
+
+@keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
+@keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
+@keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
+@keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
+
+/* ============================================================
+   6. LOBBY CARD
    ============================================================ */
 .lobby-pulse {
+  background: rgba(0, 0, 0, 0.7) !important;
   border: 1px solid var(--theme-color, #03e9f4) !important;
-  animation: pulse-engine 2.5s infinite ease-in-out;
+  padding: 40px !important;
+  animation: pulse-engine 3s infinite ease-in-out;
 }
+
 @keyframes pulse-engine {
-  0%, 100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.05); }
-  50% { box-shadow: 0 0 30px var(--theme-color); }
+  0%, 100% { box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+  50% { box-shadow: 0 0 40px var(--theme-color); }
 }
