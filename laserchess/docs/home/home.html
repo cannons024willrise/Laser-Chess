@@ -8,11 +8,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="blue.css">
 
+  <!-- Logic Modules -->
   <script type="module" src="homeauthcheck.js"></script>
   <script type="module" src="lobby.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-black overflow-x-hidden">
+  <!-- Navigation Header -->
   <header class="lobby-header z-50">
     <h1 class="logo-text">LASER CHESS</h1>
     <div class="user-meta">
@@ -21,47 +23,55 @@
     </div>
   </header>
 
+  <!-- Community Banner -->
   <section class="discord-bar z-40">
     <a href="https://discord.gg/mbEuNMee">Join Our Discord Community</a>
   </section>
 
-  <main class="lobby-main z-30">
+  <!-- Main Content Area -->
+  <main class="lobby-container z-30">
     
-    <div class="hero-section">
+    <!-- Title Section -->
+    <div class="hero-text-block">
       <h1 class="hero-title">READY FOR BATTLE?</h1>
       <p class="hero-subtitle">Select your side and enter the queue</p>
     </div>
 
-    <div class="battle-grid">
+    <!-- UI WRAPPER: This holds the two sides apart -->
+    <div class="battle-station-wrapper">
       
-      <div class="zone-left">
-        <div id="lobbyStatus" class="status-card">
-          <p id="statusText" class="label">Scanning Lobby...</p>
-          <div class="status-indicator">
+      <!-- LEFT SIDE: STATUS -->
+      <div class="status-side">
+        <div id="lobbyStatus" class="status-box">
+          <p id="statusText" class="status-top-label">Scanning Lobby...</p>
+          <div class="status-main-display">
             STATUS: <span id="statusValue">IDLE</span>
           </div>
         </div>
       </div>
 
-      <div class="zone-right">
-        <div class="theme-selector">
-          <span class="red-label">RED</span>
+      <!-- RIGHT SIDE: CONTROLS -->
+      <div class="controls-side">
+        <!-- Theme Toggle Row -->
+        <div class="selector-row">
+          <span class="side-label side-red">RED</span>
           <label class="switch">
             <input type="checkbox" id="sideToggle">
             <span class="slider"></span>
           </label>
-          <span class="blue-label">BLUE</span>
+          <span class="side-label side-blue">BLUE</span>
         </div>
 
-        <div class="action-wrapper">
-          <button id="mainActionBtn" class="primary-btn">
-            <div class="glow-border">
+        <!-- Create Button Row -->
+        <div class="button-row">
+          <button id="mainActionBtn" class="battle-btn">
+            <div class="btn-glow-lines">
               <span></span><span></span><span></span><span></span>
             </div>
             <span id="mainBtnLabel">CREATE MATCH</span>
           </button>
           
-          <button id="followBtn" class="hidden alt-btn">
+          <button id="followBtn" class="hidden ghost-btn">
             Host new match instead
           </button>
         </div>
@@ -70,6 +80,7 @@
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="lobby-footer">
     ALPHA BUILD v1.0 // <a href="mailto:later5143@gmail.com">REPORT_GLITCH</a>
   </footer>
