@@ -81,83 +81,79 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (The "Snake" Border Engine)
+   5. THE BUTTON (The Rotating Laser Engine)
    ============================================================ */
 .play-now-btn {
   position: relative;
   width: 100%;
   height: 64px;
-  background: #0a0a0a; /* Solid dark base */
+  background: #000 !important; /* Forces internal black */
   color: var(--theme-color);
-  font-family: 'Inter', sans-serif;
-  font-weight: 900;
-  font-size: 16px;
-  letter-spacing: 4px;
   border: none;
   cursor: pointer;
-  overflow: hidden; /* This now works for the internal shine */
+  overflow: hidden; /* This clips the "snake" to the button shape */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
   z-index: 1;
 }
 
-/* The Animated Border "Snake" */
-.btn-border-animation {
+/* The container for the moving light */
+.btn-glow-container {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   z-index: -1;
 }
 
-.btn-border-animation::before {
-  content: '';
+/* THE ANIMATION: A rotating light beam */
+.btn-glow-line {
   position: absolute;
-  width: 200%;
-  height: 200%;
-  background: conic-gradient(
-    transparent, 
-    var(--theme-color), 
-    transparent 30%
-  );
   top: -50%;
   left: -50%;
-  animation: rotate-border 4s linear infinite;
+  width: 200%;
+  height: 200%;
+  /* This creates a 25% "sliver" of light, the rest transparent */
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 70%,
+    var(--theme-color) 85%,
+    transparent 100%
+  );
+  animation: laser-rotate 3s linear infinite;
 }
 
-/* This creates the "hollow" look by masking the center */
-.btn-border-animation::after {
+/* This creates the "Inner Box" to keep the center black */
+.play-now-btn::after {
   content: '';
   position: absolute;
   inset: 2px; /* This is your border thickness */
-  background: #0a0a0a;
+  background: #000;
   z-index: -1;
+  transition: background 0.3s ease;
 }
 
 /* Hover States */
 .play-now-btn:hover {
-  color: #000;
-  background: var(--theme-color);
-  box-shadow: 0 0 20px var(--theme-color);
+  color: #000 !important;
 }
 
-.play-now-btn:hover .btn-border-animation::after {
-  background: var(--theme-color); /* Matches the hover bg */
+.play-now-btn:hover::after {
+  background: var(--theme-color); /* Fills button on hover */
 }
 
-@keyframes rotate-border {
-  100% { transform: rotate(360deg); }
+@keyframes laser-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 #mainBtnLabel {
   position: relative;
   z-index: 10;
-  pointer-events: none;
+  font-weight: 900;
+  letter-spacing: 4px;
+  pointer-events: none; /* Keeps click events on the button */
 }
-
 /* ============================================================
    6. TACTICAL CARD SYSTEM
    ============================================================ */
