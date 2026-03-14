@@ -81,65 +81,69 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (The Sliding Laser Engine)
+   5. THE BUTTON (The Physical Beam Engine)
    ============================================================ */
 .play-now-btn {
   position: relative;
   width: 100%;
   height: 64px;
-  background: #000; /* Dark inner body */
+  background: #000 !important;
   color: var(--theme-color);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle static border */
   cursor: pointer;
-  overflow: hidden; 
+  overflow: hidden; /* This keeps the beam inside the button shape */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1;
 }
 
-/* This is the 2px "Frame" where the animation lives */
-.laser-track {
+/* THE BEAM: A physical glowing rectangle */
+.laser-beam {
   position: absolute;
-  inset: 0;
-  border: 2px solid transparent; /* Creates the space for the laser */
-  background: 
-    linear-gradient(#000, #000) padding-box, /* Inner color */
-    linear-gradient(90deg, 
-      transparent 0%, 
-      transparent 25%, 
-      var(--theme-color) 50%, 
-      transparent 75%, 
-      transparent 100%) border-box; /* The "Laser" color */
-  
-  background-size: 200% 100%; /* Makes the gradient twice as wide as the button */
-  border-radius: 4px;
-  /* FORCED ANIMATION */
-  animation: move-laser 2s linear infinite !important;
-  pointer-events: none;
+  top: 0;
+  left: 0;
+  width: 40px; /* Length of the laser */
+  height: 100%;
+  background: linear-gradient(to right, transparent, var(--theme-color), transparent);
+  opacity: 0.8;
+  filter: blur(4px);
+  z-index: 2;
+  /* FORCED MOVEMENT */
+  animation: physical-slide 2s linear infinite !important;
+  display: block !important; /* Ensure it's not hidden */
 }
 
-/* Hover: The button fills with color */
+/* Inner Glow to make it look "Neon" */
+.play-now-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 15px var(--theme-color);
+  opacity: 0.2;
+  z-index: 1;
+}
+
+/* Hover State */
 .play-now-btn:hover {
   background: var(--theme-color) !important;
   color: #000 !important;
-  box-shadow: 0 0 20px var(--theme-color);
+}
+.play-now-btn:hover .laser-beam {
+  display: none !important;
 }
 
-.play-now-btn:hover .laser-track {
-  display: none; /* Hide the laser when the whole button glows */
-}
-
-/* THE ANIMATION: Simply slides the background position */
-@keyframes move-laser {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+/* THE ANIMATION: A simple left-to-right slide */
+@keyframes physical-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
 }
 
 #mainBtnLabel {
+  position: relative;
+  z-index: 10;
   font-weight: 900;
   letter-spacing: 4px;
-  text-transform: uppercase;
 }
 /* ============================================================
    6. TACTICAL CARD SYSTEM
