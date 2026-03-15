@@ -81,69 +81,77 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   5. THE BUTTON (The Physical Beam Engine)
+   5. THE BUTTON (The Sandwich Border Engine)
    ============================================================ */
 .play-now-btn {
   position: relative;
   width: 100%;
   height: 64px;
-  background: #000 !important;
-  color: var(--theme-color);
-  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle static border */
+  /* Step 1: The outer-most edge (Transparent) */
+  background: transparent;
+  border: none;
   cursor: pointer;
-  overflow: hidden; /* This keeps the beam inside the button shape */
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   z-index: 1;
+  border-radius: 4px;
 }
 
-/* THE BEAM: A physical glowing rectangle */
-.laser-beam {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 40px; /* Length of the laser */
-  height: 100%;
-  background: linear-gradient(to right, transparent, var(--theme-color), transparent);
-  opacity: 0.8;
-  filter: blur(4px);
-  z-index: 2;
-  /* FORCED MOVEMENT */
-  animation: physical-slide 2s linear infinite !important;
-  display: block !important; /* Ensure it's not hidden */
-}
-
-/* Inner Glow to make it look "Neon" */
+/* Step 2: The Animation Layer (The "Snake") */
 .play-now-btn::before {
   content: '';
   position: absolute;
-  inset: 0;
-  box-shadow: inset 0 0 15px var(--theme-color);
-  opacity: 0.2;
-  z-index: 1;
+  /* We make this much larger than the button so it can rotate */
+  width: 150%; 
+  height: 300%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 75%,
+    var(--theme-color) 90%,
+    transparent 100%
+  );
+  animation: rotate-laser 3s linear infinite;
+  z-index: -2; /* Sits at the very bottom */
 }
 
-/* Hover State */
+/* Step 3: The "Mask" (The center black part) */
+.play-now-btn::after {
+  content: '';
+  position: absolute;
+  /* This creates a 2px gap around the edges */
+  inset: 2px;
+  background: #000;
+  border-radius: 2px;
+  z-index: -1; /* Sits above the animation, but below the text */
+  transition: background 0.3s ease;
+}
+
+/* Hover Effects */
 .play-now-btn:hover {
-  background: var(--theme-color) !important;
   color: #000 !important;
 }
-.play-now-btn:hover .laser-beam {
-  display: none !important;
+
+.play-now-btn:hover::after {
+  background: var(--theme-color); /* Fills the button */
 }
 
-/* THE ANIMATION: A simple left-to-right slide */
-@keyframes physical-slide {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(400%); }
-}
-
+/* The Label */
 #mainBtnLabel {
   position: relative;
-  z-index: 10;
+  z-index: 10; /* Ensures text is always on top */
   font-weight: 900;
   letter-spacing: 4px;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* THE ANIMATION */
+@keyframes rotate-laser {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 /* ============================================================
    6. TACTICAL CARD SYSTEM
