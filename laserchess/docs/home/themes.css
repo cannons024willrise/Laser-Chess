@@ -196,6 +196,23 @@ button.play-now-btn span:nth-child(4) {
 @keyframes legacy-3 { 0% { right: -100%; } 50%, 100% { right: 100%; } }
 @keyframes legacy-4 { 0% { bottom: -100%; } 50%, 100% { bottom: 100%; } }
 
+/* THE BUTTON HOVER */
+button.play-now-btn:hover {
+  background: var(--theme-color) !important;
+  color: #000 !important;
+  box-shadow: 0 0 20px var(--theme-color), 0 0 60px rgba(var(--theme-rgb), 0.4) !important;
+}
+
+/* Restoring the label color swap on hover */
+button.play-now-btn:hover #mainBtnLabel {
+  color: #000 !important;
+}
+
+/* CRITICAL: Let the mouse "see" the button through the lines */
+button.play-now-btn span {
+  pointer-events: none !important; /* This allows hover to work again */
+}
+
 /* ============================================================
    6. TACTICAL CARD SYSTEM
    ============================================================ */
