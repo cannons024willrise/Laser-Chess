@@ -84,6 +84,45 @@ input:checked + .slider:before {
    THE FINAL DISSECTION: PHYSICAL ANCHOR METHOD
    ============================================================ */
 
+/* THE BUTTON - Stability Version */
+button.play-now-btn {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 64px !important;
+  background: #000 !important;
+  color: var(--theme-color) !important;
+  font-family: 'customfont', sans-serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.4em !important;
+  text-transform: uppercase !important;
+  border: none !important; /* Removes default button border */
+  cursor: pointer;
+  overflow: hidden !important;
+  border-radius: 4px;
+  transition: 0.5s;
+  /* Add this to prevent 'breaking' other elements */
+  box-sizing: border-box !important;
+}
+
+/* THE LABEL - Ensuring it stays centered and visible */
+#mainBtnLabel {
+  position: relative !important;
+  z-index: 10 !important;
+  pointer-events: none;
+}
+
+/* THE SPANS - The Lasers */
+button.play-now-btn span {
+  position: absolute !important;
+  display: block !important;
+  z-index: 5 !important;
+}
+
+/* Keep your existing span:nth-child and @keyframes logic below this! */
+
 button.play-now-btn {
   all: unset;
   position: relative !important;
