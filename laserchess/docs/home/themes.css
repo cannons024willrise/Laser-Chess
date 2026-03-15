@@ -81,80 +81,78 @@ input:checked + .slider:before {
 }
 
 /* ============================================================
-   THE RAILWAY ENGINE (Hardened for Tailwind)
+   DIAGNOSTIC RAILWAY - FORCE VISIBILITY
    ============================================================ */
 
-/* 1. THE BUTTON: The container must be a strictly clipped relative box */
+/* Ensure variables are defined at the very top of blue.css */
+:root {
+  --theme-color: #03e9f4; 
+  --theme-rgb: 3, 233, 244;
+}
+
 button.play-now-btn {
-  all: unset; /* Nukes default button padding/borders */
+  all: unset;
   position: relative !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   height: 64px !important;
-  background: #000 !important;
+  background: #000 !important; /* Button background */
   cursor: pointer;
-  overflow: hidden !important; /* This is the "mask" for the lines */
+  overflow: hidden !important; /* The clipping mask */
   border-radius: 4px;
-  transition: 0.5s;
-  text-align: center;
+  z-index: 1; /* Base layer */
 }
 
-/* Hover Fill Effect */
-button.play-now-btn:hover {
-  background: var(--theme-color) !important;
-  box-shadow: 0 0 10px var(--theme-color), 0 0 40px var(--theme-color);
+/* THE TEXT: Must be above the spans */
+#mainBtnLabel {
+  position: relative;
+  z-index: 10 !important; 
+  color: var(--theme-color) !important;
 }
 
-/* Hover Text Swap */
-button.play-now-btn:hover #mainBtnLabel {
-  color: #000 !important;
-}
-
-/* 2. THE SPANS: Forcing them to exist as absolute layers */
+/* THE SPANS: Forced Visibility */
 button.play-now-btn span {
   position: absolute !important;
   display: block !important;
-  pointer-events: none !important;
+  z-index: 5 !important; /* Between background and text */
+  /* If var failing, this solid color will show us the lines */
+  background: #ff0000 !important; 
 }
 
-/* Line 1: Top (Left to Right) */
+/* Line 1: Top */
 button.play-now-btn span:nth-child(1) {
-  top: 0; left: -100%; width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--theme-color)) !important;
-  animation: legacy-anim1 1s linear infinite;
+  top: 0; left: -100%; width: 100%; height: 4px; /* Thicker for diagnostic */
+  background: linear-gradient(90deg, transparent, #03e9f4) !important;
+  animation: test-anim1 2s linear infinite;
 }
-
-/* Line 2: Right (Top to Bottom) */
+/* Line 2: Right */
 button.play-now-btn span:nth-child(2) {
-  top: -100%; right: 0; width: 2px; height: 100%;
-  background: linear-gradient(180deg, transparent, var(--theme-color)) !important;
-  animation: legacy-anim2 1s linear infinite;
-  animation-delay: 0.25s;
-}
-
-/* Line 3: Bottom (Right to Left) */
-button.play-now-btn span:nth-child(3) {
-  bottom: 0; right: -100%; width: 100%; height: 2px;
-  background: linear-gradient(270deg, transparent, var(--theme-color)) !important;
-  animation: legacy-anim3 1s linear infinite;
+  top: -100%; right: 0; width: 4px; height: 100%;
+  background: linear-gradient(180deg, transparent, #03e9f4) !important;
+  animation: test-anim2 2s linear infinite;
   animation-delay: 0.5s;
 }
-
-/* Line 4: Left (Bottom to Top) */
+/* Line 3: Bottom */
+button.play-now-btn span:nth-child(3) {
+  bottom: 0; right: -100%; width: 100%; height: 4px;
+  background: linear-gradient(270deg, transparent, #03e9f4) !important;
+  animation: test-anim3 2s linear infinite;
+  animation-delay: 1s;
+}
+/* Line 4: Left */
 button.play-now-btn span:nth-child(4) {
-  bottom: -100%; left: 0; width: 2px; height: 100%;
-  background: linear-gradient(360deg, transparent, var(--theme-color)) !important;
-  animation: legacy-anim4 1s linear infinite;
-  animation-delay: 0.75s;
+  bottom: -100%; left: 0; width: 4px; height: 100%;
+  background: linear-gradient(360deg, transparent, #03e9f4) !important;
+  animation: test-anim4 2s linear infinite;
+  animation-delay: 1.5s;
 }
 
-/* 3. THE KEYFRAMES: The Legacy 50% Rule */
-@keyframes legacy-anim1 { 0% { left: -100%; } 50%, 100% { left: 100%; } }
-@keyframes legacy-anim2 { 0% { top: -100%; } 50%, 100% { top: 100%; } }
-@keyframes legacy-anim3 { 0% { right: -100%; } 50%, 100% { right: 100%; } }
-@keyframes legacy-anim4 { 0% { bottom: -100%; } 50%, 100% { bottom: 100%; } }
+@keyframes test-anim1 { 0% { left: -100%; } 50%, 100% { left: 100%; } }
+@keyframes test-anim2 { 0% { top: -100%; } 50%, 100% { top: 100%; } }
+@keyframes test-anim3 { 0% { right: -100%; } 50%, 100% { right: 100%; } }
+@keyframes test-anim4 { 0% { bottom: -100%; } 50%, 100% { bottom: 100%; } }
 /* ============================================================
    6. TACTICAL CARD SYSTEM
    ============================================================ */
