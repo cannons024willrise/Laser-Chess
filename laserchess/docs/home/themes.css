@@ -80,93 +80,83 @@ input:checked + .slider:before {
   transform: translateX(31px); background-color: var(--theme-color); box-shadow: 0 0 15px var(--theme-color);
 }
 
+/* ============================================================
+   THE FINAL DISSECTION: PHYSICAL ANCHOR METHOD
+   ============================================================ */
 
-
-
-
-
-
-
-
-
-
-.legacy-railway-engine {
+button.play-now-btn {
+  all: unset;
   position: relative !important;
   display: flex !important;
-  width: 100% !important;
-  height: 64px !important;
   align-items: center !important;
   justify-content: center !important;
+  width: 100% !important;
+  height: 64px !important;
   background: #000 !important;
-  color: #03e9f4 !important;
-  text-decoration: none !important;
-  text-transform: uppercase !important;
-  letter-spacing: 4px !important;
-  font-weight: 900 !important;
+  cursor: pointer;
   overflow: hidden !important;
-  box-sizing: border-box !important;
-  transition: 0.5s;
+  border-radius: 4px;
+  /* Force a stacking context so spans don't vanish */
+  isolation: isolate !important;
 }
 
-.legacy-railway-engine:hover {
-  background: #03e9f4 !important;
-  color: #050801 !important;
-  box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0 200px #03e9f4;
-}
-
-/* THE LINES - Using fixed width/height math */
-.legacy-railway-engine span {
+/* THE SPANS: Forcing physical dimensions */
+button.play-now-btn span {
   position: absolute !important;
   display: block !important;
-  background: #03e9f4 !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
 }
 
-/* Line 1: Top */
-.legacy-railway-engine span:nth-child(1) {
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #03e9f4) !important;
+/* Line 1: Top - Forced Height */
+button.play-now-btn span:nth-child(1) {
+  top: 0; left: -100%; 
+  width: 100% !important; 
+  height: 2px !important; /* Forced */
+  min-height: 2px !important; 
+  background: linear-gradient(90deg, transparent, var(--theme-color)) !important;
   animation: legacy-1 1s linear infinite;
 }
-@keyframes legacy-1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
 
-/* Line 2: Right */
-.legacy-railway-engine span:nth-child(2) {
-  top: -100%;
-  right: 0;
-  width: 2px;
-  height: 100%;
-  background: linear-gradient(180deg, transparent, #03e9f4) !important;
+/* Line 2: Right - Forced Width */
+button.play-now-btn span:nth-child(2) {
+  top: -100%; right: 0; 
+  width: 2px !important; /* Forced */
+  min-width: 2px !important;
+  height: 100% !important;
+  background: linear-gradient(180deg, transparent, var(--theme-color)) !important;
   animation: legacy-2 1s linear infinite;
   animation-delay: 0.25s;
 }
-@keyframes legacy-2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
 
-/* Line 3: Bottom */
-.legacy-railway-engine span:nth-child(3) {
-  bottom: 0;
-  right: -100%;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(270deg, transparent, #03e9f4) !important;
+/* Line 3: Bottom - Forced Height */
+button.play-now-btn span:nth-child(3) {
+  bottom: 0; right: -100%; 
+  width: 100% !important; 
+  height: 2px !important; /* Forced */
+  min-height: 2px !important;
+  background: linear-gradient(270deg, transparent, var(--theme-color)) !important;
   animation: legacy-3 1s linear infinite;
   animation-delay: 0.5s;
 }
-@keyframes legacy-3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
 
-/* Line 4: Left */
-.legacy-railway-engine span:nth-child(4) {
-  bottom: -100%;
-  left: 0;
-  width: 2px;
-  height: 100%;
-  background: linear-gradient(360deg, transparent, #03e9f4) !important;
+/* Line 4: Left - Forced Width */
+button.play-now-btn span:nth-child(4) {
+  bottom: -100%; left: 0; 
+  width: 2px !important; /* Forced */
+  min-width: 2px !important;
+  height: 100% !important;
+  background: linear-gradient(360deg, transparent, var(--theme-color)) !important;
   animation: legacy-4 1s linear infinite;
   animation-delay: 0.75s;
 }
-@keyframes legacy-4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
+
+/* The Keyframes (Legacy 50% Rule) */
+@keyframes legacy-1 { 0% { left: -100%; } 50%, 100% { left: 100%; } }
+@keyframes legacy-2 { 0% { top: -100%; } 50%, 100% { top: 100%; } }
+@keyframes legacy-3 { 0% { right: -100%; } 50%, 100% { right: 100%; } }
+@keyframes legacy-4 { 0% { bottom: -100%; } 50%, 100% { bottom: 100%; } }
+
 /* ============================================================
    6. TACTICAL CARD SYSTEM
    ============================================================ */
