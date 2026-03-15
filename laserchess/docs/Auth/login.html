@@ -1,218 +1,66 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en" style="scroll-behavior: smooth;">
 <head>
-    <meta charset="utf-8" />
-    <title>Login to Laser Chess</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <style id="theme1" disabled>
-        @font-face { font-family: customfont; src: url(c.otf); }
-        html { height: 100%; }
-body { margin: 0; padding: 0; font-family: customfont; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("Gemini_Generated_Image_atb53oatb53oatb5.png") no-repeat center center fixed; background-size: 100% 100%; }
-        .login-box {
-            position: absolute; top: 50%; left: 50%; width: 700px; padding: 40px;
-            transform: translate(-50%, -50%); background: rgba(0,0,0,.5);
-            box-sizing: border-box; box-shadow: 0 15px 25px rgba(0,0,0,.6); border-radius: 10px;
-        }
-        .login-box h2 { margin: 0 0 30px; padding: 0; color: #fff; text-align: center; }
-        .login-box .user-box { position: relative; }
-        .login-box .user-box input {
-            width: 100%; padding: 10px 0; font-size: 16px; color: #fff;
-            margin-bottom: 30px; border: none; border-bottom: 1px solid #fff;
-            outline: none; background: transparent;
-        }
-        .login-box .user-box label {
-            position: absolute; top: 0; left: 0; padding: 10px 0; font-size: 16px;
-            color: #fff; pointer-events: none; transition: .5s;
-        }
-        .login-box .user-box input:focus ~ label,
-        .login-box .user-box input:valid ~ label { top: -20px; left: 0; color: #f44336; font-size: 12px; }
-        .login-box form a {
-            position: relative; display: inline-block; padding: 10px 20px; color: #f44336;
-            font-size: 16px; text-decoration: none; text-transform: uppercase;
-            overflow: hidden; transition: .5s; margin-top: 40px; letter-spacing: 4px;
-        }
-        .login-box a:hover {
-            background: #f44336; color: #fff; border-radius: 5px;
-            box-shadow: 0 0 5px #f44336, 0 0 25px #f44336, 0 0 50px #f44336, 0 0 100px #f44336;
-        }
-        .login-box a span { position: absolute; display: block; }
-        .login-box a span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #f44336); animation: btn-anim1 1s linear infinite; }
-        .login-box a span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, #f44336); animation: btn-anim2 1s linear infinite; animation-delay: .25s; }
-        .login-box a span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, #f44336); animation: btn-anim3 1s linear infinite; animation-delay: .5s; }
-        .login-box a span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, #f44336); animation: btn-anim4 1s linear infinite; animation-delay: .75s; }
-        @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
-        @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
-        @keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
-        @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
-    </style>
-
-    <style id="theme2" disabled>
-        @font-face { font-family: customfont; src: url(c.otf); }
-        html { height: 100%; }
-body { margin: 0; padding: 0; font-family: customfont; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url("Gemini_Generated_Image_tjcevutjcevutjce.png") no-repeat center center fixed; background-size: 100% 100%; }
-        .login-box {
-            position: absolute; top: 50%; left: 50%; width: 700px; padding: 40px;
-            transform: translate(-50%, -50%); background: rgba(0,0,0,.5);
-            box-sizing: border-box; box-shadow: 0 15px 25px rgba(0,0,0,.6); border-radius: 10px;
-        }
-        .login-box h2 { margin: 0 0 30px; padding: 0; color: #fff; text-align: center; }
-        .login-box .user-box { position: relative; }
-        .login-box .user-box input {
-            width: 100%; padding: 10px 0; font-size: 16px; color: #fff;
-            margin-bottom: 30px; border: none; border-bottom: 1px solid #fff;
-            outline: none; background: transparent;
-        }
-        .login-box .user-box label {
-            position: absolute; top: 0; left: 0; padding: 10px 0; font-size: 16px;
-            color: #fff; pointer-events: none; transition: .5s;
-        }
-        .login-box .user-box input:focus ~ label,
-        .login-box .user-box input:valid ~ label { top: -20px; left: 0; color: #03e9f4; font-size: 12px; }
-        .login-box form a {
-            position: relative; display: inline-block; padding: 10px 20px; color: #03e9f4;
-            font-size: 16px; text-decoration: none; text-transform: uppercase;
-            overflow: hidden; transition: .5s; margin-top: 40px; letter-spacing: 4px;
-        }
-        .login-box a:hover {
-            background: #03e9f4; color: #fff; border-radius: 5px;
-            box-shadow: 0 0 5px #03e9f4, 0 0 25px #03e9f4, 0 0 50px #03e9f4, 0 0 100px #03e9f4;
-        }
-        .login-box a span { position: absolute; display: block; }
-        .login-box a span:nth-child(1) { top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #03e9f4); animation: btn-anim1 1s linear infinite; }
-        .login-box a span:nth-child(2) { top: -100%; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, #03e9f4); animation: btn-anim2 1s linear infinite; animation-delay: .25s; }
-        .login-box a span:nth-child(3) { bottom: 0; right: -100%; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, #03e9f4); animation: btn-anim3 1s linear infinite; animation-delay: .5s; }
-        .login-box a span:nth-child(4) { bottom: -100%; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, #03e9f4); animation: btn-anim4 1s linear infinite; animation-delay: .75s; }
-        @keyframes btn-anim1 { 0% { left: -100%; } 50%,100% { left: 100%; } }
-        @keyframes btn-anim2 { 0% { top: -100%; } 50%,100% { top: 100%; } }
-        @keyframes btn-anim3 { 0% { right: -100%; } 50%,100% { right: 100%; } }
-        @keyframes btn-anim4 { 0% { bottom: -100%; } 50%,100% { bottom: 100%; } }
-    </style>
-
-    <style>
-        .columns { display: flex; gap: 28px; align-items: flex-start; }
-        #login-form { flex: 1 1 50%; display: flex; flex-direction: column; }
-        .button-row { display: flex; gap: 12px; margin-top: 6px; align-items: center; justify-content: center; }
-        .button-row a { flex: 1 1 50%; text-align: center; cursor: pointer; }
-        #googleLogin, #passwordResetBtn { display: block; margin-top: 14px; text-align: center; cursor: pointer; }
-        .login-text { flex: 1 1 50%; }
-        .login-text p { color: #fff; margin: 0; line-height: 1.45; font-size: 20px; }
-        .status-msg, .error-msg { width: 100%; text-align: center; margin-top: 14px; word-wrap: break-word; }
-        .status-msg { color: #fff; }
-        .error-msg { color: #ff6b6b; }
-        @media (max-width: 720px) {
-            .login-box { width: 90vw; padding: 24px; }
-            .columns { flex-direction: column; gap: 18px; }
-            .login-text p { font-size: 13px; }
-        }
-    </style>
-
-    <script>
-        function randomizeTheme() {
-            const randomTheme = Math.random() < 0.5 ? 'theme1' : 'theme2';
-            document.getElementById('theme1').disabled = true;
-            document.getElementById('theme2').disabled = true;
-            document.getElementById(randomTheme).disabled = false;
-        }
-        window.onload = randomizeTheme;
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Laser Chess | Lobby</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="themes.css">
+  <script type="module" src="homeauthcheck.js"></script>
+  <script type="module" src="lobby.js"></script>
 </head>
 
-<body>
-    <div class="login-box">
-        <h2>Login to Laser Chess</h2>
-        <div class="columns">
-            <form id="login-form">
-                <div class="user-box">
-                    <br><br>
-                    <input id="entry-email" type="email" required />
-                    <label>Email</label>
-                </div>
-                <div class="user-box">
-                    <br><br>
-                    <input id="entry-password" type="password" required />
-                    <label>Password</label>
-                </div>
-                <div class="button-row">
-                    <a id="signUpBtn"><span></span><span></span><span></span><span></span>Sign Up</a>
-                    <a id="signInBtn"><span></span><span></span><span></span><span></span>Sign In</a>
-                </div>
-                <a id="googleLogin"><span></span><span></span><span></span><span></span>Sign in with Google</a>
-                <a id="passwordResetBtn"><span></span><span></span><span></span><span></span>Forgot Password?</a>
-            </form>
-            <div class="login-text">
-                <p>
-                    A small site for playing online multiplayer Laser Chess.<br><br>
-                    Right in your browser, no install required!<br><br>
-                    Play today!<br><br>
-                    (Under development)
-                </p>
-            </div>
-        </div>
-        <div id="status" class="status-msg"></div>
-        <div id="error-msg" class="error-msg"></div>
+<body class="min-h-screen flex flex-col overflow-x-hidden">
+  <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-screen h-full overflow-hidden">
+    
+    <div class="text-center mt-4 mb-16 lg:mb-24 relative">
+      <h1 class="text-6xl md:text-8xl lg:text-7xl font-black text-white tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+        READY FOR BATTLE?
+      </h1>
+      <p class="text-gray-400 text-xs md:text-sm tracking-[0.8em] uppercase font-mono mt-6">Select parameters & enter queue</p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import {
-            getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-            GoogleAuthProvider, signInWithPopup, sendEmailVerification,
-            sendPasswordResetEmail, setPersistence, browserLocalPersistence
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    <div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0">
+      
+      <div class="w-full lg:w-[450px] transform lg:-translate-x-32 transition-transform duration-500">
+        <div id="lobbyStatus" class="rule-card relative p-16 text-center lobby-pulse">
+          <div class="rule-card-accent"></div>
+          <p id="statusText" class="text-theme tracking-[0.5em] uppercase text-xs mb-8 font-mono">SCANNING LOBBY...</p>
+          <div id="oppPreview" class="text-white text-4xl lg:text-5xl font-black tracking-widest uppercase italic leading-tight">
+            STATUS: <br>
+            <span id="statusValue" class="text-gray-500 block mt-3 font-mono text-3xl">IDLE</span>
+          </div>
+        </div>
+      </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBuT7P1iTdXcZW-y05DX-kseuLrPGmaWSs",
-            authDomain: "laserchess-web-free.firebaseapp.com",
-            projectId: "laserchess-web-free",
-            storageBucket: "laserchess-web-free.firebasestorage.app",
-            messagingSenderId: "887464510754",
-            appId: "1:887464510754:web:aee6938681543602a4517b",
-            measurementId: "G-KC5J6JPX2M"
-        };
+      <div class="w-full lg:w-[500px] transform lg:translate-x-32 transition-transform duration-500">
+        <div class="rule-card relative p-10 lg:p-14 flex flex-col items-center space-y-12">
+          <div class="rule-card-accent"></div>
+          
+          <div class="w-full text-center">
+            <p class="text-[30px] text-gray-500 font-mono tracking-[0.4em] mb-6 border-b border-white/10 pb-2 uppercase">SELECT FACTION</p>
+            <div class="flex items-center justify-center space-x-12 scale-110">
+              <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-2xl">RED</span>
+              <label class="switch">
+                <input type="checkbox" id="sideToggle">
+                <span class="slider"></span>
+              </label>
+              <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-2xl">BLUE</span>
+            </div>
+          </div>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+          <div class="w-full max-w-md mx-auto pt-8">
+            <button id="mainActionBtn" class="play-now-btn">
+              <span></span><span></span><span></span><span></span>
+              <span id="mainBtnLabel">CREATE MATCH</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
-        (async () => {
-            try { await setPersistence(auth, browserLocalPersistence); } catch (e) { console.warn(e); }
-        })();
+    </div>
+    <div class="h-32 lg:h-40"></div>
+  </main>
 
-        const errorMsgEl = document.getElementById("error-msg");
-        const handleSuccess = () => { window.location.replace("/laserchess/docs/home/home.html"); };
-
-        document.getElementById("signUpBtn").addEventListener("click", async () => {
-            const email = document.getElementById("entry-email").value;
-            const password = document.getElementById("entry-password").value;
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await sendEmailVerification(userCredential.user);
-                alert("Verification email sent.");
-                handleSuccess(); 
-            } catch (error) { errorMsgEl.textContent = error.message; }
-        });
-
-        document.getElementById("signInBtn").addEventListener("click", async () => {
-            const email = document.getElementById("entry-email").value;
-            const password = document.getElementById("entry-password").value;
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                if (userCredential.user.emailVerified) { handleSuccess(); } 
-                else { alert("Please verify your email."); }
-            } catch (error) { errorMsgEl.textContent = error.message; }
-        });
-
-        document.getElementById("googleLogin").addEventListener("click", async () => {
-            try { await signInWithPopup(auth, provider); handleSuccess(); } 
-            catch (error) { errorMsgEl.textContent = error.message; }
-        });
-
-        document.getElementById("passwordResetBtn").addEventListener("click", async () => {
-            const email = document.getElementById("entry-email").value;
-            try { await sendPasswordResetEmail(auth, email); alert("Reset email sent!"); } 
-            catch (error) { errorMsgEl.textContent = error.message; }
-        });
-    </script>
-</body>
+  </body>
 </html>
