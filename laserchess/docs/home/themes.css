@@ -196,27 +196,38 @@ button.play-now-btn span:nth-child(4) {
 @keyframes legacy-3 { 0% { right: -100%; } 50%, 100% { right: 100%; } }
 @keyframes legacy-4 { 0% { bottom: -100%; } 50%, 100% { bottom: 100%; } }
 
-/* 1. Restore Hover by making lasers "ghosts" */
-button.play-now-btn span {
-  pointer-events: none !important; /* CRITICAL: Mouse goes through the lines to hit the button */
+/* THE BUTTON - Base State */
+button.play-now-btn {
+  /* ... existing styles ... */
+  transition: 
+    background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+    box-shadow 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+    color 0.4s ease !important;
 }
 
-/* 2. The Hover State */
+/* THE HOVER - Gradual Build */
 button.play-now-btn:hover {
   background: var(--theme-color) !important;
-  box-shadow: 0 0 15px var(--theme-color), 0 0 40px rgba(var(--theme-rgb), 0.4) !important;
-  transition: all 0.3s ease;
-}
-
-/* 3. Swap Text Color on Hover to Black for Contrast */
-button.play-now-btn:hover #mainBtnLabel {
   color: #000 !important;
-  text-shadow: none !important;
+  /* Multi-layered shadow for a 'soft' gradual bloom */
+  box-shadow: 
+    0 0 10px var(--theme-color), 
+    0 0 30px rgba(var(--theme-rgb), 0.6), 
+    0 0 60px rgba(var(--theme-rgb), 0.3) !important;
 }
 
-/* 4. Fix the "Select Faction" centering (removes that 'center' class bug) */
-.center {
-  text-align: center !important;
+/* Ensure the label also transitions smoothly */
+#mainBtnLabel {
+  transition: color 0.6s ease;
+}
+
+/* Hide the laser lines smoothly on hover */
+button.play-now-btn span {
+  transition: opacity 0.5s ease;
+}
+
+button.play-now-btn:hover span {
+  opacity: 0; /* Fades the lasers out as the button glows up */
 }
 
 /* ============================================================
