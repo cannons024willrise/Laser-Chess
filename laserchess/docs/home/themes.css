@@ -80,7 +80,7 @@ input:checked + .slider:before {
   transform: translateX(31px); background-color: var(--theme-color); box-shadow: 0 0 15px var(--theme-color);
 }
 
-//* ============================================================
+/* ============================================================
    5. THE BUTTON (Railway Mechanical Engine)
    ============================================================ */
 .play-now-btn {
