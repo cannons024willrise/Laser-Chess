@@ -53,7 +53,7 @@
 <div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0">
   
   <div class="w-full lg:w-[450px] transform lg:-translate-x-12">
-    <div id="lobbyStatus" class="rule-card relative p-8 lg:p-10 text-center lobby-pulse min-h-[320px] flex flex-col justify-center">
+    <div id="lobbyStatus" class="rule-card relative p-8 lg:p-10 text-center lobby-pulse min-h-[340px] flex flex-col justify-center">
       <div class="rule-card-accent"></div>
       <div class="absolute top-4 left-4 w-2 h-2 bg-theme animate-pulse"></div>
       
@@ -67,32 +67,31 @@
     </div>
   </div>
 
-  <div class="w-full lg:w-[480px] transform lg:translate-x-12">
-    <div class="rule-card shadow-theme relative p-8 lg:p-10 flex flex-col items-center justify-center space-y-6 min-h-[320px]">
+  <div class="w-full lg:w-[480px] transform lg:translate-x-12"> <div class="rule-card relative p-10 lg:p-12 flex flex-col items-center justify-center space-y-8 min-h-[340px]">
       <div class="rule-card-accent"></div>
       
       <div class="w-full text-center">
-        <p class="text-[20px] text-gray-500 font-mono tracking-[0.4em] mb-4 border-b border-white/10 pb-2 uppercase">
+        <p class="text-[22px] text-gray-500 font-mono tracking-[0.4em] mb-6 border-b border-white/10 pb-2 uppercase">
           SELECT FACTION
         </p>
-        <div class="flex items-center justify-center space-x-10">
-          <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-xl drop-shadow-[0_0_10px_rgba(244,67,54,0.5)]">RED</span>
+        <div class="flex items-center justify-center space-x-12">
+          <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(244,67,54,0.5)]">RED</span>
           <label class="switch shadow-[0_0_20px_rgba(0,0,0,0.8)]">
             <input type="checkbox" id="sideToggle">
             <span class="slider"></span>
           </label>
-          <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-xl drop-shadow-[0_0_10px_rgba(3,233,244,0.5)]">BLUE</span>
+          <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(3,233,244,0.5)]">BLUE</span>
         </div>
       </div>
 
       <div class="w-full max-w-[300px] mx-auto pt-2">
         <button id="mainActionBtn" class="play-now-btn">
           <span></span><span></span><span></span><span></span>
-          <span id="mainBtnLabel" class="text-[14px]">CREATE MATCH</span>
+          <span id="mainBtnLabel" class="text-[15px]">CREATE MATCH</span>
         </button>
       </div>
       
-      <button id="followBtn" class="hidden w-full text-[9px] text-gray-500 hover:text-white transition-all uppercase tracking-[0.5em] font-mono mt-2">
+      <button id="followBtn" class="hidden w-full text-[10px] text-gray-400 hover:text-white transition-all uppercase tracking-[0.5em] font-mono">
         Host new match instead
       </button>
     </div>
