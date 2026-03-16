@@ -32,78 +32,78 @@
   </section>
 
   <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-screen h-full overflow-hidden">
-    
-    <div class="text-center mt-4 mb-16 lg:mb-24 relative">
-      <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-px h-8 bg-theme opacity-30"></div>
-      <h1 class="text-6xl md:text-8xl lg:text-7xl font-black text-white tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-        READY FOR BATTLE?
-      </h1>
-      <div class="flex items-center justify-center space-x-4 mt-6 opacity-80">
-        <div class="w-12 h-px bg-gray-600"></div>
-        <p class="text-gray-400 text-xs md:text-sm tracking-[0.8em] uppercase font-mono">
-          Select parameters & enter queue
-        </p>
-        <div class="w-12 h-px bg-gray-600"></div>
-      </div>
-      <a href="#the-rules" class="inline-block mt-10 text-[9px] tracking-[0.5em] text-theme/60 hover-text-theme transition-all uppercase border border-theme-20 hover-border-theme px-6 py-2 bg-theme-10">
-        Access Combat Manual
-      </a>
+  
+  <div class="text-center mt-4 mb-16 lg:mb-24 relative">
+    <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-px h-8 bg-theme opacity-30"></div>
+    <h1 class="text-6xl md:text-8xl lg:text-7xl font-black text-white tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+      READY FOR BATTLE?
+    </h1>
+    <div class="flex items-center justify-center space-x-4 mt-6 opacity-80">
+      <div class="w-12 h-px bg-gray-600"></div>
+      <p class="text-gray-400 text-xs md:text-sm tracking-[0.8em] uppercase font-mono">
+        Select parameters & enter queue
+      </p>
+      <div class="w-12 h-px bg-gray-600"></div>
     </div>
+    <a href="#the-rules" class="inline-block mt-10 text-[9px] tracking-[0.5em] text-theme/60 hover-text-theme transition-all uppercase border border-theme-20 hover-border-theme px-6 py-2 bg-theme-10">
+      Access Combat Manual
+    </a>
+  </div>
 
-    <div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0">
-      
-      <div class="w-full lg:w-[450px] transform lg:-translate-x-12">
-        <div id="lobbyStatus" class="rule-card relative p-16 text-center lobby-pulse">
-          <div class="rule-card-accent"></div>
-          <div class="absolute top-4 left-4 w-2 h-2 bg-theme animate-pulse"></div>
-          
-          <p id="statusText" class="text-theme tracking-[0.5em] uppercase text-xs mb-8 font-mono">
-            SCANNING LOBBY...
-          </p>
-          <div id="oppPreview" class="text-white text-4xl lg:text-5xl font-black tracking-widest uppercase italic leading-tight">
-            STATUS: <br>
-            <span id="statusValue" class="text-gray-500 block mt-3 font-mono text-3xl">IDLE</span>
-          </div>
+  <div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0">
+    
+    <div class="w-full lg:w-[450px] transform lg:-translate-x-12">
+      <div id="lobbyStatus" class="rule-card relative p-16 text-center lobby-pulse">
+        <div class="rule-card-accent"></div>
+        <div class="absolute top-4 left-4 w-2 h-2 bg-theme animate-pulse"></div>
+        
+        <p id="statusText" class="text-theme tracking-[0.5em] uppercase text-xs mb-8 font-mono">
+          SCANNING LOBBY...
+        </p>
+        <div id="oppPreview" class="text-white text-4xl lg:text-5xl font-black tracking-widest uppercase italic leading-tight">
+          STATUS: <br>
+          <span id="statusValue" class="text-gray-500 block mt-3 font-mono text-3xl">IDLE</span>
         </div>
       </div>
+    </div>
 
-      <div class="w-full lg:w-[500px] transform lg:translate-x-12">
-  <div class="rule-card relative p-10 lg:p-14 flex flex-col items-center space-y-12">
-    <div class="rule-card-accent"></div>
-    
-    <div class="w-full text-center">
-      <p class="text-[30px] text-gray-500 font-mono tracking-[0.4em] mb-6 border-b border-white/10 pb-2 uppercase">
-        SELECT FACTION
-      </p>
-      <div class="flex items-center justify-center space-x-12 scale-110">
-        <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(244,67,54,0.5)]">RED</span>
-        <label class="switch shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-          <input type="checkbox" id="sideToggle">
-          <span class="slider"></span>
-        </label>
-        <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(3,233,244,0.5)]">BLUE</span>
+    <div class="w-full lg:w-[500px] transform lg:translate-x-12">
+      <div class="rule-card relative p-10 lg:p-14 flex flex-col items-center space-y-12">
+        <div class="rule-card-accent"></div>
+        
+        <div class="w-full text-center">
+          <p class="text-[30px] text-gray-500 font-mono tracking-[0.4em] mb-6 border-b border-white/10 pb-2 uppercase">
+            SELECT FACTION
+          </p>
+          <div class="flex items-center justify-center space-x-12 scale-110">
+            <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(244,67,54,0.5)]">RED</span>
+            <label class="switch shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+              <input type="checkbox" id="sideToggle">
+              <span class="slider"></span>
+            </label>
+            <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(3,233,244,0.5)]">BLUE</span>
+          </div>
+        </div>
+
+        <div class="w-full max-w-md mx-auto pt-8">
+          <button id="mainActionBtn" class="play-now-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span id="mainBtnLabel">CREATE MATCH</span>
+          </button>
+        </div>
+        
+        <button id="followBtn" class="hidden w-full text-[10px] text-gray-500 hover:text-white transition-all uppercase tracking-[0.5em] font-mono">
+          Host new match instead
+        </button>
       </div>
     </div>
-
-    <div class="w-full max-w-md mx-auto pt-8">
-      <button id="mainActionBtn" class="play-now-btn">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span id="mainBtnLabel">CREATE MATCH</span>
-      </button>
-    </div>
-    
-    <button id="followBtn" class="hidden w-full text-[10px] text-gray-500 hover:text-white transition-all uppercase tracking-[0.5em] font-mono">
-      Host new match instead
-    </button>
   </div>
-</div>
 
-    <div class="h-32 lg:h-40"></div>
-  </main>
-
+  <div class="h-32 lg:h-40"></div>
+</main>
   <section id="the-rules" class="relative z-10 w-full bg-black border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)]">
     <div class="max-w-7xl mx-auto">
       
