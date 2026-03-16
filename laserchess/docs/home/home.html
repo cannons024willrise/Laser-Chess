@@ -50,57 +50,56 @@
     </a>
   </div>
 
-  <div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0">
-    
-    <div class="w-full lg:w-[450px] transform lg:-translate-x-12">
-      <div id="lobbyStatus" class="rule-card relative p-16 text-center lobby-pulse">
-        <div class="rule-card-accent"></div>
-        <div class="absolute top-4 left-4 w-2 h-2 bg-theme animate-pulse"></div>
-        
-        <p id="statusText" class="text-theme tracking-[0.5em] uppercase text-xs mb-8 font-mono">
-          SCANNING LOBBY...
+ <div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0">
+  
+  <div class="w-full lg:w-[450px] transform lg:-translate-x-12">
+    <div id="lobbyStatus" class="rule-card relative p-8 lg:p-10 text-center lobby-pulse min-h-[320px] flex flex-col justify-center">
+      <div class="rule-card-accent"></div>
+      <div class="absolute top-4 left-4 w-2 h-2 bg-theme animate-pulse"></div>
+      
+      <p id="statusText" class="text-theme tracking-[0.5em] uppercase text-xs mb-8 font-mono">
+        SCANNING LOBBY...
+      </p>
+      <div id="oppPreview" class="text-white text-4xl lg:text-5xl font-black tracking-widest uppercase italic leading-tight">
+        STATUS: <br>
+        <span id="statusValue" class="text-gray-500 block mt-3 font-mono text-3xl">IDLE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="w-full lg:w-[450px] transform lg:translate-x-12">
+    <div class="rule-card relative p-8 lg:p-10 flex flex-col items-center justify-center space-y-6 min-h-[320px]">
+      <div class="rule-card-accent"></div>
+      
+      <div class="w-full text-center">
+        <p class="text-[20px] text-gray-500 font-mono tracking-[0.4em] mb-4 border-b border-white/10 pb-2 uppercase">
+          SELECT FACTION
         </p>
-        <div id="oppPreview" class="text-white text-4xl lg:text-5xl font-black tracking-widest uppercase italic leading-tight">
-          STATUS: <br>
-          <span id="statusValue" class="text-gray-500 block mt-3 font-mono text-3xl">IDLE</span>
+        <div class="flex items-center justify-center space-x-10">
+          <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-xl drop-shadow-[0_0_10px_rgba(244,67,54,0.5)]">RED</span>
+          <label class="switch shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+            <input type="checkbox" id="sideToggle">
+            <span class="slider"></span>
+          </label>
+          <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-xl drop-shadow-[0_0_10px_rgba(3,233,244,0.5)]">BLUE</span>
         </div>
       </div>
-    </div>
 
-   <div class="w-full lg:w-[420px] transform lg:translate-x-12">
-  <div class="rule-card relative p-8 lg:p-10 flex flex-col items-center space-y-6">
-    <div class="rule-card-accent"></div>
-    
-    <div class="w-full text-center">
-      <p class="text-[20px] text-gray-500 font-mono tracking-[0.4em] mb-4 border-b border-white/10 pb-2 uppercase">
-        SELECT FACTION
-      </p>
-      <div class="flex items-center justify-center space-x-10">
-        <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-xl drop-shadow-[0_0_10px_rgba(244,67,54,0.5)]">RED</span>
-        <label class="switch shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-          <input type="checkbox" id="sideToggle">
-          <span class="slider"></span>
-        </label>
-        <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-xl drop-shadow-[0_0_10px_rgba(3,233,244,0.5)]">BLUE</span>
+      <div class="w-full max-w-[280px] mx-auto pt-2">
+        <button id="mainActionBtn" class="play-now-btn">
+          <span></span><span></span><span></span><span></span>
+          <span id="mainBtnLabel" class="text-[14px]">CREATE MATCH</span>
+        </button>
       </div>
-    </div>
-
-    <div class="w-full max-w-[280px] mx-auto pt-2">
-      <button id="mainActionBtn" class="play-now-btn">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span id="mainBtnLabel" class="text-[14px]">CREATE MATCH</span>
+      
+      <button id="followBtn" class="hidden w-full text-[9px] text-gray-500 hover:text-white transition-all uppercase tracking-[0.5em] font-mono mt-2">
+        Host new match instead
       </button>
     </div>
-    
-    <button id="followBtn" class="hidden w-full text-[9px] text-gray-500 hover:text-white transition-all uppercase tracking-[0.5em] font-mono mt-2">
-      Host new match instead
-    </button>
   </div>
-</div>
 
+</div>
+    
   <div class="h-32 lg:h-40"></div>
 </main>
   <section id="the-rules" class="relative z-10 w-full bg-black border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)]">
