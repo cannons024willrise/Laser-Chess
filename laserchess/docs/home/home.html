@@ -13,8 +13,8 @@
   <script type="module" src="lobby.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col overflow-x-hidden bg-black">
-  <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+<body class="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
+  <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-black">
     <div class="flex items-center space-x-4">
       <h1 class="text-2xl font-black tracking-tighter italic text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">LASER CHESS</h1>
     </div>
@@ -31,9 +31,10 @@
     </a>
   </section>
 
-  <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-screen h-full overflow-hidden">
+  <!-- FIXED: Changed w-screen to w-full and removed h-full to stop infinite layout scroll loops -->
+  <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-full overflow-x-hidden">
   
-    <div class="text-center mt-4 mb-12 relative">
+    <div class="text-center mt-4 mb-12 relative select-none">
       <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-px h-8 bg-theme opacity-30"></div>
       <h1 class="text-6xl md:text-8xl lg:text-7xl font-black text-white tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
         READY FOR BATTLE?
@@ -51,54 +52,54 @@
     <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20">
       
       <!-- LOCAL PASS & PLAY -->
-      <button id="btnLocalPlay" class="play-now-btn w-full !block min-h-[90px] p-0 text-left relative group overflow-hidden">
+      <!-- FIXED: Uses strict box layout padding instead of absolute overlays to anchor height perfectly -->
+      <button id="btnLocalPlay" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <!-- Isolated Layout Engine Overlay to prevent text squishing -->
-        <div class="absolute inset-0 w-full h-full px-8 flex items-center justify-between z-10 pointer-events-none">
-          <div class="flex flex-col justify-center select-none">
+        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
+          <div class="flex flex-col justify-center">
             <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">01 // LOCAL PASS & PLAY</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Local workstation deployment node. Offline configuration.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 inside-btn-desc leading-normal">Local workstation deployment node. Offline configuration.</span>
           </div>
-          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 select-none">➔</span>
+          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
         </div>
       </button>
 
       <!-- CYBERNETIC AI MODE -->
-      <button id="btnAiMode" class="play-now-btn w-full !block min-h-[90px] p-0 text-left relative group overflow-hidden">
+      <button id="btnAiMode" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="absolute inset-0 w-full h-full px-8 flex items-center justify-between z-10 pointer-events-none">
-          <div class="flex flex-col justify-center select-none">
+        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
+          <div class="flex flex-col justify-center">
             <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">02 // CYBERNETIC AI ENEMY</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Simulate tactical grid engagements against local Q-tables.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 inside-btn-desc leading-normal">Simulate tactical grid engagements against local Q-tables.</span>
           </div>
-          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 select-none">➔</span>
+          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
         </div>
       </button>
 
       <!-- DISTRIBUTED ONLINE QUEUE -->
-      <button id="btnOnlineMatch" class="play-now-btn w-full !block min-h-[90px] p-0 text-left relative group overflow-hidden">
+      <button id="btnOnlineMatch" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="absolute inset-0 w-full h-full px-8 flex items-center justify-between z-10 pointer-events-none">
-          <div class="flex flex-col justify-center select-none">
+        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
+          <div class="flex flex-col justify-center">
             <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">03 // ONLINE MATCHMAKING</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Establish communication bridge links across matchmaking instances.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 inside-btn-desc leading-normal">Establish communication bridge links across matchmaking instances.</span>
           </div>
-          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 select-none">➔</span>
+          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
         </div>
       </button>
 
       <!-- COMBAT MANUAL (VIDEO TUTORIAL) -->
-      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block min-h-[90px] p-0 text-left relative group overflow-hidden">
+      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden decoration-none">
         <span></span><span></span><span></span><span></span>
-        <div class="absolute inset-0 w-full h-full px-8 flex items-center justify-between z-10">
+        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
           <div class="flex flex-col justify-center">
             <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic flex items-center group-hover:text-theme transition-colors leading-tight">
               04 // EXTERNAL TRAINING FEED
               <span class="ml-3 text-[8px] tracking-normal font-mono text-red-500 bg-red-950/40 border border-red-500/30 px-2 py-0.5 rounded animate-pulse">LIVE FEED</span>
             </span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">De-encrypt a full visual trace simulation guide on YouTube.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 inside-btn-desc leading-normal">De-encrypt a full visual trace simulation guide on YouTube.</span>
           </div>
-          <span class="text-white font-mono font-bold text-xl transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300">↗</span>
+          <span class="text-white font-mono font-bold text-xl transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 flex-shrink-0">↗</span>
         </div>
       </a>
 
@@ -128,9 +129,9 @@
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">TARGET</span>
             </div>
             <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
-              The main target. No mirrors, no shields. If any laser beam hits any of its four sides, that King is removed and the game is over instantly.
+              The main target. No mirrors, no shields. If any laser beam hits any of its four sides, that King is removed and the game is over instantly[cite: 3].
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-[#f44336] font-bold tracking-[0.3em]">VULNERABILITY: 100%</div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-[#f44336] font-bold tracking-[0.3em]">VULNERABILITY: 100%[cite: 3]</div>
           </div>
 
           <div class="rule-card relative p-8">
@@ -140,9 +141,9 @@
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">UTILITY</span>
             </div>
             <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
-              Mirrored on both sides. It cannot be eliminated. <span class="text-white">Special:</span> Can swap positions with an adjacent Defender or Deflector without rotating.
+              Mirrored on both sides. It cannot be eliminated. <span class="text-white">Special:</span> Can swap positions with an adjacent Defender or Deflector without rotating[cite: 3].
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-theme font-bold tracking-[0.3em]">STATUS: INVULNERABLE</div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-theme font-bold tracking-[0.3em]">STATUS: INVULNERABLE[cite: 3]</div>
           </div>
 
           <div class="rule-card relative p-8">
@@ -152,9 +153,9 @@
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">SHIELD</span>
             </div>
             <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
-              Equipped with a shielded front that safely blocks lasers. It remains in play if hit on the shield, but is destroyed if hit on the sides or back.
+              Equipped with a shielded front that safely blocks lasers. It remains in play if hit on the shield, but is destroyed if hit on the sides or back[cite: 3].
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-gray-400 font-bold tracking-[0.3em]">VULNERABILITY: SIDE/REAR</div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-gray-400 font-bold tracking-[0.3em]">VULNERABILITY: SIDE/REAR[cite: 3]</div>
           </div>
 
           <div class="rule-card relative p-8">
@@ -164,9 +165,9 @@
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">MIRROR</span>
             </div>
             <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
-              The main tactical unit. One side reflects the beam at exactly 90°. If struck on any of the other three non-mirrored sides, it is eliminated.
+              The main tactical unit. One side reflects the beam at exactly 90°. If struck on any of the other three non-mirrored sides, it is eliminated[cite: 3].
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-gray-400 font-bold tracking-[0.3em]">VULNERABILITY: 3 SIDES</div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-gray-400 font-bold tracking-[0.3em]">VULNERABILITY: 3 SIDES[cite: 3]</div>
           </div>
 
           <div class="rule-card relative p-8">
@@ -176,9 +177,9 @@
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">WEAPON</span>
             </div>
             <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
-              Permanent beam source located in the corner. It cannot move or be removed. It can be rotated to fire down the first column or across the first row.
+              Permanent beam source located in the corner. It cannot move or be removed. It can be rotated to fire down the first column or across the first row[cite: 3].
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-theme font-bold tracking-[0.3em]">STATUS: PERMANENT</div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-theme font-bold tracking-[0.3em]">STATUS: PERMANENT[cite: 3]</div>
           </div>
 
         </div>
@@ -191,27 +192,27 @@
           <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 text-white flex items-center">
             <span class="text-theme mr-4 font-mono text-lg opacity-80">02</span> YOUR TURN
           </h3>
-          <p class="text-gray-500 text-xs mb-8 uppercase tracking-widest font-mono border-b border-theme-20 pb-4">Perform one of three actions:</p>
+          <p class="text-gray-500 text-xs mb-8 uppercase tracking-widest font-mono border-b border-theme-20 pb-4">Perform one of three actions[cite: 3]:</p>
           <div class="space-y-6">
             <div class="flex items-start gap-5">
               <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
               <div>
                 <p class="text-[12px] font-bold text-white uppercase tracking-widest mb-1">MOVE</p>
-                <p class="text-[11px] text-gray-400 uppercase tracking-wider">Shift any piece one square in any direction (including diagonals). Orientation remains the same.</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">Shift any piece one square in any direction (including diagonals). Orientation remains the same[cite: 3].</p>
               </div>
             </div>
             <div class="flex items-start gap-5">
               <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
               <div>
                 <p class="text-[12px] font-bold text-white uppercase tracking-widest mb-1">ROTATE</p>
-                <p class="text-[11px] text-gray-400 uppercase tracking-wider">Turn any piece 90° clockwise or counter-clockwise on its current square.</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">Turn any piece 90° clockwise or counter-clockwise on its current square[cite: 3].</p>
               </div>
             </div>
             <div class="flex items-start gap-5">
               <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
               <div>
                 <p class="text-[12px] font-bold text-white uppercase tracking-widest mb-1">SWAP</p>
-                <p class="text-[11px] text-gray-400 uppercase tracking-wider">The Switch may change places with an adjacent Defender or Deflector of either color.</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">The Switch may change places with an adjacent Defender or Deflector of either color[cite: 3].</p>
               </div>
             </div>
           </div>
@@ -229,7 +230,7 @@
               <div class="absolute left-0 top-0 w-1 h-full bg-theme"></div>
               <span class="text-theme text-xl font-black leading-none">!</span>
               <p class="text-[11px] text-gray-300 uppercase tracking-widest leading-relaxed">
-                Blue pieces cannot enter squares marked with <span class="text-[#f44336] font-bold">Red Helix symbols</span>. Red pieces cannot enter squares marked with <span class="text-[#03e9f4] font-bold">Blue Helix symbols</span>.
+                Blue pieces cannot enter squares marked with <span class="text-[#f44336] font-bold">Red Helix symbols</span>. Red pieces cannot enter squares marked with <span class="text-[#03e9f4] font-bold">Blue Helix symbols</span>[cite: 3].
               </p>
             </div>
             
@@ -237,7 +238,7 @@
               <div class="absolute left-0 top-0 w-1 h-full bg-theme"></div>
               <span class="text-theme text-xl font-black leading-none">!</span>
               <p class="text-[11px] text-gray-300 uppercase tracking-widest leading-relaxed">
-                No test firing. Once you remove your hand from a piece, the move is locked permanently and the laser must be fired.
+                No test firing. Once you remove your hand from a piece, the move is locked permanently and the laser must be fired[cite: 3].
               </p>
             </div>
           </div>
@@ -250,7 +251,7 @@
           <h3 class="text-3xl font-black tracking-[0.3em] uppercase mb-6 text-theme">04 // AUTO FIRE SEQUENCE</h3>
           <div class="w-24 h-1 bg-theme mx-auto mb-8 shadow-theme"></div>
           <p class="max-w-3xl mx-auto text-[12px] text-white uppercase tracking-[0.25em] leading-loose">
-            After every turn, your laser automatically fires. The beam bounces off mirrors until it leaves the board or hits a piece. Any piece struck on a non-mirrored side is instantly removed. You may rotate your Laser before firing.<span class="text-white font-black bg-theme-10 border border-theme-20 px-4 py-2 block mt-6 text-sm">FRIENDLY FIRE COUNTS. WATCH YOUR OWN BEAM.</span>
+            After every turn, your laser automatically fires[cite: 3]. The beam bounces off mirrors until it leaves the board or hits a piece[cite: 3]. Any piece struck on a non-mirrored side is instantly removed[cite: 3]. You may rotate your Laser before firing[cite: 3].<span class="text-white font-black bg-theme-10 border border-theme-20 px-4 py-2 block mt-6 text-sm">FRIENDLY FIRE COUNTS. WATCH YOUR OWN BEAM[cite: 3].</span>
           </p>
         </div>
       </div>
@@ -260,10 +261,10 @@
 
   <footer class="fixed bottom-0 left-0 w-full p-4 text-center text-gray-600 text-[9px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/90 backdrop-blur-md z-50">
     <div class="flex justify-center items-center space-x-6">
-      <span>ALPHA BUILD v1.0</span>
-      <span class="text-theme">///</span>
+      <span>ALPHA BUILD v1.0[cite: 3]</span>
+      <span class="text-theme">///[cite: 3]</span>
       <a href="mailto:later5143@gmail.com" class="hover-text-theme transition-colors font-mono">
-        REPORT GLITCH // SUGGEST FEATURE
+        REPORT GLITCH // SUGGEST FEATURE[cite: 3]
       </a>
     </div>
   </footer>
