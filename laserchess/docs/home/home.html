@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" style="scroll-behavior: smooth;">
+<!-- FIXED: Stripped out scroll-behavior: smooth to break the infinite animation physics loop -->
+<html lang="en" class="m-0 p-0 h-full w-full overflow-x-hidden">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -13,8 +14,10 @@
   <script type="module" src="lobby.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
-  <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-black">
+<!-- FIXED: Forced strict layout containment via max-w-full and absolute overflow clamping -->
+<body class="min-h-screen w-full max-w-full flex flex-col overflow-x-hidden bg-black text-white m-0 p-0 containment-lock">
+  
+  <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-black w-full box-border">
     <div class="flex items-center space-x-4">
       <h1 class="text-2xl font-black tracking-tighter italic text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">LASER CHESS</h1>
     </div>
@@ -25,14 +28,14 @@
     </div>
   </header>
 
-  <section class="w-full py-2 bg-theme-10 border-b border-theme-20 text-center z-10 transition-all duration-500">
+  <section class="w-full py-2 bg-theme-10 border-b border-theme-20 text-center z-10 transition-all duration-500 box-border">
     <a href="https://discord.gg/mbEuNMee" class="text-[9px] font-bold tracking-[0.5em] uppercase text-theme hover:text-white transition-colors">
       >> JOIN GLOBAL COMMUNICATIONS DIRECTORY (DISCORD) <<
     </a>
   </section>
 
-  <!-- FIXED: Changed w-screen to w-full and removed h-full to stop infinite layout scroll loops -->
-  <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-full overflow-x-hidden">
+  <!-- FIXED: Cleaned layout bounds to ensure no vertical or horizontal micro-jitter can translate to the window -->
+  <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-full max-w-full overflow-hidden box-border">
   
     <div class="text-center mt-4 mb-12 relative select-none">
       <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-px h-8 bg-theme opacity-30"></div>
@@ -49,16 +52,15 @@
     </div>
 
     <!-- TACTICAL CORE MENU STRUCTURE -->
-    <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20">
+    <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20 box-border">
       
       <!-- LOCAL PASS & PLAY -->
-      <!-- FIXED: Uses strict box layout padding instead of absolute overlays to anchor height perfectly -->
       <button id="btnLocalPlay" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
+        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center">
             <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">01 // LOCAL PASS & PLAY</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 inside-btn-desc leading-normal">Local workstation deployment node. Offline configuration.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Local workstation deployment node. Offline configuration.</span>
           </div>
           <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
         </div>
@@ -67,10 +69,10 @@
       <!-- CYBERNETIC AI MODE -->
       <button id="btnAiMode" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
+        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center">
             <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">02 // CYBERNETIC AI ENEMY</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 inside-btn-desc leading-normal">Simulate tactical grid engagements against local Q-tables.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Simulate tactical grid engagements against local Q-tables.</span>
           </div>
           <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
         </div>
@@ -79,17 +81,17 @@
       <!-- DISTRIBUTED ONLINE QUEUE -->
       <button id="btnOnlineMatch" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
+        <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center">
             <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">03 // ONLINE MATCHMAKING</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 inside-btn-desc leading-normal">Establish communication bridge links across matchmaking instances.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Establish communication bridge links across matchmaking instances.</span>
           </div>
           <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
         </div>
       </button>
 
       <!-- COMBAT MANUAL (VIDEO TUTORIAL) -->
-      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden decoration-none">
+      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden no-underline">
         <span></span><span></span><span></span><span></span>
         <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
           <div class="flex flex-col justify-center">
@@ -97,7 +99,7 @@
               04 // EXTERNAL TRAINING FEED
               <span class="ml-3 text-[8px] tracking-normal font-mono text-red-500 bg-red-950/40 border border-red-500/30 px-2 py-0.5 rounded animate-pulse">LIVE FEED</span>
             </span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 inside-btn-desc leading-normal">De-encrypt a full visual trace simulation guide on YouTube.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">De-encrypt a full visual trace simulation guide on YouTube.</span>
           </div>
           <span class="text-white font-mono font-bold text-xl transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 flex-shrink-0">↗</span>
         </div>
@@ -108,7 +110,8 @@
     <div class="h-24 lg:h-32"></div>
   </main>
 
-  <section id="the-rules" class="relative z-10 w-full bg-black border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)]">
+  <!-- FIXED: Explicit clear-fix bounds around the rules engine -->
+  <section id="the-rules" class="relative z-10 w-full max-w-full bg-black border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)] overflow-hidden box-border">
     <div class="max-w-7xl mx-auto">
       
       <div class="mb-24 text-left border-l-4 border-theme pl-8">
@@ -259,7 +262,10 @@
     </div>
   </section>
 
-  <footer class="fixed bottom-0 left-0 w-full p-4 text-center text-gray-600 text-[9px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/90 backdrop-blur-md z-50">
+  <!-- FIXED: Left spacing reservation to ensure footer background never blocks rule elements -->
+  <div class="h-20 w-full clear-both"></div>
+
+  <footer class="fixed bottom-0 left-0 w-full p-4 text-center text-gray-600 text-[9px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/90 backdrop-blur-md z-50 box-border">
     <div class="flex justify-center items-center space-x-6">
       <span>ALPHA BUILD v1.0[cite: 3]</span>
       <span class="text-theme">///[cite: 3]</span>
