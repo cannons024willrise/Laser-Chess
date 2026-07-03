@@ -9,30 +9,48 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="themes.css">
 
-  <!-- ENGINE OVERRIDE PATCH: Isolates typography layers via GPU acceleration -->
+  <!-- ENGINE OVERRIDE PATCH: Bypasses native button rendering anomalies -->
   <style>
     html, body {
       overflow-anchor: none !important;
       scroll-behavior: auto !important;
     }
     
-    /* Lock the core button footprint */
+    /* Hard-lock structural blocks to block layout calculations */
     .play-now-btn {
+      display: block !important;
       height: 95px !important;
       max-height: 95px !important;
       overflow: hidden !important;
       box-sizing: border-box !important;
-      /* Promotes the button element to a unique composite layer */
-      transform: translateZ(0) !important;
-      will-change: transform !important;
-      backface-visibility: hidden !important;
+      position: relative !important;
+      contain: content !important; /* Locks layout, paint, and style entirely inside this footprint */
     }
 
-    /* HARD LOCK FOR INNER TEXT LAYERS: Stops sub-pixel animation drift dead */
+    /* ABSOLUTE ANCHOR: Strips browser ability to slide or scroll text content horizontally */
     .gpu-text-lock {
-      transform: translateZ(0) !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      white-space: normal !important; /* Eradicates marquee scrolling behaviors */
+      overflow: hidden !important;
+      transform: translateZ(0) !important; /* Forces independent hardware compositing layer */
       backface-visibility: hidden !important;
-      will-change: transform, opacity !important;
+    }
+    
+    /* Retain custom kinetic motion strictly for target transition triggers */
+    .play-now-btn:hover .group-hover\:translate-x-2 {
+      transform: translateX(0.5rem) !important;
+    }
+    .play-now-btn:hover .group-hover\:translate-x-1 {
+      transform: translateX(0.25rem) translateY(-0.25rem) !important;
+    }
+    .gpu-text-lock .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
     }
   </style>
 
@@ -75,57 +93,58 @@
       </div>
     </div>
 
-    <!-- TACTICAL CORE MENU STRUCTURE -->
+    <!-- TACTICAL CORE MENU STRUCTURE (RE-ENGINEERED BLOCK NODES) -->
     <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20 box-border">
       
       <!-- LOCAL PASS & PLAY -->
-      <button id="btnLocalPlay" class="play-now-btn w-full !block p-0 text-left relative group">
+      <div id="btnLocalPlay" role="button" tabindex="0" class="play-now-btn w-full cursor-pointer p-0 text-left relative group select-none">
+        <!-- Spans here are strictly processed by themes.css as decorative lines -->
         <span></span><span></span><span></span><span></span>
-        <div class="gpu-text-lock relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
+        <div class="gpu-text-lock z-10 py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center min-w-0">
-            <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">01 // LOCAL PASS & PLAY</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal truncate md:overflow-visible md:whitespace-normal">Local workstation deployment node. Offline configuration.</span>
+            <div class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">01 // LOCAL PASS & PLAY</div>
+            <div class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Local workstation deployment node. Offline configuration.</div>
           </div>
-          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
+          <div class="text-theme font-mono font-bold text-xl transition-transform duration-300 flex-shrink-0 group-hover:translate-x-2">➔</div>
         </div>
-      </button>
+      </div>
 
       <!-- CYBERNETIC AI MODE -->
-      <button id="btnAiMode" class="play-now-btn w-full !block p-0 text-left relative group">
+      <div id="btnAiMode" role="button" tabindex="0" class="play-now-btn w-full cursor-pointer p-0 text-left relative group select-none">
         <span></span><span></span><span></span><span></span>
-        <div class="gpu-text-lock relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
+        <div class="gpu-text-lock z-10 py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center min-w-0">
-            <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">02 // CYBERNETIC AI ENEMY</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal truncate md:overflow-visible md:whitespace-normal">Simulate tactical grid engagements against local Q-tables.</span>
+            <div class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">02 // CYBERNETIC AI ENEMY</div>
+            <div class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Simulate tactical grid engagements against local Q-tables.</div>
           </div>
-          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
+          <div class="text-theme font-mono font-bold text-xl transition-transform duration-300 flex-shrink-0 group-hover:translate-x-2">➔</div>
         </div>
-      </button>
+      </div>
 
       <!-- DISTRIBUTED ONLINE QUEUE -->
-      <button id="btnOnlineMatch" class="play-now-btn w-full !block p-0 text-left relative group">
+      <div id="btnOnlineMatch" role="button" tabindex="0" class="play-now-btn w-full cursor-pointer p-0 text-left relative group select-none">
         <span></span><span></span><span></span><span></span>
-        <div class="gpu-text-lock relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
+        <div class="gpu-text-lock z-10 py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center min-w-0">
-            <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">03 // ONLINE MATCHMAKING</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal truncate md:overflow-visible md:whitespace-normal">Establish communication bridge links across matchmaking instances.</span>
+            <div class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">03 // ONLINE MATCHMAKING</div>
+            <div class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Establish communication bridge links across matchmaking instances.</div>
           </div>
-          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 flex-shrink-0">➔</span>
+          <div class="text-theme font-mono font-bold text-xl transition-transform duration-300 flex-shrink-0 group-hover:translate-x-2">➔</div>
         </div>
-      </button>
+      </div>
 
       <!-- COMBAT MANUAL (VIDEO TUTORIAL) -->
-      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block p-0 text-left relative group no-underline">
+      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full p-0 text-left relative group no-underline block select-none">
         <span></span><span></span><span></span><span></span>
-        <div class="gpu-text-lock relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
+        <div class="gpu-text-lock z-10 py-5 px-8 flex items-center justify-between gap-4">
           <div class="flex flex-col justify-center min-w-0">
-            <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic flex items-center group-hover:text-theme transition-colors leading-tight">
+            <div class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic flex items-center group-hover:text-theme transition-colors leading-tight">
               04 // EXTERNAL TRAINING FEED
-              <span class="ml-3 text-[8px] tracking-normal font-mono text-red-500 bg-red-950/40 border border-red-500/30 px-2 py-0.5 rounded animate-pulse">LIVE FEED</span>
-            </span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal truncate md:overflow-visible md:whitespace-normal">De-encrypt a full visual trace simulation guide on YouTube.</span>
+              <b class="ml-3 text-[8px] tracking-normal font-mono text-red-500 bg-red-950/40 border border-red-500/30 px-2 py-0.5 rounded animate-pulse">LIVE FEED</b>
+            </div>
+            <div class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">De-encrypt a full visual trace simulation guide on YouTube.</div>
           </div>
-          <span class="text-white font-mono font-bold text-xl transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300 flex-shrink-0">↗</span>
+          <div class="text-white font-mono font-bold text-xl transition-transform duration-300 flex-shrink-0 group-hover:translate-x-1">↗</div>
         </div>
       </a>
 
