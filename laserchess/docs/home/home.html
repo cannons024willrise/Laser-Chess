@@ -13,7 +13,7 @@
   <script type="module" src="lobby.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col overflow-x-hidden">
+<body class="min-h-screen flex flex-col overflow-x-hidden bg-black">
   <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
     <div class="flex items-center space-x-4">
       <h1 class="text-2xl font-black tracking-tighter italic text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">LASER CHESS</h1>
@@ -33,7 +33,7 @@
 
   <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-screen h-full overflow-hidden">
   
-    <div class="text-center mt-4 mb-16 relative">
+    <div class="text-center mt-4 mb-12 relative">
       <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-px h-8 bg-theme opacity-30"></div>
       <h1 class="text-6xl md:text-8xl lg:text-7xl font-black text-white tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
         READY FOR BATTLE?
@@ -48,56 +48,57 @@
     </div>
 
     <!-- TACTICAL CORE MENU STRUCTURE -->
-    <div class="w-full max-w-[540px] flex flex-col space-y-6 px-6 relative z-20">
+    <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20">
       
       <!-- LOCAL PASS & PLAY -->
-      <button id="btnLocalPlay" class="play-now-btn w-full !block h-auto py-5 px-8 text-left relative group">
+      <button id="btnLocalPlay" class="play-now-btn w-full !block min-h-[90px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="flex justify-between items-center relative z-10">
-          <div>
-            <span class="text-[17px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors">01 // LOCAL PASS & PLAY</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-widest uppercase block mt-1">Local workstation deployment node. Offline configuration.</span>
+        <!-- Isolated Layout Engine Overlay to prevent text squishing -->
+        <div class="absolute inset-0 w-full h-full px-8 flex items-center justify-between z-10 pointer-events-none">
+          <div class="flex flex-col justify-center select-none">
+            <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">01 // LOCAL PASS & PLAY</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Local workstation deployment node. Offline configuration.</span>
           </div>
-          <span class="text-theme font-mono font-bold text-xl group-hover:translate-x-2 transition-transform duration-300">➔</span>
+          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 select-none">➔</span>
         </div>
       </button>
 
       <!-- CYBERNETIC AI MODE -->
-      <button id="btnAiMode" class="play-now-btn w-full !block h-auto py-5 px-8 text-left relative group">
+      <button id="btnAiMode" class="play-now-btn w-full !block min-h-[90px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="flex justify-between items-center relative z-10">
-          <div>
-            <span class="text-[17px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors">02 // CYBERNETIC AI ENEMY</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-widest uppercase block mt-1">Simulate tactical grid engagements against local Q-tables.</span>
+        <div class="absolute inset-0 w-full h-full px-8 flex items-center justify-between z-10 pointer-events-none">
+          <div class="flex flex-col justify-center select-none">
+            <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">02 // CYBERNETIC AI ENEMY</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Simulate tactical grid engagements against local Q-tables.</span>
           </div>
-          <span class="text-theme font-mono font-bold text-xl group-hover:translate-x-2 transition-transform duration-300">➔</span>
+          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 select-none">➔</span>
         </div>
       </button>
 
       <!-- DISTRIBUTED ONLINE QUEUE -->
-      <button id="btnOnlineMatch" class="play-now-btn w-full !block h-auto py-5 px-8 text-left relative group">
+      <button id="btnOnlineMatch" class="play-now-btn w-full !block min-h-[90px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="flex justify-between items-center relative z-10">
-          <div>
-            <span class="text-[17px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors">03 // ONLINE MATCHMAKING</span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-widest uppercase block mt-1">Establish communication bridge links across matchmaking instances.</span>
+        <div class="absolute inset-0 w-full h-full px-8 flex items-center justify-between z-10 pointer-events-none">
+          <div class="flex flex-col justify-center select-none">
+            <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors leading-tight">03 // ONLINE MATCHMAKING</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">Establish communication bridge links across matchmaking instances.</span>
           </div>
-          <span class="text-theme font-mono font-bold text-xl group-hover:translate-x-2 transition-transform duration-300">➔</span>
+          <span class="text-theme font-mono font-bold text-xl transform group-hover:translate-x-2 transition-transform duration-300 select-none">➔</span>
         </div>
       </button>
 
       <!-- COMBAT MANUAL (VIDEO TUTORIAL) -->
-      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block h-auto py-5 px-8 text-left relative group">
+      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block min-h-[90px] p-0 text-left relative group overflow-hidden">
         <span></span><span></span><span></span><span></span>
-        <div class="flex justify-between items-center relative z-10">
-          <div>
-            <span class="text-[17px] font-black tracking-[0.2em] text-white uppercase italic flex items-center group-hover:text-theme transition-colors">
+        <div class="absolute inset-0 w-full h-full px-8 flex items-center justify-between z-10">
+          <div class="flex flex-col justify-center">
+            <span class="text-[16px] font-black tracking-[0.2em] text-white uppercase italic flex items-center group-hover:text-theme transition-colors leading-tight">
               04 // EXTERNAL TRAINING FEED
               <span class="ml-3 text-[8px] tracking-normal font-mono text-red-500 bg-red-950/40 border border-red-500/30 px-2 py-0.5 rounded animate-pulse">LIVE FEED</span>
             </span>
-            <span class="text-[10px] text-gray-400 font-mono tracking-widest uppercase block mt-1">De-encrypt a full visual trace simulation guide on YouTube.</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-wider uppercase block mt-1 leading-normal">De-encrypt a full visual trace simulation guide on YouTube.</span>
           </div>
-          <span class="text-white font-mono font-bold text-xl group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300">↗</span>
+          <span class="text-white font-mono font-bold text-xl transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300">↗</span>
         </div>
       </a>
 
