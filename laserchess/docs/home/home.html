@@ -54,15 +54,16 @@
     </div>
 
     <!-- TACTICAL CORE MENU STRUCTURE -->
-    <!-- Aligned to match button.play-now-btn & #mainBtnLabel exactly -->
     <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20 box-border">
       
       <!-- LOCAL PASS & PLAY -->
       <button id="btnLocalPlay" class="play-now-btn group">
+        <!-- ONLY THESE 4 SPANS WILL ANIMATE AS LASERS NOW -->
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
-          <span>01 // LOCAL PASS & PLAY</span>
-          <span class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</span>
+          <!-- CHANGED FROM SPAN TO DIV TO HIDE FROM CSS ANIMATIONS -->
+          <div>01 // LOCAL PASS & PLAY</div>
+          <div class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</div>
         </div>
       </button>
 
@@ -70,8 +71,8 @@
       <button id="btnAiMode" class="play-now-btn group">
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
-          <span>02 // CYBERNETIC AI ENEMY</span>
-          <span class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</span>
+          <div>02 // CYBERNETIC AI ENEMY</div>
+          <div class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</div>
         </div>
       </button>
 
@@ -79,21 +80,20 @@
       <button id="btnOnlineMatch" class="play-now-btn group">
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
-          <span>03 // ONLINE MATCHMAKING</span>
-          <span class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</span>
+          <div>03 // ONLINE MATCHMAKING</div>
+          <div class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</div>
         </div>
       </button>
 
       <!-- COMBAT MANUAL (VIDEO TUTORIAL) -->
-      <!-- Changed to <button> to ensure it gets all the exact same CSS properties -->
       <button onclick="window.open('https://www.youtube.com/watch?v=UqLa-LOficM&t=52s', '_blank')" class="play-now-btn group">
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
-          <span class="flex items-center">
+          <div class="flex items-center">
             04 // EXTERNAL TRAINING
             <b class="ml-3 text-[10px] tracking-normal font-mono text-black bg-red-500 px-2 py-0.5 rounded animate-pulse">LIVE</b>
-          </span>
-          <span class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-1">↗</span>
+          </div>
+          <div class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-1">↗</div>
         </div>
       </button>
 
