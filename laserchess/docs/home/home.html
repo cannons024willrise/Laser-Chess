@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- FIXED: Stripped out scroll-behavior: smooth to break the infinite animation physics loop -->
-<html lang="en" class="m-0 p-0 h-full w-full overflow-x-hidden">
+<html lang="en" style="scroll-behavior: auto !important; overflow-anchor: none !important;">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -10,12 +9,26 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="themes.css">
 
+  <!-- THE CRISIS OVERRIDE PATCH: Kills layout tracking loops dead -->
+  <style>
+    html, body {
+      overflow-anchor: none !important; /* Stops browser from hijacking scroll positions */
+      scroll-behavior: auto !important;
+    }
+    /* Hard-locking the animated buttons to rigid bounds so they can never shift the page height */
+    .play-now-btn {
+      height: 95px !important;
+      max-height: 95px !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
+  </style>
+
   <script type="module" src="homeauthcheck.js"></script>
   <script type="module" src="lobby.js"></script>
 </head>
 
-<!-- FIXED: Forced strict layout containment via max-w-full and absolute overflow clamping -->
-<body class="min-h-screen w-full max-w-full flex flex-col overflow-x-hidden bg-black text-white m-0 p-0 containment-lock">
+<body class="min-h-screen w-full max-w-full flex flex-col overflow-x-hidden bg-black text-white m-0 p-0">
   
   <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] bg-black w-full box-border">
     <div class="flex items-center space-x-4">
@@ -34,7 +47,6 @@
     </a>
   </section>
 
-  <!-- FIXED: Cleaned layout bounds to ensure no vertical or horizontal micro-jitter can translate to the window -->
   <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-full max-w-full overflow-hidden box-border">
   
     <div class="text-center mt-4 mb-12 relative select-none">
@@ -55,7 +67,7 @@
     <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20 box-border">
       
       <!-- LOCAL PASS & PLAY -->
-      <button id="btnLocalPlay" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
+      <button id="btnLocalPlay" class="play-now-btn w-full !block p-0 text-left relative group">
         <span></span><span></span><span></span><span></span>
         <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center">
@@ -67,7 +79,7 @@
       </button>
 
       <!-- CYBERNETIC AI MODE -->
-      <button id="btnAiMode" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
+      <button id="btnAiMode" class="play-now-btn w-full !block p-0 text-left relative group">
         <span></span><span></span><span></span><span></span>
         <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center">
@@ -79,7 +91,7 @@
       </button>
 
       <!-- DISTRIBUTED ONLINE QUEUE -->
-      <button id="btnOnlineMatch" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden">
+      <button id="btnOnlineMatch" class="play-now-btn w-full !block p-0 text-left relative group">
         <span></span><span></span><span></span><span></span>
         <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4 pointer-events-none">
           <div class="flex flex-col justify-center">
@@ -91,7 +103,7 @@
       </button>
 
       <!-- COMBAT MANUAL (VIDEO TUTORIAL) -->
-      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block min-h-[95px] p-0 text-left relative group overflow-hidden no-underline">
+      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block p-0 text-left relative group no-underline">
         <span></span><span></span><span></span><span></span>
         <div class="relative z-10 w-full h-full py-5 px-8 flex items-center justify-between gap-4">
           <div class="flex flex-col justify-center">
@@ -110,7 +122,6 @@
     <div class="h-24 lg:h-32"></div>
   </main>
 
-  <!-- FIXED: Explicit clear-fix bounds around the rules engine -->
   <section id="the-rules" class="relative z-10 w-full max-w-full bg-black border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)] overflow-hidden box-border">
     <div class="max-w-7xl mx-auto">
       
@@ -262,7 +273,6 @@
     </div>
   </section>
 
-  <!-- FIXED: Left spacing reservation to ensure footer background never blocks rule elements -->
   <div class="h-20 w-full clear-both"></div>
 
   <footer class="fixed bottom-0 left-0 w-full p-4 text-center text-gray-600 text-[9px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/90 backdrop-blur-md z-50 box-border">
