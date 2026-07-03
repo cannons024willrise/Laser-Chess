@@ -33,74 +33,79 @@
 
   <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-screen h-full overflow-hidden">
   
-  <div class="text-center mt-4 mb-16 lg:mb-24 relative">
-    <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-px h-8 bg-theme opacity-30"></div>
-    <h1 class="text-6xl md:text-8xl lg:text-7xl font-black text-white tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-      READY FOR BATTLE?
-    </h1>
-    <div class="flex items-center justify-center space-x-4 mt-6 opacity-80">
-      <div class="w-12 h-px bg-gray-600"></div>
-      <p class="text-gray-400 text-xs md:text-sm tracking-[0.8em] uppercase font-mono">
-        Select parameters & enter queue
-      </p>
-      <div class="w-12 h-px bg-gray-600"></div>
-    </div>
-    <a href="#the-rules" class="inline-block mt-10 text-[9px] tracking-[0.5em] text-theme/60 hover-text-theme transition-all uppercase border border-theme-20 hover-border-theme px-6 py-2 bg-theme-10">
-      Access Combat Manual
-    </a>
-  </div>
-
-<div class="w-full flex flex-col lg:flex-row items-center justify-between px-10 md:px-20 lg:px-40 gap-12 lg:gap-0">
-  
-  <div class="w-full lg:w-[450px] transform lg:-translate-x-12">
-    <div id="lobbyStatus" class="rule-card relative p-8 lg:p-10 text-center lobby-pulse min-h-[340px] flex flex-col justify-center">
-      <div class="rule-card-accent"></div>
-      <div class="absolute top-4 left-4 w-2 h-2 bg-theme animate-pulse"></div>
-      
-      <p id="statusText" class="text-theme tracking-[0.5em] uppercase text-xs mb-8 font-mono">
-        SCANNING LOBBY...
-      </p>
-      <div id="oppPreview" class="text-white text-4xl lg:text-5xl font-black tracking-widest uppercase italic leading-tight">
-        STATUS: <br>
-        <span id="statusValue" class="text-gray-500 block mt-3 font-mono text-3xl">IDLE</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="w-full lg:w-[480px] transform lg:translate-x-12"> <div class="rule-card relative p-10 lg:p-12 flex flex-col items-center justify-center space-y-8 min-h-[340px]">
-      <div class="rule-card-accent"></div>
-      
-      <div class="w-full text-center">
-        <p class="text-[22px] text-gray-500 font-mono tracking-[0.4em] mb-6 border-b border-white/10 pb-2 uppercase">
-          SELECT FACTION
+    <div class="text-center mt-4 mb-16 relative">
+      <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 w-px h-8 bg-theme opacity-30"></div>
+      <h1 class="text-6xl md:text-8xl lg:text-7xl font-black text-white tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+        READY FOR BATTLE?
+      </h1>
+      <div class="flex items-center justify-center space-x-4 mt-6 opacity-80">
+        <div class="w-12 h-px bg-gray-600"></div>
+        <p class="text-gray-400 text-xs md:text-sm tracking-[0.8em] uppercase font-mono">
+          Select parameters & initialize interface
         </p>
-        <div class="flex items-center justify-center space-x-12">
-          <span class="text-[#f44336] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(244,67,54,0.5)]">RED</span>
-          <label class="switch shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-            <input type="checkbox" id="sideToggle">
-            <span class="slider"></span>
-          </label>
-          <span class="text-[#03e9f4] font-black tracking-[0.2em] uppercase text-2xl drop-shadow-[0_0_10px_rgba(3,233,244,0.5)]">BLUE</span>
-        </div>
+        <div class="w-12 h-px bg-gray-600"></div>
       </div>
-
-      <div class="w-full max-w-[300px] mx-auto pt-2">
-        <button id="mainActionBtn" class="play-now-btn">
-          <span></span><span></span><span></span><span></span>
-          <span id="mainBtnLabel" class="text-[15px]">CREATE MATCH</span>
-        </button>
-      </div>
-      
-      <button id="followBtn" class="hidden w-full text-[10px] text-gray-400 hover:text-white transition-all uppercase tracking-[0.5em] font-mono">
-        Host new match instead
-      </button>
     </div>
-  </div>
 
-</div>
-    
-  <div class="h-32 lg:h-40"></div>
-</main>
+    <!-- TACTICAL CORE MENU STRUCTURE -->
+    <div class="w-full max-w-[540px] flex flex-col space-y-6 px-6 relative z-20">
+      
+      <!-- LOCAL PASS & PLAY -->
+      <button id="btnLocalPlay" class="play-now-btn w-full !block h-auto py-5 px-8 text-left relative group">
+        <span></span><span></span><span></span><span></span>
+        <div class="flex justify-between items-center relative z-10">
+          <div>
+            <span class="text-[17px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors">01 // LOCAL PASS & PLAY</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-widest uppercase block mt-1">Local workstation deployment node. Offline configuration.</span>
+          </div>
+          <span class="text-theme font-mono font-bold text-xl group-hover:translate-x-2 transition-transform duration-300">➔</span>
+        </div>
+      </button>
+
+      <!-- CYBERNETIC AI MODE -->
+      <button id="btnAiMode" class="play-now-btn w-full !block h-auto py-5 px-8 text-left relative group">
+        <span></span><span></span><span></span><span></span>
+        <div class="flex justify-between items-center relative z-10">
+          <div>
+            <span class="text-[17px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors">02 // CYBERNETIC AI ENEMY</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-widest uppercase block mt-1">Simulate tactical grid engagements against local Q-tables.</span>
+          </div>
+          <span class="text-theme font-mono font-bold text-xl group-hover:translate-x-2 transition-transform duration-300">➔</span>
+        </div>
+      </button>
+
+      <!-- DISTRIBUTED ONLINE QUEUE -->
+      <button id="btnOnlineMatch" class="play-now-btn w-full !block h-auto py-5 px-8 text-left relative group">
+        <span></span><span></span><span></span><span></span>
+        <div class="flex justify-between items-center relative z-10">
+          <div>
+            <span class="text-[17px] font-black tracking-[0.2em] text-white uppercase italic block group-hover:text-theme transition-colors">03 // ONLINE MATCHMAKING</span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-widest uppercase block mt-1">Establish communication bridge links across matchmaking instances.</span>
+          </div>
+          <span class="text-theme font-mono font-bold text-xl group-hover:translate-x-2 transition-transform duration-300">➔</span>
+        </div>
+      </button>
+
+      <!-- COMBAT MANUAL (VIDEO TUTORIAL) -->
+      <a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s" target="_blank" class="play-now-btn w-full !block h-auto py-5 px-8 text-left relative group">
+        <span></span><span></span><span></span><span></span>
+        <div class="flex justify-between items-center relative z-10">
+          <div>
+            <span class="text-[17px] font-black tracking-[0.2em] text-white uppercase italic flex items-center group-hover:text-theme transition-colors">
+              04 // EXTERNAL TRAINING FEED
+              <span class="ml-3 text-[8px] tracking-normal font-mono text-red-500 bg-red-950/40 border border-red-500/30 px-2 py-0.5 rounded animate-pulse">LIVE FEED</span>
+            </span>
+            <span class="text-[10px] text-gray-400 font-mono tracking-widest uppercase block mt-1">De-encrypt a full visual trace simulation guide on YouTube.</span>
+          </div>
+          <span class="text-white font-mono font-bold text-xl group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300">↗</span>
+        </div>
+      </a>
+
+    </div>
+      
+    <div class="h-24 lg:h-32"></div>
+  </main>
+
   <section id="the-rules" class="relative z-10 w-full bg-black border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)]">
     <div class="max-w-7xl mx-auto">
       
@@ -246,7 +251,6 @@
           <p class="max-w-3xl mx-auto text-[12px] text-white uppercase tracking-[0.25em] leading-loose">
             After every turn, your laser automatically fires. The beam bounces off mirrors until it leaves the board or hits a piece. Any piece struck on a non-mirrored side is instantly removed. You may rotate your Laser before firing.<span class="text-white font-black bg-theme-10 border border-theme-20 px-4 py-2 block mt-6 text-sm">FRIENDLY FIRE COUNTS. WATCH YOUR OWN BEAM.</span>
           </p>
-          <p class="text-[30px] text-gray-500 font-mono tracking-[0.4em] mb-6 border-b border-white/10 pb-2 center"><a href="https://www.youtube.com/watch?v=UqLa-LOficM&t=52s">Video Guide</a></p>
         </div>
       </div>
 
