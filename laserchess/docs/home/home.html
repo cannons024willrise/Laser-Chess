@@ -28,14 +28,9 @@
 <body class="min-h-screen w-full flex flex-col m-0 p-0 text-white">
   
   <!-- HEADER -->
-  <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] w-full box-border">
+  <header class="flex justify-center items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] w-full box-border">
     <div class="flex items-center space-x-4">
       <h1 class="text-2xl font-black tracking-tighter italic drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">LASER CHESS</h1>
-    </div>
-    <div class="flex items-center space-x-6 text-[10px] tracking-widest uppercase">
-      <span class="text-gray-500 font-mono">OP ID:</span>
-      <span id="userEmail" class="text-theme font-bold shadow-theme">ACCOUNT SYNCING...</span>
-      <button id="signOutBtn" class="opacity-50 hover:opacity-100 hover:text-red-500 transition-colors font-bold ml-4">TERMINATE SESSION</button>
     </div>
   </header>
 
@@ -68,10 +63,8 @@
       
       <!-- LOCAL PASS & PLAY -->
       <button id="btnLocalPlay" class="play-now-btn group">
-        <!-- ONLY THESE 4 SPANS WILL ANIMATE AS LASERS NOW -->
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
-          <!-- CHANGED FROM SPAN TO DIV TO HIDE FROM CSS ANIMATIONS -->
           <div>01 // LOCAL PASS AND PLAY</div>
           <div class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</div>
         </div>
