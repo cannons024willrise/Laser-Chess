@@ -11,6 +11,16 @@
   <!-- YOUR CSS ENGINE -->
   <link rel="stylesheet" href="themes.css">
 
+  <script>
+      // Automatically calculates the 50/50 probability 
+      function randomizeTheme() {
+          if (Math.random() < 0.5) {
+              document.documentElement.classList.add('theme-red');
+          }
+      }
+      window.onload = randomizeTheme;
+  </script>
+
   <script type="module" src="homeauthcheck.js"></script>
   <script type="module" src="lobby.js"></script>
 </head>
