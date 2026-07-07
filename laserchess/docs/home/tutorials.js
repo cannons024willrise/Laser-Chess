@@ -1,179 +1,120 @@
 /**
- * LASER CHESS - TACTICAL SIMULATION SUBSYSTEM
- * Handles standalone interactive micro-boards for individual piece cards.
+ * LASER CHESS - STANDALONE TUTORIALS ENGINE
+ * Completely self-contained. Bypasses dynamic CSS compilation issues.
  */
 
-// Isolated state configurations matching core engine symbols and mechanics
+// 1. Define the simulation states explicitly
 const tutorialStates = {
-  KING: { rotation: 0, type: 'KING', symbols: ['◈', '◈', '◈', '◈'], desc: "TARGET // Absorbs lasers from all 4 sides." },
-  LASER: { rotation: 0, type: 'LASER', symbols: ['⫝', '⟜', 'Ͳ', 'Ð'], desc: "EMITTER // Anchored hardware. Fires terminal beam vectors." },
-  SWITCH: { rotation: 0, type: 'SWITCH', symbols: ['⟋', '⟍', '⟋', '⟍'], desc: "REFLECTOR // Dual-sided mirror. Cannot be destroyed." },
-  DEFENDER: { rotation: 0, type: 'DEFENDER', symbols: ['⬓', '', '⬒', '◨'], desc: "SHIELD // Blocks from front. Vulnerable on 3 sides." },
-  DEFLECTOR: { rotation: 0, type: 'DEFLECTOR', symbols: ['◤', '◥', '◢', '◣'], desc: "DIVERTER // Redirects lasers at 90-degree angles." }
+  KING: { rotation: 0 },
+  DEFENDER: { rotation: 0 },
+  DEFLECTOR: { rotation: 0 },
+  SWITCH: { rotation: 0 },
+  LASER: { rotation: 0 }
 };
 
-/**
- * Toggles the visibility of the interactive simulation pane inside a piece card.
- */
-export function togglePieceTutorial(cardElement, pieceKey) {
+// 2. Global attachment for HTML event attributes
+window.togglePieceTutorial = function(cardElement, pieceKey) {
+  // Prevent rotation button clicks from triggering the card collapse
+  if (window.event && window.event.target.tagName === 'BUTTON') return;
+
   const sandbox = cardElement.querySelector('.sandbox-container');
-  const label = cardElement.querySelector('.expand-label');
+  if (!sandbox) return;
+
+  const isHidden = sandbox.classList.contains('hidden');
   
-  if (!sandbox || !label) return;
+  // Collapse all other active sandboxes
+  document.querySelectorAll('.sandbox-container').forEach(el => {
+    el.classList.add('hidden');
+  });
 
-  if (sandbox.classList.contains('hidden')) {
-    // Collapse any other open sandbox layers to keep UI focused
-    document.querySelectorAll('.sandbox-container').forEach(el => el.classList.add('hidden'));
-    document.querySelectorAll('.expand-label').forEach(el => el.innerText = "[ CLICK TO OPEN TACTICAL SIMULATION ]");
-    
+  if (isHidden) {
     sandbox.classList.remove('hidden');
-    label.innerText = "[ CLICK TO CLOSE SIMULATION ]";
-    renderSandbox(cardElement, pieceKey);
-  } else {
-    sandbox.classList.add('hidden');
-    label.innerText = "[ CLICK TO OPEN TACTICAL SIMULATION ]";
+    renderSandbox(pieceKey); // Render immediately upon opening
   }
-}
+};
 
-/**
- * Processes a CW or CCW rotation command on a simulated piece asset.
- */
-export function rotateTutorialPiece(pieceKey, direction) {
+window.rotateTutorialPiece = function(pieceKey, direction) {
+  if (window.event) window.event.stopPropagation();
+  
   const state = tutorialStates[pieceKey];
   if (!state) return;
 
-  // The King piece is anchored and cannot execute manual rotation actions
-  if (state.type === 'KING') return;
-
+  // Cycle rotations across 4 quadrants smoothly
   state.rotation = (state.rotation + direction + 4) % 4;
+  renderSandbox(pieceKey);
+};
+
+// 3. The hardened, raw SVG generation engine
+function renderSandbox(pieceKey) {
+  const svgBoard = document.getElementById(`svg-sandbox-${pieceKey}`);
+  if (!svgBoard) {
+    console.error(`ERROR: Could not locate <svg id="svg-sandbox-${pieceKey}"> in DOM.`);
+    return;
+  }
   
-  // Find host card element context dynamically and update its viewport matrix
-  const card = document.querySelector(`[data-tutorial-id="${pieceKey}"]`);
-  if (card) renderSandbox(card, pieceKey);
-}
-
-/**
- * Renders the local 3x3 layout and traces beam logic paths
- */
-function renderSandbox(cardElement, pieceKey) {
-  const gridContainer = cardElement.querySelector('.sandbox-grid');
-  if (!gridContainer) return;
-
-  gridContainer.innerHTML = ''; // Clear previous frame
+  // Flush previous drawing layers completely
+  svgBoard.innerHTML = '';
   const state = tutorialStates[pieceKey];
-  
-  // Calculate laser path vectors crossing our 3x3 local coordinate scope.
-  // Beam enters from Left side cell (0, 1) going Right (dx=1, dy=0)
-  const beamPath = calculateMockLaserPath(state);
+  const CELL_SIZE = 100;
 
-  for (let r = 0; r < 3; r++) {
-    for (let c = 0; c < 3; c++) {
-      const cell = document.createElement('div');
-      cell.className = "border border-white/5 flex items-center justify-center relative font-mono text-xl select-none text-gray-600 w-full h-full min-h-[50px] min-w-[50px]";
+  // LAYER A: Fixed Background Grid (Using raw inline SVG properties)
+  const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  for (let y = 0; y < 3; y++) {
+    for (let x = 0; x < 3; x++) {
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', x * CELL_SIZE);
+      rect.setAttribute('y', y * CELL_SIZE);
+      rect.setAttribute('width', CELL_SIZE);
+      rect.setAttribute('height', CELL_SIZE);
       
-      const isCenter = (r === 1 && c === 1);
-      const cellKey = `${c},${r}`;
-      const isHitByLaser = beamPath.includes(cellKey);
-
-      // Inject the structural token emblem at center coordinates
-      if (isCenter) {
-        cell.innerText = state.symbols[state.rotation];
-        
-        // If piece is destroyed by hitting an unshielded edge, change styles
-        if (state.wasDestroyed) {
-          cell.className += " text-red-500 font-black bg-red-900/20 animate-pulse border-red-500/30";
-        } else {
-          cell.className += " text-theme font-black bg-theme/5 border-theme/20";
-        }
-      }
-
-      // Draw Laser paths if the vector occupies this cell grid node
-      if (isHitByLaser && (!isCenter || !state.wasDestroyed)) {
-        const laserLine = document.createElement('div');
-        // Yellow active ray matching index.html colors (--laser: #ffff00)
-        laserLine.className = "absolute inset-0 bg-yellow-500/10 border-y border-yellow-400/40 z-0 animate-pulse";
-        
-        // Adjust style layout if vector turned vertically
-        const indexInPath = beamPath.indexOf(cellKey);
-        if (indexInPath > 0) {
-          const prevCell = beamPath[indexInPath - 1].split(',');
-          if (prevCell[0] === String(c)) { // X is same, it means moving vertically
-            laserLine.className = "absolute inset-0 bg-yellow-500/10 border-x border-yellow-400/40 z-0 animate-pulse";
-          }
-        }
-        cell.appendChild(laserLine);
-      }
-      
-      gridContainer.appendChild(cell);
+      // Native SVG styling replaces Tailwind to guarantee visibility
+      rect.setAttribute('fill', 'rgba(0,0,0,0.6)');
+      rect.setAttribute('stroke', 'rgba(255,255,255,0.08)');
+      rect.setAttribute('stroke-width', '2');
+      gridGroup.appendChild(rect);
     }
   }
-}
+  svgBoard.appendChild(gridGroup);
 
-/**
- * Traces input laser collisions inside a 3x3 space based on core index.html logic rules
- */
-function calculateMockLaserPath(pieceState) {
-  let path = ['0,1']; // Start at Left row center
-  let currentX = 0, currentY = 1;
-  let dirX = 1, dirY = 0; // Vector Heading Right
+  // LAYER B: Demonstration Laser Pass
+  const laserGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  let dStr = `M 0 150 L 300 150`; 
+
+  const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  glow.setAttribute('d', dStr);
+  glow.setAttribute('stroke', 'rgba(234, 179, 8, 0.3)'); 
+  glow.setAttribute('stroke-width', '12');
+  glow.setAttribute('fill', 'none');
   
-  pieceState.wasDestroyed = false;
+  const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  core.setAttribute('d', dStr);
+  core.setAttribute('stroke', 'rgba(253, 224, 71, 1)'); 
+  core.setAttribute('stroke-width', '4');
+  core.setAttribute('fill', 'none');
 
-  // Move right directly into the target cell at center context (1,1)
-  currentX += dirX; currentY += dirY;
-  path.push(`${currentX},${currentY}`);
+  laserGroup.appendChild(glow);
+  laserGroup.appendChild(core);
+  svgBoard.appendChild(laserGroup);
 
-  const rot = pieceState.rotation;
-
-  if (pieceState.type === 'DEFLECTOR') {
-    // 0:◤ (Reflects Left/Down), 1:◥ (Left/Up), 2:◢ (Right/Up), 3:◣ (Right/Down)
-    if (rot === 0) { // Incoming from left hits mirror hypotenuse and diverts DOWN
-      dirX = 0; dirY = 1;
-    } else if (rot === 1) { // Diverts UP
-      dirX = 0; dirY = -1;
-    } else { // Hit the flat vertical/horizontal back sides -> Destroyed
-      pieceState.wasDestroyed = true;
-      return path;
-    }
-  } 
-  else if (pieceState.type === 'DEFENDER') {
-    // 0:⬓ (Shield Top), 1: (Shield Right), 2:⬒ (Shield Bottom), 3:◨ (Shield Left)
-    if (rot === 3) { 
-      // Laser hits the left side shield directly. Path safely terminates/absorbs
-      return path;
-    } else { 
-      // Hits unprotected side. Piece is vaporized.
-      pieceState.wasDestroyed = true;
-      return path;
-    }
-  } 
-  else if (pieceState.type === 'SWITCH') {
-    // Dual mirror. 0 & 2: ⟋ (Reflects Left->Up), 1 & 3: ⟍ (Reflects Left->Down)
-    if (rot === 0 || rot === 2) {
-      dirX = 0; dirY = -1; // Divert Up
-    } else {
-      dirX = 0; dirY = 1;  // Divert Down
-    }
-  } 
-  else if (pieceState.type === 'KING') {
-    // Kings absorb from all angles and are instantly destroyed
-    pieceState.wasDestroyed = true;
-    return path;
-  } 
-  else if (pieceState.type === 'LASER') {
-    // Emitter housing blocks fire natively without receiving destruction penalties
-    return path;
-  }
-
-  // Final Step out of the center node into the peripheral exit cells
-  currentX += dirX; currentY += dirY;
-  if (currentX >= 0 && currentX < 3 && currentY >= 0 && currentY < 3) {
-    path.push(`${currentX},${currentY}`);
-  }
+  // LAYER C: The Game Piece Sprite
+  const pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   
-  return path;
-}
+  // Pivot anchored to matrix center (3x3 grid = 300x300, center is 150,150)
+  pieceGroup.style.transformOrigin = "150px 150px";
+  pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
+  pieceGroup.style.transition = "transform 0.25s ease-in-out";
 
-// Attach callbacks cleanly to global window space so inline HTML hooks don't throw ReferenceErrors
-window.togglePieceTutorial = togglePieceTutorial;
-window.rotateTutorialPiece = rotateTutorialPiece;
+  const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+  image.setAttribute('x', 110); 
+  image.setAttribute('y', 110);
+  image.setAttribute('width', 80);
+  image.setAttribute('height', 80);
+  
+  // Dual-protocol declaration ensures standard compliance across Safari/Chrome
+  const spritePath = `../pieces/blue${pieceKey.toLowerCase()}.png`;
+  image.setAttribute('href', spritePath);
+  image.setAttributeNS('http://www.w3.org/1999/xlink', 'href', spritePath);
+  
+  pieceGroup.appendChild(image);
+  svgBoard.appendChild(pieceGroup);
+}
