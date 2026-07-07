@@ -1,134 +1,106 @@
-
 /**
- * LASER CHESS - MINIMALIST SVG VECTOR ENGINE
- * Drops seamlessly into existing codebases with zero logic overrides.
+ * LASER CHESS - TUTORIAL ENGINE OPERATIONAL PATCH
+ * Binds module-scoped layout triggers directly to the global window environment.
  */
 
-const CELL_SIZE = 100;
+// --- Keep your existing tutorialStates dictionary up here ---
 
 /**
- * Generates the static grid background frame
+ * Toggles visibility of the card sandbox and fires the SVG vector engine renderer
  */
-export function initStaticBoard() {
-  const board = document.getElementById('laser-board');
-  if (!board) return;
+window.togglePieceTutorial = function(cardElement, pieceKey) {
+  // Find the sandbox wrapper inside this specific clicked card
+  const sandbox = cardElement.querySelector('.sandbox-container');
+  if (!sandbox) return;
 
-  // Clear or initialize background tracking group
-  let bgGroup = document.getElementById('svg-grid-background');
-  if (!bgGroup) {
-    bgGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    bgGroup.setAttribute('id', 'svg-grid-background');
-    board.appendChild(bgGroup);
+  // Toggle the hidden display utility state
+  const isHidden = sandbox.classList.contains('hidden');
+  
+  // Close any other open sandboxes first for clean UX
+  document.querySelectorAll('.sandbox-container').forEach(el => el.classList.add('hidden'));
+
+  if (isHidden) {
+    sandbox.classList.remove('hidden');
+    // Call your SVG rendering engine logic immediately once container layout renders
+    renderSandbox(cardElement, pieceKey);
   }
-  bgGroup.innerHTML = '';
+};
 
-  for (let y = 0; y < 8; y++) {
-    for (let x = 0; x < 10; x++) {
+/**
+ * Handles clockwise / counter-clockwise rotations from the button parameters
+ */
+window.rotateTutorialPiece = function(pieceKey, direction) {
+  const state = tutorialStates[pieceKey];
+  if (!state) return;
+
+  // Track standard 0-3 rotational quadrant matrix bounds
+  state.rotation = (state.rotation + direction + 4) % 4;
+
+  // Find the active open card element to force an immediate scene update pass
+  const targetCard = document.querySelector(`[data-tutorial-id="${pieceKey}"]`);
+  if (targetCard) {
+    renderSandbox(targetCard, pieceKey);
+  }
+};
+
+/**
+ * Your Core Vector Rendering Engine Logic
+ */
+function renderSandbox(cardElement, pieceKey) {
+  const svgBoard = document.getElementById(`svg-sandbox-${pieceKey}`);
+  if (!svgBoard) return;
+  
+  svgBoard.innerHTML = ''; // Flush layout buffer
+  const state = tutorialStates[pieceKey];
+  const CELL_SIZE = 100;
+
+  // 1. Paint 3x3 Vector Grid Matrix
+  const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  for (let y = 0; y < 3; y++) {
+    for (let x = 0; x < 3; x++) {
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       rect.setAttribute('x', x * CELL_SIZE);
       rect.setAttribute('y', y * CELL_SIZE);
       rect.setAttribute('width', CELL_SIZE);
       rect.setAttribute('height', CELL_SIZE);
-      
-      // Default structural tile formatting
-      let styleClass = "fill-transparent stroke-white/5 stroke-[1]";
-      if (x === 0) styleClass = "fill-blue-500/5 stroke-blue-500/10 stroke-[1]";
-      if (x === 9) styleClass = "fill-red-500/5 stroke-red-500/10 stroke-[1]";
-      
-      rect.setAttribute('class', styleClass);
-      bgGroup.appendChild(rect);
+      rect.setAttribute('class', 'fill-transparent stroke-white/5 stroke-[1]');
+      gridGroup.appendChild(rect);
     }
   }
-}
+  svgBoard.appendChild(gridGroup);
 
-/**
- * Paints all active game pieces onto the vector scene using your existing board state format
- * @param {Array} currentBoardState - Your original array of piece entities
- */
-export function drawPieces(currentBoardState) {
-  let piecesGroup = document.getElementById('svg-pieces-layer');
-  const board = document.getElementById('laser-board');
-  
-  if (!piecesGroup && board) {
-    piecesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    piecesGroup.setAttribute('id', 'svg-pieces-layer');
-    board.appendChild(piecesGroup);
-  }
-  if (!piecesGroup) return;
-  piecesGroup.innerHTML = ''; // Fresh paint frame buffer wipe
+  // 2. Mock Laser Vector Path Line Drawing (Middle horizontal lane pass example)
+  const laserGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  // Creates a clean line from left edge through middle cell
+  let dStr = `M 0 150 L 300 150`; 
 
-  currentBoardState.forEach(piece => {
-    if (!piece) return;
-
-    // Direct structural variables mapping your existing properties
-    const { x, y, type, color, rotation } = piece;
-    const pixelX = x * CELL_SIZE;
-    const pixelY = y * CELL_SIZE;
-
-    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    group.setAttribute('class', 'cursor-pointer transition-transform duration-200');
-    
-    // Set piece rotational anchor coordinates directly at cell midpoint
-    const cX = pixelX + (CELL_SIZE / 2);
-    const cY = pixelY + (CELL_SIZE / 2);
-    group.style.transformOrigin = `${cX}px ${cY}px`;
-    group.style.transform = `rotate(${rotation * 90}deg)`;
-
-    // Attach native data attributes so your current click handlers continue to function
-    group.setAttribute('data-x', x);
-    group.setAttribute('data-y', y);
-
-    const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    image.setAttribute('x', pixelX + 10); // Uniform inner padding boundary
-    image.setAttribute('y', pixelY + 10);
-    image.setAttribute('width', CELL_SIZE - 20);
-    image.setAttribute('height', CELL_SIZE - 20);
-    
-    // Direct link navigating back to your target sibling piece directories
-    const spritePath = `../pieces/${color.toLowerCase()}${type.toLowerCase()}.png`;
-    image.setAttributeNS('http://www.w3.org/1999/xlink', 'href', spritePath);
-
-    group.appendChild(image);
-    piecesGroup.appendChild(group);
-  });
-}
-
-/**
- * Renders glowing vector lines along existing calculated laser tracks
- * @param {Array<Object>} calculatedPath - [{x: 0, y: 1}, {x: 1, y: 1}]
- */
-export function drawLaserBeam(calculatedPath) {
-  let laserGroup = document.getElementById('svg-laser-beams');
-  const board = document.getElementById('laser-board');
-
-  if (!laserGroup && board) {
-    laserGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    laserGroup.setAttribute('id', 'svg-laser-beams');
-    board.appendChild(laserGroup);
-  }
-  if (!laserGroup) return;
-  laserGroup.innerHTML = ''; // Clear previous frame track
-
-  if (!calculatedPath || calculatedPath.length < 2) return;
-
-  // Build sequential SVG vector track line strings
-  let pathString = "";
-  calculatedPath.forEach((pt, i) => {
-    const pX = (pt.x * CELL_SIZE) + (CELL_SIZE / 2);
-    const pY = (pt.y * CELL_SIZE) + (CELL_SIZE / 2);
-    pathString += `${i === 0 ? 'M' : 'L'} ${pX} ${pY} `;
-  });
-
-  // Background glow element
   const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  glow.setAttribute('d', pathString);
-  glow.setAttribute('class', 'stroke-yellow-500/30 fill-none stroke-[8] blur-sm animate-pulse');
+  glow.setAttribute('d', dStr);
+  glow.setAttribute('class', 'stroke-yellow-500/20 fill-none stroke-[8] blur-sm');
   
-  // Focused intense center core element
   const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  core.setAttribute('d', pathString);
-  core.setAttribute('class', 'stroke-yellow-300 fill-none stroke-[3] drop-shadow-[0_0_8px_rgba(255,255,0,0.8)]');
+  core.setAttribute('d', dStr);
+  core.setAttribute('class', 'stroke-yellow-400 fill-none stroke-[3]');
 
   laserGroup.appendChild(glow);
   laserGroup.appendChild(core);
+  svgBoard.appendChild(laserGroup);
+
+  // 3. Mount Unit Sprite Layer Nodes
+  const pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  pieceGroup.style.transformOrigin = "150px 150px";
+  pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
+  pieceGroup.setAttribute('class', 'transition-transform duration-200');
+
+  const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+  image.setAttribute('x', 110); // Center layout position configuration
+  image.setAttribute('y', 110);
+  image.setAttribute('width', 80);
+  image.setAttribute('height', 80);
+  
+  // Dynamic path translation relative to your repository map layout configuration
+  image.setAttributeNS('http://www.w3.org/1999/xlink', 'href', `../pieces/blue${pieceKey.toLowerCase()}.png`);
+  
+  pieceGroup.appendChild(image);
+  svgBoard.appendChild(pieceGroup);
 }
