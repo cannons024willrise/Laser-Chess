@@ -8,40 +8,32 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   
-  <!-- YOUR CSS ENGINE -->
   <link rel="stylesheet" href="themes.css">
-
-  <script>
-      // Automatically calculates the 50/50 probability 
-      function randomizeTheme() {
-          if (Math.random() < 0.5) {
-              document.documentElement.classList.add('theme-red');
-          }
-      }
-      window.onload = randomizeTheme;
-  </script>
 
   <script type="module" src="homeauthcheck.js"></script>
   <script type="module" src="lobby.js"></script>
+  <script type="module" src="./tutorials.js"></script>
 </head>
 
 <body class="min-h-screen w-full flex flex-col m-0 p-0 text-white">
   
-  <!-- HEADER -->
-  <header class="flex justify-center items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] w-full box-border">
+  <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] w-full box-border">
     <div class="flex items-center space-x-4">
       <h1 class="text-2xl font-black tracking-tighter italic drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">LASER CHESS</h1>
     </div>
+    <div class="flex items-center space-x-6 text-[10px] tracking-widest uppercase">
+      <span class="text-gray-500 font-mono">OP ID:</span>
+      <span id="userEmail" class="text-theme font-bold shadow-theme">ACCOUNT SYNCING...</span>
+      <button id="signOutBtn" class="opacity-50 hover:opacity-100 hover:text-red-500 transition-colors font-bold ml-4">TERMINATE SESSION</button>
+    </div>
   </header>
 
-  <!-- DISCORD BAR -->
   <section class="w-full py-2 bg-theme-10 border-b border-theme-20 text-center z-10 box-border">
     <a href="https://discord.gg/mbEuNMee" class="text-[9px] font-bold tracking-[0.5em] uppercase text-theme hover:text-white transition-colors">
       >> JOIN GLOBAL COMMUNICATIONS DIRECTORY (DISCORD) <<
     </a>
   </section>
 
-  <!-- MAIN MENU INTERFACE -->
   <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-full overflow-hidden box-border">
   
     <div class="text-center mt-4 mb-12 relative select-none">
@@ -58,10 +50,8 @@
       </div>
     </div>
 
-    <!-- TACTICAL CORE MENU STRUCTURE -->
     <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20 box-border">
       
-      <!-- LOCAL PASS & PLAY -->
       <button id="btnLocalPlay" class="play-now-btn group">
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
@@ -70,7 +60,6 @@
         </div>
       </button>
 
-      <!-- CYBERNETIC AI MODE -->
       <button id="btnAiMode" class="play-now-btn group">
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
@@ -79,7 +68,6 @@
         </div>
       </button>
 
-      <!-- DISTRIBUTED ONLINE QUEUE -->
       <button id="btnOnlineMatch" class="play-now-btn group">
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
@@ -88,7 +76,6 @@
         </div>
       </button>
 
-      <!-- COMBAT MANUAL (VIDEO TUTORIAL) -->
       <button onclick="window.open('https://www.youtube.com/watch?v=UqLa-LOficM&t=52s', '_blank')" class="play-now-btn group">
         <span></span><span></span><span></span><span></span>
         <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
@@ -105,7 +92,6 @@
     <div class="h-24 lg:h-32"></div>
   </main>
 
-  <!-- RULESET SECTION -->
   <section id="the-rules" class="relative z-10 w-full bg-black/60 backdrop-blur-sm border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)] overflow-hidden box-border">
     <div class="max-w-7xl mx-auto">
       
@@ -120,64 +106,136 @@
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          <div class="rule-card relative p-8">
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]"
+               data-tutorial-id="KING"
+               onclick="togglePieceTutorial(this, 'KING')">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
-              <h4 class="text-theme font-black tracking-widest uppercase text-lg">KING</h4>
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">KING</h4>
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">TARGET</span>
             </div>
-            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20 text-left">
               The main target. No mirrors, no shields. If any laser beam hits any of its four sides, that King is removed and the game is over instantly.
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-[#f44336] font-bold tracking-[0.3em]">VULNERABILITY: 100%</div>
+            
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" 
+                 onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-KING" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="text-[9px] font-mono tracking-widest text-gray-500 uppercase mt-4">[ ANCHORED ASSET // FIXED POSITION ]</div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-[#f44336] font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>VULNERABILITY: 100%</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
           </div>
 
-          <div class="rule-card relative p-8">
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]"
+               data-tutorial-id="SWITCH"
+               onclick="togglePieceTutorial(this, 'SWITCH')">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
-              <h4 class="text-theme font-black tracking-widest uppercase text-lg">SWITCH</h4>
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">SWITCH</h4>
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">UTILITY</span>
             </div>
-            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20 text-left">
               Mirrored on both sides. It cannot be eliminated. Special: Can swap positions with an adjacent Defender or Deflector without rotating.
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-theme font-bold tracking-[0.3em]">STATUS: INVULNERABLE</div>
+            
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" 
+                 onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-SWITCH" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="flex space-x-4 mt-4">
+                <button onclick="rotateTutorialPiece('SWITCH', -1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">⟲ CCW</button>
+                <button onclick="rotateTutorialPiece('SWITCH', 1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">CW ⟳</button>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-theme font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>STATUS: INVULNERABLE</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
           </div>
 
-          <div class="rule-card relative p-8">
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]"
+               data-tutorial-id="DEFENDER"
+               onclick="togglePieceTutorial(this, 'DEFENDER')">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
-              <h4 class="text-theme font-black tracking-widest uppercase text-lg">DEFENDER</h4>
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">DEFENDER</h4>
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">SHIELD</span>
             </div>
-            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20 text-left">
               Equipped with a shielded front that safely blocks lasers. It remains in play if hit on the shield, but is destroyed if hit on the sides or back.
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-gray-400 font-bold tracking-[0.3em]">VULNERABILITY: SIDE/REAR</div>
+            
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" 
+                 onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-DEFENDER" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="flex space-x-4 mt-4">
+                <button onclick="rotateTutorialPiece('DEFENDER', -1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">⟲ CCW</button>
+                <button onclick="rotateTutorialPiece('DEFENDER', 1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">CW ⟳</button>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-gray-400 font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>VULNERABILITY: SIDE/REAR</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
           </div>
 
-          <div class="rule-card relative p-8">
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]"
+               data-tutorial-id="DEFLECTOR"
+               onclick="togglePieceTutorial(this, 'DEFLECTOR')">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
-              <h4 class="text-theme font-black tracking-widest uppercase text-lg">DEFLECTOR</h4>
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">DEFLECTOR</h4>
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">MIRROR</span>
             </div>
-            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20 text-left">
               The main tactical unit. One side reflects the beam at exactly 90°. If struck on any of the other three non-mirrored sides, it is eliminated.
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-gray-400 font-bold tracking-[0.3em]">VULNERABILITY: 3 SIDES</div>
+            
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" 
+                 onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-DEFLECTOR" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="flex space-x-4 mt-4">
+                <button onclick="rotateTutorialPiece('DEFLECTOR', -1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">⟲ CCW</button>
+                <button onclick="rotateTutorialPiece('DEFLECTOR', 1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">CW ⟳</button>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-gray-400 font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>VULNERABILITY: 3 SIDES</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
           </div>
 
-          <div class="rule-card relative p-8">
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]"
+               data-tutorial-id="LASER"
+               onclick="togglePieceTutorial(this, 'LASER')">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
-              <h4 class="text-theme font-black tracking-widest uppercase text-lg">LASER</h4>
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">LASER</h4>
               <span class="text-[9px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">WEAPON</span>
             </div>
-            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20">
+            <p class="text-[11px] leading-relaxed text-gray-400 uppercase tracking-wider h-20 text-left">
               Permanent beam source located in the corner. It cannot move or be removed. It can be rotated to fire down the first column or across the first row.
             </p>
-            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-theme font-bold tracking-[0.3em]">STATUS: PERMANENT</div>
+            
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" 
+                 onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-LASER" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="flex space-x-4 mt-4">
+                <button onclick="rotateTutorialPiece('LASER', -1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">⟲ CCW</button>
+                <button onclick="rotateTutorialPiece('LASER', 1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[10px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">CW ⟳</button>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[9px] text-theme font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>STATUS: PERMANENT</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
           </div>
 
         </div>
