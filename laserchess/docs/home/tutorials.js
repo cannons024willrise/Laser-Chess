@@ -1,7 +1,6 @@
 /**
- * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE (CLICK GUI BUILD)
- * Implements full cell-clicking movement matrices, dynamic piece selection,
- * and unified card control rotational bounds.
+ * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE (COMPLETE CLICK GUI WITH ROTATION)
+ * Full inline rotation controls, cell-clicking movement matrices, and dynamic selection mapping.
  */
 
 // 1. CONFIGURABLE PIECE INTERACTION MATRIX
@@ -120,7 +119,7 @@ window.togglePieceTutorial = function(cardElement, pieceKey) {
   }
 };
 
-// Unified Rotation Interface targeting the selected entity
+// Unified Rotation Engine targeting the currently selected target entity
 window.rotateTutorialPiece = function(pieceKey, direction) {
   if (window.event) window.event.stopPropagation();
   
@@ -151,7 +150,6 @@ window.handleGridCellClick = function(pieceKey, x, y) {
   if (!state) return;
 
   if (pieceKey === 'LASER' || state.selectedEntity === 'PIECE') {
-    // Block stacking entities over each other
     if (pieceKey !== 'LASER' && x === state.laserX && y === state.laserY) return;
     state.gridX = x;
     state.gridY = y;
@@ -278,7 +276,7 @@ function renderSandbox(pieceKey) {
 
   const physics = traceLaserEngine(pieceKey);
 
-  // 1. Interactive Grid Overlay
+  // 1. Grid Interaction Squares
   const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   for (let y = 0; y < 3; y++) {
     for (let x = 0; x < 3; x++) {
@@ -297,7 +295,7 @@ function renderSandbox(pieceKey) {
   }
   svgBoard.appendChild(gridGroup);
 
-  // 2. Vector Laser Beam Paths
+  // 2. Raycast Rendering Paths
   const laserGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   glow.setAttribute('d', physics.pathStr);
@@ -317,9 +315,17 @@ function renderSandbox(pieceKey) {
   laserGroup.appendChild(core);
   svgBoard.appendChild(laserGroup);
 
-  // 3. Render Game Piece Modules
+  // 3. Setup and Injection of Containers
+  let controlsContainer = svgBoard.nextElementSibling;
+  if (!controlsContainer || !controlsContainer.classList.contains('gui-controls')) {
+    if (controlsContainer) controlsContainer.remove();
+    controlsContainer = document.createElement('div');
+    controlsContainer.className = "gui-controls mt-4 p-3 bg-black/40 border border-white/5 flex flex-col gap-3 rounded";
+    svgBoard.parentNode.insertBefore(controlsContainer, svgBoard.nextSibling);
+  }
+
   if (pieceKey !== 'LASER') {
-    // Render External Laser Source Node
+    // Render Laser Source Node
     const laserSrcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const lOrigX = state.laserX * CELL_SIZE + CELL_SIZE / 2;
     const lOrigY = state.laserY * CELL_SIZE + CELL_SIZE / 2;
@@ -327,7 +333,6 @@ function renderSandbox(pieceKey) {
     laserSrcGroup.style.transform = `rotate(${state.laserRotation * 90}deg)`;
     laserSrcGroup.style.transition = "transform 0.2s ease-out";
     
-    // Add glowing stroke border ring if laser source is selected
     if (state.selectedEntity === 'LASER') {
       const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       ring.setAttribute('x', state.laserX * CELL_SIZE + 4);
@@ -349,7 +354,7 @@ function renderSandbox(pieceKey) {
     laserSrcGroup.appendChild(laserImg);
     svgBoard.appendChild(laserSrcGroup);
 
-    // Target piece rendering
+    // Render active target piece
     const pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const pOrigX = state.gridX * CELL_SIZE + CELL_SIZE / 2;
     const pOrigY = state.gridY * CELL_SIZE + CELL_SIZE / 2;
@@ -385,15 +390,7 @@ function renderSandbox(pieceKey) {
     pieceGroup.appendChild(image);
     svgBoard.appendChild(pieceGroup);
 
-    // Inject GUI selection toggles below the chessboard grid layout
-    let controlsContainer = svgBoard.nextElementSibling;
-    if (!controlsContainer || !controlsContainer.classList.contains('gui-controls')) {
-      if (controlsContainer) controlsContainer.remove();
-      controlsContainer = document.createElement('div');
-      controlsContainer.className = "gui-controls mt-4 p-3 bg-black/40 border border-white/5 flex flex-col gap-3 rounded";
-      svgBoard.parentNode.insertBefore(controlsContainer, svgBoard.nextSibling);
-    }
-
+    // Non-LASER Card dynamic controllers
     controlsContainer.innerHTML = `
       <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
         <span class="text-gray-400">Swap Active Piece:</span>
@@ -405,24 +402,23 @@ function renderSandbox(pieceKey) {
         </select>
       </div>
       <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
-        <span class="text-gray-400">Selection Control Focus:</span>
+        <span class="text-gray-400">Selection Target Focus:</span>
         <div class="flex gap-1">
           <button onclick="selectTutorialEntity('${pieceKey}', 'PIECE')" class="px-2 py-1 text-[9px] font-mono rounded border ${state.selectedEntity === 'PIECE' ? 'bg-theme/20 border-theme text-theme' : 'bg-white/5 border-white/10 text-gray-400'}">PIECE</button>
           <button onclick="selectTutorialEntity('${pieceKey}', 'LASER')" class="px-2 py-1 text-[9px] font-mono rounded border ${state.selectedEntity === 'LASER' ? 'bg-theme/20 border-theme text-theme' : 'bg-white/5 border-white/10 text-gray-400'}">LASER SOURCE</button>
         </div>
       </div>
-      <div class="text-[10px] text-gray-500 font-mono text-center uppercase tracking-wider border-t border-white/5 pt-2">
-        💡 Tip: Click any square on the grid matrix layout above to move the selected entity.
+      <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider border-t border-white/5 pt-2">
+        <span class="text-gray-400">Rotate Selected Element:</span>
+        <div class="flex gap-1">
+          <button onclick="rotateTutorialPiece('${pieceKey}', -1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT L</button>
+          <button onclick="rotateTutorialPiece('${pieceKey}', 1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT R</button>
+        </div>
       </div>
     `;
 
   } else {
-    // Specialized standalone Laser card handling
-    let controlsContainer = svgBoard.nextElementSibling;
-    if (controlsContainer && controlsContainer.classList.contains('gui-controls')) {
-      controlsContainer.remove();
-    }
-
+    // Specialized standalone LASER card viewport control mechanics
     const laserSrcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const computedOriginX = state.gridX * CELL_SIZE + CELL_SIZE / 2;
     const computedOriginY = state.gridY * CELL_SIZE + CELL_SIZE / 2;
@@ -438,5 +434,19 @@ function renderSandbox(pieceKey) {
     laserImg.setAttribute('href', `../pieces/bluelaser.png`);
     laserSrcGroup.appendChild(laserImg);
     svgBoard.appendChild(laserSrcGroup);
+
+    // Laser card internal rotation controls template injection mapping
+    controlsContainer.innerHTML = `
+      <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
+        <span class="text-gray-400">Rotate Emitter Node:</span>
+        <div class="flex gap-1">
+          <button onclick="rotateTutorialPiece('${pieceKey}', -1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT L</button>
+          <button onclick="rotateTutorialPiece('${pieceKey}', 1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT R</button>
+        </div>
+      </div>
+      <div class="text-[9px] text-gray-500 font-mono text-center uppercase tracking-wider border-t border-white/5 pt-2">
+        💡 Move Emitter Node around by clicking any square on the grid matrix.
+      </div>
+    `;
   }
 }
