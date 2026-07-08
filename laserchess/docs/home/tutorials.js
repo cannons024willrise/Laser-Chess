@@ -3,7 +3,7 @@
  * Full inline rotation controls, cell-clicking movement matrices, and dynamic selection mapping.
  */
 
-// 1. CONFIGURABLE PIECE INTERACTION MATRIX WITH INLINE SHAPE REFERENCES
+// 1. CONFIGURABLE PIECE INTERACTION MATRIX WITH UPDATED SHAPE REFERENCES
 const PIECE_INTERACTION_TABLE = {
   KING: {
     NORTH: { reflect: null, isDestroyed: true }, // [0]: ◈ | [1]: ◈ | [2]: ◈ | [3]: ◈
@@ -13,62 +13,62 @@ const PIECE_INTERACTION_TABLE = {
   },
   DEFENDER: {
     NORTH: {
-      0: { reflect: 'NORTH', isDestroyed: true },  // ⬓ (Vulnerable top)
-      1: { reflect: 'NORTH', isDestroyed: true },  // ◧ (Vulnerable left)
-      2: { reflect: null, isDestroyed: false },    // ⬒ (Blocks beam on flat base)
-      3: { reflect: 'NORTH', isDestroyed: true }   // ◨ (Vulnerable right)
+      0: { reflect: 'NORTH', isDestroyed: true },  // ⬓
+      1: { reflect: 'NORTH', isDestroyed: true },  // ◧
+      2: { reflect: null, isDestroyed: false },    // ⬒
+      3: { reflect: 'NORTH', isDestroyed: true }   // ◨
     },
     EAST: {
       0: { reflect: 'EAST', isDestroyed: true },   // ⬓
       1: { reflect: 'EAST', isDestroyed: true },   // ◧
       2: { reflect: 'EAST', isDestroyed: true },   // ⬒
-      3: { reflect: null, isDestroyed: false }     // ◨ (Blocks beam on flat flat left)
+      3: { reflect: null, isDestroyed: false }     // ◨
     },
     SOUTH: {
-      0: { reflect: null, isDestroyed: false },    // ⬓ (Blocks beam on flat top)
+      0: { reflect: null, isDestroyed: false },    // ⬓
       1: { reflect: 'SOUTH', isDestroyed: true },  // ◧
       2: { reflect: 'SOUTH', isDestroyed: true },  // ⬒
       3: { reflect: 'SOUTH', isDestroyed: true }   // ◨
     },
     WEST: {
       0: { reflect: 'EAST', isDestroyed: true },   // ⬓
-      1: { reflect: null, isDestroyed: false },    // ◧ (Blocks beam on flat right)
+      1: { reflect: null, isDestroyed: false },    // ◧
       2: { reflect: 'EAST', isDestroyed: true },   // ⬒
       3: { reflect: 'EAST', isDestroyed: true }    // ◨
     }
   },
   DEFLECTOR: {
     WEST: {
-      0: { reflect: null, isDestroyed: true },     // ◤ (Backside hit)
-      1: { reflect: null, isDestroyed: true },     // ◥ (Backside hit)
-      2: { reflect: 'SOUTH', isDestroyed: false }, // ◢ (Bounces laser off diagonal mirror)
-      3: { reflect: 'NORTH', isDestroyed: false }  // ◣ (Bounces laser off diagonal mirror)
+      0: { reflect: null, isDestroyed: true },     // ◣
+      1: { reflect: null, isDestroyed: true },     // ◤
+      2: { reflect: 'SOUTH', isDestroyed: false }, // ◥
+      3: { reflect: 'NORTH', isDestroyed: false }  // ◢
     },
     NORTH: {
-      0: { reflect: null, isDestroyed: true },     // ◤
-      1: { reflect: null, isDestroyed: true },     // ◥
-      2: { reflect: 'EAST', isDestroyed: false },  // ◢
-      3: { reflect: 'WEST', isDestroyed: false }   // ◣
+      0: { reflect: null, isDestroyed: true },     // ◣
+      1: { reflect: null, isDestroyed: true },     // ◤
+      2: { reflect: 'EAST', isDestroyed: false },  // ◥
+      3: { reflect: 'WEST', isDestroyed: false }   // ◢
     },
     EAST: {
-      0: { reflect: null, isDestroyed: true },     // ◤
-      1: { reflect: null, isDestroyed: true },     // ◥
-      2: { reflect: 'SOUTH', isDestroyed: false }, // ◢
-      3: { reflect: 'NORTH', isDestroyed: false }  // ◣
+      0: { reflect: null, isDestroyed: true },     // ◣
+      1: { reflect: null, isDestroyed: true },     // ◤
+      2: { reflect: 'SOUTH', isDestroyed: false }, // ◥
+      3: { reflect: 'NORTH', isDestroyed: false }  // ◢
     },
     SOUTH: {
-      0: { reflect: null, isDestroyed: true },     // ◤
-      1: { reflect: null, isDestroyed: true },     // ◥
-      2: { reflect: 'WEST', isDestroyed: false },  // ◢
-      3: { reflect: 'EAST', isDestroyed: false }   // ◣
+      0: { reflect: null, isDestroyed: true },     // ◣
+      1: { reflect: null, isDestroyed: true },     // ◤
+      2: { reflect: 'WEST', isDestroyed: false },  // ◥
+      3: { reflect: 'EAST', isDestroyed: false }   // ◢
     }
   },
   SWITCH: {
     WEST: {
-      0: { reflect: 'NORTH', isDestroyed: false }, // ⟋ (Dual-sided mirror reflection)
-      1: { reflect: 'SOUTH', isDestroyed: false }, // ⟍ (Dual-sided mirror reflection)
-      2: { reflect: 'SOUTH', isDestroyed: false }, // ⟋ (Dual-sided mirror reflection)
-      3: { reflect: 'SOUTH', isDestroyed: false }  // ⟍ (Dual-sided mirror reflection)
+      0: { reflect: 'NORTH', isDestroyed: false }, // ⟋
+      1: { reflect: 'SOUTH', isDestroyed: false }, // ⟍
+      2: { reflect: 'SOUTH', isDestroyed: false }, // ⟋
+      3: { reflect: 'SOUTH', isDestroyed: false }  // ⟍
     },
     NORTH: {
       0: { reflect: 'WEST', isDestroyed: false },  // ⟋
