@@ -32,7 +32,7 @@ const PIECE_INTERACTION_TABLE = {
     // Companion double-sided mirror piece (Never destroyed):
     0: { reflect: 'NORTH', isDestroyed: false }, // Reflects UP
     1: { reflect: 'SOUTH', isDestroyed: false }, // Reflects DOWN
-    2: { reflect: 'SOUTH', isDestroyed: false }, // Reflects DOWN
+    2: { reflect: 'NORTH', isDestroyed: false }, // Reflects DOWN
     3: { reflect: 'SOUTH', isDestroyed: false }  // Reflects DOWN
   },
   LASER: {
