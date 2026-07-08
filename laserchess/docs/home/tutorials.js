@@ -57,8 +57,8 @@ const PIECE_INTERACTION_TABLE = {
       3: { reflect: 'NORTH', isDestroyed: false }
     },
     SOUTH: {
-      0: { reflect: null, isDestroyed: false },
-      1: { reflect: null, isDestroyed: false },
+      0: { reflect: null, isDestroyed: true },
+      1: { reflect: null, isDestroyed: true },
       2: { reflect: 'WEST', isDestroyed: false },
       3: { reflect: 'EAST', isDestroyed: false }
     }
