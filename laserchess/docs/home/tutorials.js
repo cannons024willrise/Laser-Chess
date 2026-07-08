@@ -3,55 +3,46 @@
  * Full inline rotation controls, cell-clicking movement matrices, and dynamic selection mapping.
  */
 
-// 1. CONFIGURABLE PIECE INTERACTION MATRIX
-// =========================================================================
-// QUICK ASCII REFERENCE MATRIX LOOKUP BY ROTATION STATE (0 - 3):
-// KING:      [0]: ◈  | [1]: ◈  | [2]: ◈  | [3]: ◈
-// LASER:     [0]: ⫝  | [1]: ⟜  | [2]: Ͳ  | [3]: Ð
-// SWITCH:    [0]: ⟋  | [1]: ⟍  | [2]: ⟋  | [3]: ⟍
-// DEFENDER:  [0]: ⬓  | [1]: ◧  | [2]: ⬒  | [3]: ◨
-// DEFLECTOR: [0]: ◤  | [1]: ◥  | [2]: ◢  | [3]: ◣
-// =========================================================================
-
+// 1. CONFIGURABLE PIECE INTERACTION MATRIX WITH INLINE SHAPE REFERENCES
 const PIECE_INTERACTION_TABLE = {
-  KING: { // Graphic Reference: ◈
-    NORTH: { reflect: null, isDestroyed: true },
+  KING: {
+    NORTH: { reflect: null, isDestroyed: true }, // [0]: ◈ | [1]: ◈ | [2]: ◈ | [3]: ◈
     EAST:  { reflect: null, isDestroyed: true },
     SOUTH: { reflect: null, isDestroyed: true },
     WEST:  { reflect: null, isDestroyed: true }
   },
-  DEFENDER: { // Graphic Reference: [0]=⬓, [1]=◧, [2]=⬒, [3]=◨
+  DEFENDER: {
     NORTH: {
-      0: { reflect: 'NORTH', isDestroyed: true },  // ⬓
-      1: { reflect: 'NORTH', isDestroyed: true },  // ◧
-      2: { reflect: null, isDestroyed: false },    // ⬒ (Blocks laser)
-      3: { reflect: 'NORTH', isDestroyed: true }   // ◨
+      0: { reflect: 'NORTH', isDestroyed: true },  // ⬓ (Vulnerable top)
+      1: { reflect: 'NORTH', isDestroyed: true },  // ◧ (Vulnerable left)
+      2: { reflect: null, isDestroyed: false },    // ⬒ (Blocks beam on flat base)
+      3: { reflect: 'NORTH', isDestroyed: true }   // ◨ (Vulnerable right)
     },
     EAST: {
       0: { reflect: 'EAST', isDestroyed: true },   // ⬓
       1: { reflect: 'EAST', isDestroyed: true },   // ◧
       2: { reflect: 'EAST', isDestroyed: true },   // ⬒
-      3: { reflect: null, isDestroyed: false }     // ◨ (Blocks laser)
+      3: { reflect: null, isDestroyed: false }     // ◨ (Blocks beam on flat flat left)
     },
     SOUTH: {
-      0: { reflect: null, isDestroyed: false },    // ⬓ (Blocks laser)
+      0: { reflect: null, isDestroyed: false },    // ⬓ (Blocks beam on flat top)
       1: { reflect: 'SOUTH', isDestroyed: true },  // ◧
       2: { reflect: 'SOUTH', isDestroyed: true },  // ⬒
       3: { reflect: 'SOUTH', isDestroyed: true }   // ◨
     },
     WEST: {
       0: { reflect: 'EAST', isDestroyed: true },   // ⬓
-      1: { reflect: null, isDestroyed: false },    // ◧ (Blocks laser)
+      1: { reflect: null, isDestroyed: false },    // ◧ (Blocks beam on flat right)
       2: { reflect: 'EAST', isDestroyed: true },   // ⬒
       3: { reflect: 'EAST', isDestroyed: true }    // ◨
     }
   },
-  DEFLECTOR: { // Graphic Reference: [0]=◤, [1]=◥, [2]=◢, [3]=◣
+  DEFLECTOR: {
     WEST: {
-      0: { reflect: null, isDestroyed: true },     // ◤
-      1: { reflect: null, isDestroyed: true },     // ◥
-      2: { reflect: 'SOUTH', isDestroyed: false }, // ◢
-      3: { reflect: 'NORTH', isDestroyed: false }  // ◣
+      0: { reflect: null, isDestroyed: true },     // ◤ (Backside hit)
+      1: { reflect: null, isDestroyed: true },     // ◥ (Backside hit)
+      2: { reflect: 'SOUTH', isDestroyed: false }, // ◢ (Bounces laser off diagonal mirror)
+      3: { reflect: 'NORTH', isDestroyed: false }  // ◣ (Bounces laser off diagonal mirror)
     },
     NORTH: {
       0: { reflect: null, isDestroyed: true },     // ◤
@@ -72,12 +63,12 @@ const PIECE_INTERACTION_TABLE = {
       3: { reflect: 'EAST', isDestroyed: false }   // ◣
     }
   },
-  SWITCH: { // Graphic Reference: [0]=⟋, [1]=⟍, [2]=⟋, [3]=⟍
+  SWITCH: {
     WEST: {
-      0: { reflect: 'NORTH', isDestroyed: false }, // ⟋
-      1: { reflect: 'SOUTH', isDestroyed: false }, // ⟍
-      2: { reflect: 'SOUTH', isDestroyed: false }, // ⟋
-      3: { reflect: 'SOUTH', isDestroyed: false }  // ⟍
+      0: { reflect: 'NORTH', isDestroyed: false }, // ⟋ (Dual-sided mirror reflection)
+      1: { reflect: 'SOUTH', isDestroyed: false }, // ⟍ (Dual-sided mirror reflection)
+      2: { reflect: 'SOUTH', isDestroyed: false }, // ⟋ (Dual-sided mirror reflection)
+      3: { reflect: 'SOUTH', isDestroyed: false }  // ⟍ (Dual-sided mirror reflection)
     },
     NORTH: {
       0: { reflect: 'WEST', isDestroyed: false },  // ⟋
@@ -105,7 +96,7 @@ const tutorialStates = {
   DEFENDER: { rotation: 0, activePieceType: 'DEFENDER', gridX: 1, gridY: 1, laserRotation: 1, laserX: 0, laserY: 1, selectedEntity: 'PIECE' },
   DEFLECTOR: { rotation: 0, activePieceType: 'DEFLECTOR', gridX: 1, gridY: 1, laserRotation: 1, laserX: 0, laserY: 1, selectedEntity: 'PIECE' },
   SWITCH: { rotation: 0, activePieceType: 'SWITCH', gridX: 1, gridY: 1, laserRotation: 1, laserX: 0, laserY: 1, selectedEntity: 'PIECE' },
-  LASER: { rotation: 0, activePieceType: 'LASER', gridX: 1, gridY: 1, selectedEntity: 'LASER' } // Graphic Reference: [0]=⫝, [1]=⟜, [2]=Ͳ, [3]=Ð
+  LASER: { rotation: 0, activePieceType: 'LASER', gridX: 1, gridY: 1, selectedEntity: 'LASER' } // [0]: ⫝ | [1]: ⟜ | [2]: Ͳ | [3]: Ð
 };
 
 window.togglePieceTutorial = function(cardElement, pieceKey) {
