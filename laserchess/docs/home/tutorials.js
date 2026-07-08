@@ -1,6 +1,6 @@
 /**
- * LASER CHESS - STANDALONE TUTORIALS ENGINE
- * Now equipped with simulated laser physics and destruction states.
+ * LASER CHESS - TUTORIALS ENGINE (EXACT ASSET ALIGNMENT MATCH)
+ * Matched precisely to raw project image orientations.
  */
 
 const tutorialStates = {
@@ -41,67 +41,73 @@ window.rotateTutorialPiece = function(pieceKey, direction) {
 
 /**
  * MINI PHYSICS ENGINE
- * Calculates laser path and asset destruction based on piece type and 90-deg rotations.
- * Assumes a laser is entering from the LEFT (West) heading RIGHT (East) into the center.
+ * Simulates path tracking based on actual uploaded graphic assets.
+ * Mock laser enters from LEFT (West) traveling RIGHT (East) toward the center cell.
  */
 function calculatePhysics(pieceKey, rotation) {
   let pathStr = ``;
   let isDestroyed = false;
 
-  // Center coordinates of our 3x3 (300x300) grid
+  // Center paths of our 3x3 sandbox grid
   const IN = `M 0 150 L 150 150`; 
+  const THROUGH = `M 0 150 L 300 150`;
   const UP = `L 150 0`;
   const DOWN = `L 150 300`;
 
   switch(pieceKey) {
     case 'KING':
-      // The King has no defenses. Any hit is fatal.
       pathStr = IN;
       isDestroyed = true;
       break;
 
     case 'DEFENDER':
-      // Assuming rotation 3 (facing West) puts the shield directly facing the incoming left laser.
-      if (rotation === 3) {
-        pathStr = IN; // Blocks it safely
+      // Native Asset: Shield is at the BOTTOM (Faces South) at rotation 0.
+      // Rotation 1 (90° CW): Shield faces West (Blocks West laser safely!)
+      // Rotation 2 (180° CW): Shield faces North (Vulnerable from West)
+      // Rotation 3 (270° CW): Shield faces East (Vulnerable from West)
+      if (rotation === 1) {
+        pathStr = IN; 
         isDestroyed = false;
       } else {
-        pathStr = IN; // Hits side/rear
+        pathStr = THROUGH; 
         isDestroyed = true;
       }
       break;
 
     case 'DEFLECTOR':
-      // Assuming rotation 0 (mirror facing NW) & rotation 3 (mirror facing SW)
+      // Native Asset: Mirror runs Top-Left to Bottom-Right.
+      // Rotation 0: Bounces West laser DOWN to South.
+      // Rotation 1: Exposes unmirrored back walls to West laser.
+      // Rotation 2: Bounces West laser UP to North.
+      // Rotation 3: Exposes unmirrored back walls to West laser.
       if (rotation === 0) {
-        pathStr = `${IN} ${UP}`;
-        isDestroyed = false;
-      } else if (rotation === 3) {
         pathStr = `${IN} ${DOWN}`;
         isDestroyed = false;
+      } else if (rotation === 2) {
+        pathStr = `${IN} ${UP}`;
+        isDestroyed = false;
       } else {
-        // Rotations 1 and 2 expose the flat, unmirrored back/sides to the left
         pathStr = IN;
         isDestroyed = true;
       }
       break;
 
     case 'SWITCH':
-      // Switches have double-sided diagonal mirrors and are invulnerable.
+      // Double sided diagonal mirror. Never destroyed.
       if (rotation === 0 || rotation === 2) {
-        pathStr = `${IN} ${UP}`;
-      } else {
         pathStr = `${IN} ${DOWN}`;
+      } else {
+        pathStr = `${IN} ${UP}`;
       }
       isDestroyed = false;
       break;
 
     case 'LASER':
-      // The laser piece doesn't receive a beam, it EMITS it based on rotation.
-      if (rotation === 0) pathStr = `M 150 150 L 150 0`;     // Shoots North
-      if (rotation === 1) pathStr = `M 150 150 L 300 150`;   // Shoots East
-      if (rotation === 2) pathStr = `M 150 150 L 150 300`;   // Shoots South
-      if (rotation === 3) pathStr = `M 150 150 L 0 150`;     // Shoots West
+      // Native Asset: Firing nozzle points UP (North) at rotation 0.
+      if (rotation === 0) pathStr = `M 150 150 L 150 0`;     // North
+      if (rotation === 1) pathStr = `M 150 150 L 300 150`;   // East
+      if (rotation === 2) pathStr = `M 150 150 L 150 300`;   // South
+      if (rotation === 3) pathStr = `M 150 150 L 0 150`;     // West
       isDestroyed = false;
       break;
   }
@@ -117,10 +123,9 @@ function renderSandbox(pieceKey) {
   const state = tutorialStates[pieceKey];
   const CELL_SIZE = 100;
 
-  // 1. Calculate the dynamic physics state
   const physics = calculatePhysics(pieceKey, state.rotation);
 
-  // 2. LAYER A: Background Grid
+  // 1. Background Grid Layer
   const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   for (let y = 0; y < 3; y++) {
     for (let x = 0; x < 3; x++) {
@@ -137,18 +142,18 @@ function renderSandbox(pieceKey) {
   }
   svgBoard.appendChild(gridGroup);
 
-  // 3. LAYER B: Dynamic Laser Path
+  // 2. Laser Vector Layer
   const laserGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   
   const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   glow.setAttribute('d', physics.pathStr);
-  glow.setAttribute('stroke', 'rgba(234, 179, 8, 0.3)'); 
+  glow.setAttribute('stroke', 'rgba(239, 68, 68, 0.4)'); // Red/crimson laser path glow
   glow.setAttribute('stroke-width', '12');
   glow.setAttribute('fill', 'none');
   
   const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   core.setAttribute('d', physics.pathStr);
-  core.setAttribute('stroke', 'rgba(253, 224, 71, 1)'); 
+  core.setAttribute('stroke', 'rgba(248, 113, 113, 1)'); // High visibility core
   core.setAttribute('stroke-width', '4');
   core.setAttribute('fill', 'none');
 
@@ -156,16 +161,18 @@ function renderSandbox(pieceKey) {
   laserGroup.appendChild(core);
   svgBoard.appendChild(laserGroup);
 
-  // 4. LAYER C: Game Piece Sprite with Damage Feedback
+  // 3. Game Piece Sprite Layer
   const pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   
   pieceGroup.style.transformOrigin = "150px 150px";
   pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
-  pieceGroup.style.transition = "transform 0.25s ease-in-out, filter 0.2s ease-in-out";
+  pieceGroup.style.transition = "transform 0.2s ease-out, filter 0.2s ease-in-out";
   
-  // Apply visual destruction filter (turns red and glows) if the physics engine flagged it dead
+  // COLOR-CONSISTENT FEEDBACK: Preserves original piece blue/red integrity while projecting a structural hazard aura
   if (physics.isDestroyed) {
-    pieceGroup.style.filter = "drop-shadow(0 0 15px rgba(255,0,0,0.9)) sepia(100%) hue-rotate(-50deg) saturate(500%)";
+    pieceGroup.style.filter = "drop-shadow(0 0 16px rgba(220, 38, 38, 1)) brightness(1.1)";
+  } else {
+    pieceGroup.style.filter = "drop-shadow(0 4px 6px rgba(0,0,0,0.5))";
   }
 
   const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
@@ -174,6 +181,7 @@ function renderSandbox(pieceKey) {
   image.setAttribute('width', 80);
   image.setAttribute('height', 80);
   
+  // Dynamic lookup to the asset folder path shown in your filetree
   const spritePath = `../pieces/blue${pieceKey.toLowerCase()}.png`;
   image.setAttribute('href', spritePath);
   image.setAttributeNS('http://www.w3.org/1999/xlink', 'href', spritePath);
