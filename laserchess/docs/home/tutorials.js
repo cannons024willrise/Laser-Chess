@@ -60,7 +60,7 @@ const PIECE_INTERACTION_TABLE = {
       0: { reflect: null, isDestroyed: false },
       1: { reflect: null, isDestroyed: false },
       2: { reflect: 'WEST', isDestroyed: false },
-      3: { reflect: 'EAST', isDestroyed: true }
+      3: { reflect: 'EAST', isDestroyed: false }
     }
   },
   SWITCH: {
