@@ -22,7 +22,7 @@ const PIECE_INTERACTION_TABLE = {
     0: { pathSuffix: '', isDestroyed: true },   // Reflects UP from West
     1: { pathSuffix: ' ', isDestroyed: true }, // Reflects DOWN from West
     2: { pathSuffix: 'L 150 300', isDestroyed: false },          // Dies from West laser
-    3: { pathSuffix: 'L 150 300', isDestroyed: false }  // Inherits rotation 2's old active path (DOWN)
+    3: { pathSuffix: 'L 150 0', isDestroyed: false }  // Inherits rotation 2's old active path (DOWN)
   },
   SWITCH: {
     0: { pathSuffix: 'L 150 0', isDestroyed: false },   // Companion mirror -> UP
