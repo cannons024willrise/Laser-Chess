@@ -1,6 +1,6 @@
 /**
- * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE (COMPREHENSIVE UPGRADE)
- * Full standalone raycasting supporting piece selection and targeted dual-rotations.
+ * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE (FULL LOGICAL ALIGNMENT)
+ * Standalone raycasting engine supporting configurable laser fire directions and exact piece interaction states.
  */
 
 // 1. CONFIGURABLE PIECE INTERACTION MATRIX
@@ -13,7 +13,6 @@ const PIECE_INTERACTION_TABLE = {
     WEST:  { reflect: null, isDestroyed: true }
   },
   DEFENDER: {
-    // Shield at bottom at rot 0 (Faces South). Struck from South -> Blocks safely.
     // rotation 0: Shield faces South (Blocks SOUTH laser safely)
     // rotation 1: Shield faces West  (Blocks WEST laser safely)
     // rotation 2: Shield faces North (Blocks NORTH laser safely)
@@ -72,7 +71,7 @@ const PIECE_INTERACTION_TABLE = {
     }
   },
   SWITCH: {
-    // Companion double-sided mirror piece (Never destroyed):
+    // Companion double-sided mirror piece (Never destroyed, perfectly inverted table mapping):
     WEST: {
       0: { reflect: 'NORTH', isDestroyed: false },
       1: { reflect: 'SOUTH', isDestroyed: false },
@@ -101,15 +100,15 @@ const PIECE_INTERACTION_TABLE = {
 };
 
 const tutorialStates = {
-  KING: { rotation: 0 },
-  DEFENDER: { rotation: 0 },
-  DEFLECTOR: { rotation: 0 },
-  SWITCH: { rotation: 0 },
-  LASER: { rotation: 0, targetPiece: 'KING', targetRotation: 0 }
+  KING: { rotation: 0, laserSourceDir: 'WEST' },
+  DEFENDER: { rotation: 0, laserSourceDir: 'WEST' },
+  DEFLECTOR: { rotation: 0, laserSourceDir: 'WEST' },
+  SWITCH: { rotation: 0, laserSourceDir: 'WEST' },
+  LASER: { rotation: 0 }
 };
 
 window.togglePieceTutorial = function(cardElement, pieceKey) {
-  if (window.event && window.event.target.tagName === 'BUTTON' || window.event?.target.tagName === 'SELECT') return;
+  if (window.event && (window.event.target.tagName === 'BUTTON' || window.event.target.tagName === 'SELECT')) return;
 
   const sandbox = cardElement.querySelector('.sandbox-container');
   if (!sandbox) return;
@@ -136,31 +135,22 @@ window.rotateTutorialPiece = function(pieceKey, direction) {
   renderSandbox(pieceKey);
 };
 
-// Specialized targeting rotations for the flexible Laser card controls
-window.rotateLaserTarget = function(direction) {
-  if (window.event) window.event.stopPropagation();
-  const state = tutorialStates.LASER;
-  state.targetRotation = (state.targetRotation + direction + 4) % 4;
-  renderSandbox('LASER');
-};
-
-window.changeLaserTargetPiece = function(selectElement) {
-  const state = tutorialStates.LASER;
-  state.targetPiece = selectElement.value;
-  renderSandbox('LASER');
+window.changeLaserSourceDirection = function(pieceKey, selectElement) {
+  const state = tutorialStates[pieceKey];
+  if (state) {
+    state.laserSourceDir = selectElement.value;
+    renderSandbox(pieceKey);
+  }
 };
 
 /**
  * STANDALONE TACTICAL LASER VECTOR ENGINE
- * Simulates complete structural step raycasting through the sandbox matrix.
+ * Simulates path trajectories through a 3x3 sandbox grid.
  */
-function traceLaserEngine(targetPieceKey, currentRotation) {
+function traceLaserEngine(pieceKey, currentRotation) {
   const CELL_SIZE = 100;
-  
-  // Laser source node occupies Cell (0, 1) [West Edge]. Target occupies Center (1, 1).
-  let currentX = 0;
-  let currentY = 1;
-  
+  let currentX, currentY, currentDir;
+
   const directions = {
     NORTH: { dx: 0, dy: -1 },
     EAST:  { dx: 1, dy: 0 },
@@ -168,17 +158,22 @@ function traceLaserEngine(targetPieceKey, currentRotation) {
     WEST:  { dx: -1, dy: 0 }
   };
 
-  // Extract variables depending on which sandbox card we are executing inside
-  let laserRot = (targetPieceKey === 'LASER') ? currentRotation : tutorialStates.LASER.rotation;
-  let targetKey = (targetPieceKey === 'LASER') ? tutorialStates.LASER.targetPiece : targetPieceKey;
-  let targetRot = (targetPieceKey === 'LASER') ? tutorialStates.LASER.targetRotation : currentRotation;
-
-  // Determine starting path vector based on Laser Emitter rotation
-  let currentDir = 'EAST';
-  if (laserRot === 0) currentDir = 'NORTH';
-  if (laserRot === 1) currentDir = 'EAST';
-  if (laserRot === 2) currentDir = 'SOUTH';
-  if (laserRot === 3) currentDir = 'WEST';
+  if (pieceKey === 'LASER') {
+    // Laser card fires directly from the center node matching its piece rotation
+    currentX = 1;
+    currentY = 1;
+    if (currentRotation === 0) currentDir = 'NORTH';
+    if (currentRotation === 1) currentDir = 'EAST';
+    if (currentRotation === 2) currentDir = 'SOUTH';
+    if (currentRotation === 3) currentDir = 'WEST';
+  } else {
+    // Configurable laser emitter injection positions matching selector direction rules
+    const srcDir = tutorialStates[pieceKey].laserSourceDir || 'WEST';
+    if (srcDir === 'WEST')  { currentX = 0; currentY = 1; currentDir = 'EAST'; }
+    if (srcDir === 'NORTH') { currentX = 1; currentY = 0; currentDir = 'SOUTH'; }
+    if (srcDir === 'EAST')  { currentX = 2; currentY = 1; currentDir = 'WEST'; }
+    if (srcDir === 'SOUTH') { currentX = 1; currentY = 2; currentDir = 'NORTH'; }
+  }
 
   let startX = currentX * CELL_SIZE + CELL_SIZE / 2;
   let startY = currentY * CELL_SIZE + CELL_SIZE / 2;
@@ -199,7 +194,7 @@ function traceLaserEngine(targetPieceKey, currentRotation) {
     let targetX = nextX * CELL_SIZE + CELL_SIZE / 2;
     let targetY = nextY * CELL_SIZE + CELL_SIZE / 2;
 
-    // Outer edge boundaries termination check
+    // Check Outer Boundaries termination segment
     if (nextX < 0 || nextX > 2 || nextY < 0 || nextY > 2) {
       let edgeX = startX + vec.dx * (CELL_SIZE * 1.5);
       let edgeY = startY + vec.dy * (CELL_SIZE * 1.5);
@@ -211,17 +206,16 @@ function traceLaserEngine(targetPieceKey, currentRotation) {
     currentX = nextX;
     currentY = nextY;
 
-    // Hit registration logic at central grid point (1, 1)
-    if (currentX === 1 && currentY === 1 && targetPieceKey !== 'LASER') {
-      // Inbound direction of laser hitting target piece (the opposite of traveling direction)
+    // Trigger grid hit verification segment if crossing the center node (1,1)
+    if (currentX === 1 && currentY === 1 && pieceKey !== 'LASER') {
       let inboundDir = 'WEST';
       if (currentDir === 'NORTH') inboundDir = 'SOUTH';
       if (currentDir === 'SOUTH') inboundDir = 'NORTH';
       if (currentDir === 'EAST') inboundDir = 'WEST';
       if (currentDir === 'WEST') inboundDir = 'EAST';
 
-      const matrix = PIECE_INTERACTION_TABLE[targetKey];
-      const cellConfig = matrix?.[inboundDir]?.[targetRot] || matrix?.[inboundDir];
+      const matrix = PIECE_INTERACTION_TABLE[pieceKey];
+      const cellConfig = matrix?.[inboundDir]?.[currentRotation] || matrix?.[inboundDir];
 
       if (cellConfig) {
         if (cellConfig.isDestroyed) {
@@ -229,7 +223,7 @@ function traceLaserEngine(targetPieceKey, currentRotation) {
           break;
         }
         if (cellConfig.reflect === null) {
-          break; // Blocked cleanly by shield or wall
+          break; 
         }
         currentDir = cellConfig.reflect;
       }
@@ -257,7 +251,7 @@ function renderSandbox(pieceKey) {
 
   const physics = traceLaserEngine(pieceKey, state.rotation);
 
-  // 1. Grid Layer
+  // 1. Grid Background
   const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   for (let y = 0; y < 3; y++) {
     for (let x = 0; x < 3; x++) {
@@ -274,7 +268,7 @@ function renderSandbox(pieceKey) {
   }
   svgBoard.appendChild(gridGroup);
 
-  // 2. Laser Ray Vector Layer
+  // 2. Vector Laser Rendering Layers
   const laserGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   glow.setAttribute('d', physics.pathStr);
@@ -294,23 +288,51 @@ function renderSandbox(pieceKey) {
   laserGroup.appendChild(core);
   svgBoard.appendChild(laserGroup);
 
-  // 3. Render Game Pieces
+  // 3. Render Node Elements
   if (pieceKey !== 'LASER') {
-    // Standard Card layout: Laser static at (0, 1) and piece at Center (1, 1)
+    // Dynamic External Laser Source placement configurations
+    const srcDir = state.laserSourceDir || 'WEST';
+    let srcX = 5, srcY = 105, srcRot = 1; // Default matching West -> firing East
+    
+    if (srcDir === 'NORTH') { srcX = 105; srcY = 5;   srcRot = 2; }
+    if (srcDir === 'EAST')  { srcX = 205; srcY = 105; srcRot = 3; }
+    if (srcDir === 'SOUTH') { srcX = 105; srcY = 205; srcRot = 0; }
+
     const laserSrcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    laserSrcGroup.style.transformOrigin = "50px 150px";
-    laserSrcGroup.style.transform = `rotate(${tutorialStates.LASER.rotation * 90}deg)`;
+    laserSrcGroup.style.transformOrigin = `${srcX + 45}px ${srcY + 45}px`;
+    laserSrcGroup.style.transform = `rotate(${srcRot * 90}deg)`;
     
     const laserImg = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    laserImg.setAttribute('x', 5);
-    laserImg.setAttribute('y', 105);
+    laserImg.setAttribute('x', srcX);
+    laserImg.setAttribute('y', srcY);
     laserImg.setAttribute('width', 90);
     laserImg.setAttribute('height', 90);
     laserImg.setAttribute('href', `../pieces/bluelaser.png`);
     laserSrcGroup.appendChild(laserImg);
     svgBoard.appendChild(laserSrcGroup);
 
-    // Target piece at center
+    // Target configuration controls drop selector setup block
+    let controlsContainer = svgBoard.nextElementSibling;
+    if (!controlsContainer || !controlsContainer.classList.contains('laser-direction-controls')) {
+      if (controlsContainer) controlsContainer.remove();
+      
+      controlsContainer = document.createElement('div');
+      controlsContainer.className = "laser-direction-controls mt-4 p-3 bg-black/40 border border-white/5 flex flex-col gap-3 rounded";
+      controlsContainer.innerHTML = `
+        <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
+          <span class="text-gray-400">Laser Inbound Vector:</span>
+          <select onchange="changeLaserSourceDirection('${pieceKey}', this)" class="bg-black border border-white/20 text-theme text-[10px] p-1 rounded font-mono uppercase">
+            <option value="WEST" ${srcDir === 'WEST' ? 'selected' : ''}>WEST (Hits Left)</option>
+            <option value="NORTH" ${srcDir === 'NORTH' ? 'selected' : ''}>NORTH (Hits Top)</option>
+            <option value="EAST" ${srcDir === 'EAST' ? 'selected' : ''}>EAST (Hits Right)</option>
+            <option value="SOUTH" ${srcDir === 'SOUTH' ? 'selected' : ''}>SOUTH (Hits Bottom)</option>
+          </select>
+        </div>
+      `;
+      svgBoard.parentNode.insertBefore(controlsContainer, svgBoard.nextSibling);
+    }
+
+    // Target piece rendering at position cell (1,1)
     const pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     pieceGroup.style.transformOrigin = "150px 150px";
     pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
@@ -333,35 +355,13 @@ function renderSandbox(pieceKey) {
     svgBoard.appendChild(pieceGroup);
 
   } else {
-    // Laser Card Advanced Target Controls Layout Builder: Inject dynamically into UI if it doesn't exist
+    // Cleaning any dangling controls container instances left over on the laser card view bounds
     let controlsContainer = svgBoard.nextElementSibling;
-    if (!controlsContainer || !controlsContainer.classList.contains('laser-dynamic-controls')) {
-      if (controlsContainer) controlsContainer.remove();
-      
-      controlsContainer = document.createElement('div');
-      controlsContainer.className = "laser-dynamic-controls mt-4 p-3 bg-black/40 border border-white/5 flex flex-col gap-3 rounded";
-      controlsContainer.innerHTML = `
-        <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
-          <span class="text-gray-400">Spawn Target Piece:</span>
-          <select onchange="changeLaserTargetPiece(this)" class="bg-black border border-white/20 text-theme text-[10px] p-1 rounded font-mono uppercase">
-            <option value="KING" ${state.targetPiece === 'KING' ? 'selected' : ''}>KING</option>
-            <option value="DEFENDER" ${state.targetPiece === 'DEFENDER' ? 'selected' : ''}>DEFENDER</option>
-            <option value="DEFLECTOR" ${state.targetPiece === 'DEFLECTOR' ? 'selected' : ''}>DEFLECTOR</option>
-            <option value="SWITCH" ${state.targetPiece === 'SWITCH' ? 'selected' : ''}>SWITCH</option>
-          </select>
-        </div>
-        <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
-          <span class="text-gray-400">Target Orientation:</span>
-          <div class="flex gap-1">
-            <button onclick="rotateLaserTarget(-1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT L</button>
-            <button onclick="rotateLaserTarget(1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT R</button>
-          </div>
-        </div>
-      `;
-      svgBoard.parentNode.insertBefore(controlsContainer, svgBoard.nextSibling);
+    if (controlsContainer && controlsContainer.classList.contains('laser-direction-controls')) {
+      controlsContainer.remove();
     }
 
-    // Render Laser piece inside center position
+    // Render Laser piece strictly at the center layout location cell (1, 1) without duplicated sub nodes
     const laserSrcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     laserSrcGroup.style.transformOrigin = "150px 150px";
     laserSrcGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
