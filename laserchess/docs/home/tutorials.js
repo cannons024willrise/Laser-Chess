@@ -1,6 +1,7 @@
 /**
- * LASER CHESS - TUTORIALS ENGINE (FLIPPED REFLECTION INTERACTIONS)
- * Matched precisely to raw project image orientations with corrected mirror tracking.
+ * LASER CHESS - TUTORIALS ENGINE (COMPLETE PRODUCTION BUILD)
+ * Includes explicit interaction tables, exact sprite orientation adjustments,
+ * and rule-compliant grayscale/darkened asset destruction states.
  */
 
 const tutorialStates = {
@@ -41,7 +42,7 @@ window.rotateTutorialPiece = function(pieceKey, direction) {
 
 /**
  * MINI PHYSICS ENGINE
- * Simulates path tracking based on actual uploaded graphic assets.
+ * Track laser paths and status matrices based on explicit instruction rules.
  * Mock laser enters from LEFT (West) traveling RIGHT (East) toward the center cell.
  */
 function calculatePhysics(pieceKey, rotation) {
@@ -61,7 +62,7 @@ function calculatePhysics(pieceKey, rotation) {
       break;
 
     case 'DEFENDER':
-      // Native Asset: Shield is at the BOTTOM (Faces South) at rotation 0.
+      // Shield is at the BOTTOM (Faces South) at rotation 0.
       // Rotation 1 (90° CW): Shield faces West (Blocks West laser safely!)
       if (rotation === 1) {
         pathStr = IN; 
@@ -73,24 +74,30 @@ function calculatePhysics(pieceKey, rotation) {
       break;
 
     case 'DEFLECTOR':
-      // FLIPPED INTERACTION TABLE:
-      // Rotations 1 and 3 are now the active reflecting states facing the West beam.
-      if (rotation === 1) {
+      // Explicit Interaction Rules:
+      // Rotation 0: Reflects UP from West
+      // Rotation 1: Reflects DOWN from West
+      // Rotation 2: Dies from West laser
+      // Rotation 3: Inherits Rotation 2's old interaction -> Reflects DOWN from West
+      if (rotation === 0) {
         pathStr = `${IN} ${UP}`;
+        isDestroyed = false;
+      } else if (rotation === 1) {
+        pathStr = `${IN} ${DOWN}`; 
         isDestroyed = false;
       } else if (rotation === 3) {
         pathStr = `${IN} ${DOWN}`;
         isDestroyed = false;
       } else {
+        // Rotation 2 drops here and gets destroyed cleanly
         pathStr = IN;
         isDestroyed = true;
       }
       break;
 
     case 'SWITCH':
-      // FLIPPED INTERACTION TABLE:
-      // Inverted reflection directions to match the flipped Deflector alignment.
-      if (rotation === 0 || rotation === 2) {
+      // Companion piece reflecting identical directions without destruction states:
+      if (rotation === 0) {
         pathStr = `${IN} ${UP}`;
       } else {
         pathStr = `${IN} ${DOWN}`;
@@ -99,7 +106,7 @@ function calculatePhysics(pieceKey, rotation) {
       break;
 
     case 'LASER':
-      // Native Asset: Firing nozzle points UP (North) at rotation 0.
+      // Firing nozzle points UP (North) at rotation 0.
       if (rotation === 0) pathStr = `M 150 150 L 150 0`;     // North
       if (rotation === 1) pathStr = `M 150 150 L 300 150`;   // East
       if (rotation === 2) pathStr = `M 150 150 L 150 300`;   // South
@@ -143,13 +150,14 @@ function renderSandbox(pieceKey) {
   
   const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   glow.setAttribute('d', physics.pathStr);
-  glow.setAttribute('stroke', 'rgba(239, 68, 68, 0.4)'); // Red/crimson laser path glow
+  // Laser paths turn gray if the laser hits a dead piece
+  glow.setAttribute('stroke', physics.isDestroyed ? 'rgba(100, 100, 100, 0.4)' : 'rgba(239, 68, 68, 0.4)'); 
   glow.setAttribute('stroke-width', '12');
   glow.setAttribute('fill', 'none');
   
   const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   core.setAttribute('d', physics.pathStr);
-  core.setAttribute('stroke', 'rgba(248, 113, 113, 1)'); // High visibility core
+  core.setAttribute('stroke', physics.isDestroyed ? 'rgba(150, 150, 150, 1)' : 'rgba(248, 113, 113, 1)'); 
   core.setAttribute('stroke-width', '4');
   core.setAttribute('fill', 'none');
 
@@ -162,12 +170,13 @@ function renderSandbox(pieceKey) {
   
   pieceGroup.style.transformOrigin = "150px 150px";
   pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
-  pieceGroup.style.transition = "transform 0.2s ease-out, filter 0.2s ease-in-out";
+  pieceGroup.style.transition = "transform 0.2s ease-out, filter 0.3s ease-in-out";
   
+  // Strict rule: Dead pieces turn gray
   if (physics.isDestroyed) {
-    pieceGroup.style.filter = "drop-shadow(0 0 16px rgba(220, 38, 38, 1)) brightness(1.1)";
+    pieceGroup.style.filter = "grayscale(100%) brightness(0.5)";
   } else {
-    pieceGroup.style.filter = "drop-shadow(0 4px 6px rgba(0,0,0,0.5))";
+    pieceGroup.style.filter = "grayscale(0%) brightness(1) drop-shadow(0 4px 6px rgba(0,0,0,0.5))";
   }
 
   const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
