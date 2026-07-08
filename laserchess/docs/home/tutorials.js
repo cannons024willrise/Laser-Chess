@@ -1,8 +1,42 @@
 /**
- * LASER CHESS - TUTORIALS ENGINE (COMPLETE PRODUCTION BUILD)
- * Includes explicit interaction tables, exact sprite orientation adjustments,
- * and rule-compliant grayscale/darkened asset destruction states.
+ * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE
+ * Integrated Configurable Matrix Build matching tactical UI paradigms.
  */
+
+// 1. CONFIGURABLE PIECE INTERACTION MATRIX
+// Explicitly maps incoming laser trajectory from LEFT (West) -> RIGHT (East)
+const PIECE_INTERACTION_TABLE = {
+  KING: {
+    0: { pathSuffix: '', isDestroyed: true },
+    1: { pathSuffix: '', isDestroyed: true },
+    2: { pathSuffix: '', isDestroyed: true },
+    3: { pathSuffix: '', isDestroyed: true }
+  },
+  DEFENDER: {
+    0: { pathSuffix: 'L 300 150', isDestroyed: true },  // THROUGH
+    1: { pathSuffix: '', isDestroyed: false },         // BLOCKED BY SHIELD Safely
+    2: { pathSuffix: 'L 300 150', isDestroyed: true },  // THROUGH
+    3: { pathSuffix: 'L 300 150', isDestroyed: true }   // THROUGH
+  },
+  DEFLECTOR: {
+    0: { pathSuffix: 'L 150 0', isDestroyed: false },   // Reflects UP from West
+    1: { pathSuffix: 'L 150 300', isDestroyed: false }, // Reflects DOWN from West
+    2: { pathSuffix: '', isDestroyed: true },          // Dies from West laser
+    3: { pathSuffix: 'L 150 300', isDestroyed: false }  // Inherits rotation 2's old active path (DOWN)
+  },
+  SWITCH: {
+    0: { pathSuffix: 'L 150 0', isDestroyed: false },   // Companion mirror -> UP
+    1: { pathSuffix: 'L 150 300', isDestroyed: false }, // Companion mirror -> DOWN
+    2: { pathSuffix: 'L 150 300', isDestroyed: false }, // Companion mirror -> DOWN
+    3: { pathSuffix: 'L 150 300', isDestroyed: false }  // Companion mirror -> DOWN
+  },
+  LASER: {
+    0: { pathOverride: 'M 150 150 L 150 0', isDestroyed: false },   // Fires North
+    1: { pathOverride: 'M 150 150 L 300 150', isDestroyed: false }, // Fires East
+    2: { pathOverride: 'M 150 150 L 150 300', isDestroyed: false }, // Fires South
+    3: { pathOverride: 'M 150 150 L 0 150', isDestroyed: false }    // Fires West
+  }
+};
 
 const tutorialStates = {
   KING: { rotation: 0 },
@@ -41,81 +75,22 @@ window.rotateTutorialPiece = function(pieceKey, direction) {
 };
 
 /**
- * MINI PHYSICS ENGINE
- * Track laser paths and status matrices based on explicit instruction rules.
- * Mock laser enters from LEFT (West) traveling RIGHT (East) toward the center cell.
+ * CONFIGURABLE PHYSICAL TRANSLATION
  */
 function calculatePhysics(pieceKey, rotation) {
-  let pathStr = ``;
-  let isDestroyed = false;
+  const config = PIECE_INTERACTION_TABLE[pieceKey]?.[rotation];
+  if (!config) return { pathStr: 'M 0 150 L 150 150', isDestroyed: true };
 
-  // Center paths of our 3x3 sandbox grid
-  const IN = `M 0 150 L 150 150`; 
-  const THROUGH = `M 0 150 L 300 150`;
-  const UP = `L 150 0`;
-  const DOWN = `L 150 300`;
-
-  switch(pieceKey) {
-    case 'KING':
-      pathStr = IN;
-      isDestroyed = true;
-      break;
-
-    case 'DEFENDER':
-      // Shield is at the BOTTOM (Faces South) at rotation 0.
-      // Rotation 1 (90° CW): Shield faces West (Blocks West laser safely!)
-      if (rotation === 1) {
-        pathStr = IN; 
-        isDestroyed = false;
-      } else {
-        pathStr = THROUGH; 
-        isDestroyed = true;
-      }
-      break;
-
-    case 'DEFLECTOR':
-      // Explicit Interaction Rules:
-      // Rotation 0: Reflects UP from West
-      // Rotation 1: Reflects DOWN from West
-      // Rotation 2: Dies from West laser
-      // Rotation 3: Inherits Rotation 2's old interaction -> Reflects DOWN from West
-      if (rotation === 0) {
-        pathStr = `${IN} ${UP}`;
-        isDestroyed = false;
-      } else if (rotation === 1) {
-        pathStr = `${IN} ${DOWN}`; 
-        isDestroyed = false;
-      } else if (rotation === 3) {
-        pathStr = `${IN} ${DOWN}`;
-        isDestroyed = false;
-      } else {
-        // Rotation 2 drops here and gets destroyed cleanly
-        pathStr = IN;
-        isDestroyed = true;
-      }
-      break;
-
-    case 'SWITCH':
-      // Companion piece reflecting identical directions without destruction states:
-      if (rotation === 0) {
-        pathStr = `${IN} ${UP}`;
-      } else {
-        pathStr = `${IN} ${DOWN}`;
-      }
-      isDestroyed = false;
-      break;
-
-    case 'LASER':
-      // Firing nozzle points UP (North) at rotation 0.
-      if (rotation === 0) pathStr = `M 150 150 L 150 0`;     // North
-      if (rotation === 1) pathStr = `M 150 150 L 300 150`;   // East
-      if (rotation === 2) pathStr = `M 150 150 L 150 300`;   // South
-      if (rotation === 3) pathStr = `M 150 150 L 0 150`;     // West
-      isDestroyed = false;
-      break;
+  // If laser emitter node, use exact static override path coordinates
+  if (config.pathOverride) {
+    return { pathStr: config.pathOverride, isDestroyed: config.isDestroyed };
   }
 
-  return { pathStr, isDestroyed };
+  // Otherwise calculate relative tracking path inbound from West grid edge
+  const basePath = 'M 0 150 L 150 150';
+  const pathStr = config.pathSuffix ? `${basePath} ${config.pathSuffix}` : basePath;
+
+  return { pathStr, isDestroyed: config.isDestroyed };
 }
 
 function renderSandbox(pieceKey) {
@@ -128,7 +103,7 @@ function renderSandbox(pieceKey) {
 
   const physics = calculatePhysics(pieceKey, state.rotation);
 
-  // 1. Background Grid Layer
+  // 1. Cybernetic Grid Matrix Layer
   const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   for (let y = 0; y < 3; y++) {
     for (let x = 0; x < 3; x++) {
@@ -137,53 +112,53 @@ function renderSandbox(pieceKey) {
       rect.setAttribute('y', y * CELL_SIZE);
       rect.setAttribute('width', CELL_SIZE);
       rect.setAttribute('height', CELL_SIZE);
-      rect.setAttribute('fill', 'rgba(0,0,0,0.6)');
-      rect.setAttribute('stroke', 'rgba(255,255,255,0.08)');
-      rect.setAttribute('stroke-width', '2');
+      rect.setAttribute('fill', 'rgba(0, 0, 0, 0.65)');
+      rect.setAttribute('stroke', 'rgba(255, 255, 255, 0.05)');
+      rect.setAttribute('stroke-width', '1.5');
       gridGroup.appendChild(rect);
     }
   }
   svgBoard.appendChild(gridGroup);
 
-  // 2. Laser Vector Layer
+  // 2. Vector Laser Glow & Outer Paths
   const laserGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   
   const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   glow.setAttribute('d', physics.pathStr);
-  // Laser paths turn gray if the laser hits a dead piece
-  glow.setAttribute('stroke', physics.isDestroyed ? 'rgba(100, 100, 100, 0.4)' : 'rgba(239, 68, 68, 0.4)'); 
-  glow.setAttribute('stroke-width', '12');
+  glow.setAttribute('stroke', physics.isDestroyed ? 'rgba(120, 120, 120, 0.3)' : 'rgba(3, 233, 244, 0.35)'); 
+  glow.setAttribute('stroke-width', '14');
+  glow.setAttribute('stroke-linecap', 'round');
   glow.setAttribute('fill', 'none');
   
   const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   core.setAttribute('d', physics.pathStr);
-  core.setAttribute('stroke', physics.isDestroyed ? 'rgba(150, 150, 150, 1)' : 'rgba(248, 113, 113, 1)'); 
-  core.setAttribute('stroke-width', '4');
+  core.setAttribute('stroke', physics.isDestroyed ? 'rgba(160, 160, 160, 0.9)' : 'rgba(255, 255, 255, 1)'); 
+  core.setAttribute('stroke-width', '3.5');
+  core.setAttribute('stroke-linecap', 'round');
   core.setAttribute('fill', 'none');
 
   laserGroup.appendChild(glow);
   laserGroup.appendChild(core);
   svgBoard.appendChild(laserGroup);
 
-  // 3. Game Piece Sprite Layer
+  // 3. Piece Sprite Layer with Rotational Bounds
   const pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  
   pieceGroup.style.transformOrigin = "150px 150px";
   pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
-  pieceGroup.style.transition = "transform 0.2s ease-out, filter 0.3s ease-in-out";
+  pieceGroup.style.transition = "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease-in-out";
   
-  // Strict rule: Dead pieces turn gray
+  // Rule Compliance: Gray out when destroyed state is met
   if (physics.isDestroyed) {
-    pieceGroup.style.filter = "grayscale(100%) brightness(0.5)";
+    pieceGroup.style.filter = "grayscale(100%) brightness(0.4) contrast(0.9)";
   } else {
-    pieceGroup.style.filter = "grayscale(0%) brightness(1) drop-shadow(0 4px 6px rgba(0,0,0,0.5))";
+    pieceGroup.style.filter = "grayscale(0%) brightness(1.05) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6))";
   }
 
   const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-  image.setAttribute('x', 110); 
-  image.setAttribute('y', 110);
-  image.setAttribute('width', 80);
-  image.setAttribute('height', 80);
+  image.setAttribute('x', 105); 
+  image.setAttribute('y', 105);
+  image.setAttribute('width', 90);
+  image.setAttribute('height', 90);
   
   const spritePath = `../pieces/blue${pieceKey.toLowerCase()}.png`;
   image.setAttribute('href', spritePath);
