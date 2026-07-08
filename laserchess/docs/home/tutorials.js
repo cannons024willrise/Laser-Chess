@@ -1,7 +1,7 @@
 /**
  * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE (COMPLETE CLICK GUI WITH ROTATION)
  * Full inline rotation controls, cell-clicking movement matrices, and dynamic selection mapping.
- * Featuring Self-Initializing DOM Hydration Core.
+ * Featuring Self-Initializing DOM Hydration Core & Tactical Legality Highlights.
  */
 
 // 1. CONFIGURABLE PIECE INTERACTION MATRIX WITH GEOMETRICALLY CORRECTED LOGIC
@@ -51,11 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const pieceKey = h4.textContent.trim().toUpperCase();
     if (!tutorialStates[pieceKey]) return;
     
-    // Add layout click styling cursor and action handler
     card.classList.add('cursor-pointer', 'hover:border-theme/40', 'transition-all');
     card.setAttribute('onclick', `togglePieceTutorial(this, '${pieceKey}')`);
     
-    // Build and inject sandbox markup components smoothly
     const sandboxContainer = document.createElement('div');
     sandboxContainer.className = 'sandbox-container hidden mt-6 pt-6 border-t border-white/10 flex flex-col items-center';
     
@@ -225,7 +223,7 @@ function traceLaserEngine(pieceKey) {
   return { pathStr, isDestroyed };
 }
 
-// 5. VECTOR VECTOR GRAPHICS RENDERING MATRIX
+// 5. VECTOR GRAPHICS RENDERING MATRIX WITH LEGEND AND GREEN HIGHLIGHT ZONE
 // =========================================================================
 function renderSandbox(pieceKey) {
   const svgBoard = document.getElementById(`svg-sandbox-${pieceKey}`);
@@ -236,7 +234,7 @@ function renderSandbox(pieceKey) {
   const CELL_SIZE = 100;
   const physics = traceLaserEngine(pieceKey);
 
-  // Render Layout Cells with contextual 1-Square bounds lighting overlay
+  // Render Layout Cells with context-aware 1-Square green legality highlights
   const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   for (let y = 0; y < 3; y++) {
     for (let x = 0; x < 3; x++) {
@@ -247,10 +245,14 @@ function renderSandbox(pieceKey) {
       rect.setAttribute('height', CELL_SIZE);
       
       let isWithinRange = Math.abs(x - state.gridX) <= 1 && Math.abs(y - state.gridY) <= 1;
-      if (pieceKey !== 'LASER' && state.selectedEntity === 'PIECE' && isWithinRange) {
-        rect.setAttribute('fill', 'rgba(3, 233, 244, 0.08)');
-        rect.setAttribute('stroke', 'rgba(3, 233, 244, 0.15)');
+      let isCurrentPos = (x === state.gridX && y === state.gridY);
+
+      if (pieceKey !== 'LASER' && state.selectedEntity === 'PIECE' && isWithinRange && !isCurrentPos) {
+        // Legal step matrix context: Cyberpunk Tactical Green
+        rect.setAttribute('fill', 'rgba(16, 185, 129, 0.12)');
+        rect.setAttribute('stroke', 'rgba(16, 185, 129, 0.4)');
       } else {
+        // Normal state grid
         rect.setAttribute('fill', 'rgba(0, 0, 0, 0.65)');
         rect.setAttribute('stroke', 'rgba(255, 255, 255, 0.05)');
       }
@@ -362,6 +364,53 @@ function renderSandbox(pieceKey) {
           <button onclick="rotateTutorialPiece('${pieceKey}', 1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT R</button>
         </div>
       </div>
+      
+      <div class="border-t border-white/5 pt-2 mt-1 flex flex-col gap-1.5 text-[9px] font-mono tracking-wide text-gray-400 uppercase">
+        <div class="text-[10px] font-bold text-gray-500 mb-0.5 tracking-wider">SANDBOX LEGEND SYSTEM:</div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded bg-emerald-500/20 border border-emerald-500/50"></span>
+          <span>GREEN GRID = LEGAL 1-SQUARE MOVE BOUNDS (CLICK TO POSITION)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded border border-cyan-400/80"></span>
+          <span>CYAN CROSSHAIR BORDER = CURRENTLY ACTIVE ELEMENT SELECTION</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-0.5 bg-cyan-400"></span>
+          <span>CYAN ENERGY PATH = ACTIVE PHOTON LASER BEAM ENGINE</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-0.5 bg-gray-500"></span>
+          <span>GREY TRACE = TERMINATED / DISRUPTED FATAL BEAM STRIKE</span>
+        </div>
+      </div>
+    `;
+  } else {
+    // Emitter node standalone layout rendering logic
+    const laserSrcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const computedOriginX = state.gridX * CELL_SIZE + CELL_SIZE / 2;
+    const computedOriginY = state.gridY * CELL_SIZE + CELL_SIZE / 2;
+    laserSrcGroup.style.transformOrigin = `${computedOriginX}px ${computedOriginY}px`;
+    laserSrcGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
+    
+    const laserImg = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+    laserImg.setAttribute('x', state.gridX * CELL_SIZE + 5); laserImg.setAttribute('y', state.gridY * CELL_SIZE + 5);
+    laserImg.setAttribute('width', 90); laserImg.setAttribute('height', 90);
+    laserImg.setAttribute('href', `../pieces/bluelaser.png`);
+    laserSrcGroup.appendChild(laserImg);
+    svgBoard.appendChild(laserSrcGroup);
+
+    controlsContainer.innerHTML = `
+      <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
+        <span class="text-gray-400">Rotate Emitter Node:</span>
+        <div class="flex gap-1">
+          <button onclick="rotateTutorialPiece('${pieceKey}', -1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT L</button>
+          <button onclick="rotateTutorialPiece('${pieceKey}', 1)" class="bg-white/10 hover:bg-white/20 text-white px-2 py-1 text-[9px] font-bold font-mono rounded">ROT R</button>
+        </div>
+      </div>
+      <div class="text-[9px] text-gray-500 font-mono text-center uppercase tracking-wider border-t border-white/5 pt-2">
+        💡 Move Emitter Node around by clicking any square on the grid matrix.
+      </div>
     `;
   }
-};
+}
