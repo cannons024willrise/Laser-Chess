@@ -1,6 +1,7 @@
 /**
- * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE (STABLE PRODUCTION BUILD)
- * Complete interactive sandbox with isolated input event bubbling safeguards.
+ * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE (CLICK GUI BUILD)
+ * Implements full cell-clicking movement matrices, dynamic piece selection,
+ * and unified card control rotational bounds.
  */
 
 // 1. CONFIGURABLE PIECE INTERACTION MATRIX
@@ -92,16 +93,15 @@ const PIECE_INTERACTION_TABLE = {
 };
 
 const tutorialStates = {
-  KING: { rotation: 0, activePieceType: 'KING', gridX: 1, gridY: 1, laserSourceDir: 'WEST' },
-  DEFENDER: { rotation: 0, activePieceType: 'DEFENDER', gridX: 1, gridY: 1, laserSourceDir: 'WEST' },
-  DEFLECTOR: { rotation: 0, activePieceType: 'DEFLECTOR', gridX: 1, gridY: 1, laserSourceDir: 'WEST' },
-  SWITCH: { rotation: 0, activePieceType: 'SWITCH', gridX: 1, gridY: 1, laserSourceDir: 'WEST' },
-  LASER: { rotation: 0, activePieceType: 'LASER', gridX: 1, gridY: 1 }
+  KING: { rotation: 0, activePieceType: 'KING', gridX: 1, gridY: 1, laserRotation: 1, laserX: 0, laserY: 1, selectedEntity: 'PIECE' },
+  DEFENDER: { rotation: 0, activePieceType: 'DEFENDER', gridX: 1, gridY: 1, laserRotation: 1, laserX: 0, laserY: 1, selectedEntity: 'PIECE' },
+  DEFLECTOR: { rotation: 0, activePieceType: 'DEFLECTOR', gridX: 1, gridY: 1, laserRotation: 1, laserX: 0, laserY: 1, selectedEntity: 'PIECE' },
+  SWITCH: { rotation: 0, activePieceType: 'SWITCH', gridX: 1, gridY: 1, laserRotation: 1, laserX: 0, laserY: 1, selectedEntity: 'PIECE' },
+  LASER: { rotation: 0, activePieceType: 'LASER', gridX: 1, gridY: 1, selectedEntity: 'LASER' }
 };
 
 window.togglePieceTutorial = function(cardElement, pieceKey) {
-  // CRITICAL FIX: Prevent dropdown selects or button clicks from firing card toggles via propagation
-  if (window.event && (window.event.target.tagName === 'BUTTON' || window.event.target.tagName === 'SELECT' || window.event.target.closest('.sandbox-interactive-controls') || window.event.target.closest('.laser-sandbox-controls'))) {
+  if (window.event && (window.event.target.tagName === 'BUTTON' || window.event.target.tagName === 'SELECT' || window.event.target.closest('.gui-controls') || window.event.target.tagName === 'rect')) {
     return;
   }
 
@@ -120,13 +120,47 @@ window.togglePieceTutorial = function(cardElement, pieceKey) {
   }
 };
 
+// Unified Rotation Interface targeting the selected entity
 window.rotateTutorialPiece = function(pieceKey, direction) {
   if (window.event) window.event.stopPropagation();
   
   const state = tutorialStates[pieceKey];
   if (!state) return;
 
-  state.rotation = (state.rotation + direction + 4) % 4;
+  if (pieceKey === 'LASER' || state.selectedEntity === 'PIECE') {
+    state.rotation = (state.rotation + direction + 4) % 4;
+  } else if (state.selectedEntity === 'LASER') {
+    state.laserRotation = (state.laserRotation + direction + 4) % 4;
+  }
+  
+  renderSandbox(pieceKey);
+};
+
+window.selectTutorialEntity = function(pieceKey, entity) {
+  if (window.event) window.event.stopPropagation();
+  const state = tutorialStates[pieceKey];
+  if (state) {
+    state.selectedEntity = entity;
+    renderSandbox(pieceKey);
+  }
+};
+
+window.handleGridCellClick = function(pieceKey, x, y) {
+  if (window.event) window.event.stopPropagation();
+  const state = tutorialStates[pieceKey];
+  if (!state) return;
+
+  if (pieceKey === 'LASER' || state.selectedEntity === 'PIECE') {
+    // Block stacking entities over each other
+    if (pieceKey !== 'LASER' && x === state.laserX && y === state.laserY) return;
+    state.gridX = x;
+    state.gridY = y;
+  } else if (state.selectedEntity === 'LASER') {
+    if (x === state.gridX && y === state.gridY) return;
+    state.laserX = x;
+    state.laserY = y;
+  }
+
   renderSandbox(pieceKey);
 };
 
@@ -139,28 +173,10 @@ window.changeSandboxPieceType = function(pieceKey, selectElement) {
   }
 };
 
-window.changeSandboxPosition = function(pieceKey, axis, selectElement) {
-  if (window.event) window.event.stopPropagation();
-  const state = tutorialStates[pieceKey];
-  if (state) {
-    state[axis] = parseInt(selectElement.value, 10);
-    renderSandbox(pieceKey);
-  }
-};
-
-window.changeLaserSourceDirection = function(pieceKey, selectElement) {
-  if (window.event) window.event.stopPropagation();
-  const state = tutorialStates[pieceKey];
-  if (state) {
-    state.laserSourceDir = selectElement.value;
-    renderSandbox(pieceKey);
-  }
-};
-
 /**
  * STANDALONE TACTICAL LASER VECTOR ENGINE
  */
-function traceLaserEngine(pieceKey, currentRotation) {
+function traceLaserEngine(pieceKey) {
   const CELL_SIZE = 100;
   const state = tutorialStates[pieceKey];
   let currentX, currentY, currentDir;
@@ -175,16 +191,17 @@ function traceLaserEngine(pieceKey, currentRotation) {
   if (pieceKey === 'LASER') {
     currentX = state.gridX;
     currentY = state.gridY;
-    if (currentRotation === 0) currentDir = 'NORTH';
-    if (currentRotation === 1) currentDir = 'EAST';
-    if (currentRotation === 2) currentDir = 'SOUTH';
-    if (currentRotation === 3) currentDir = 'WEST';
+    if (state.rotation === 0) currentDir = 'NORTH';
+    if (state.rotation === 1) currentDir = 'EAST';
+    if (state.rotation === 2) currentDir = 'SOUTH';
+    if (state.rotation === 3) currentDir = 'WEST';
   } else {
-    const srcDir = state.laserSourceDir || 'WEST';
-    if (srcDir === 'WEST')  { currentX = 0; currentY = 1; currentDir = 'EAST'; }
-    if (srcDir === 'NORTH') { currentX = 1; currentY = 0; currentDir = 'SOUTH'; }
-    if (srcDir === 'EAST')  { currentX = 2; currentY = 1; currentDir = 'WEST'; }
-    if (srcDir === 'SOUTH') { currentX = 1; currentY = 2; currentDir = 'NORTH'; }
+    currentX = state.laserX;
+    currentY = state.laserY;
+    if (state.laserRotation === 0) currentDir = 'NORTH';
+    if (state.laserRotation === 1) currentDir = 'EAST';
+    if (state.laserRotation === 2) currentDir = 'SOUTH';
+    if (state.laserRotation === 3) currentDir = 'WEST';
   }
 
   let startX = currentX * CELL_SIZE + CELL_SIZE / 2;
@@ -225,7 +242,7 @@ function traceLaserEngine(pieceKey, currentRotation) {
       if (currentDir === 'WEST') inboundDir = 'EAST';
 
       const matrix = PIECE_INTERACTION_TABLE[state.activePieceType];
-      const cellConfig = matrix?.[inboundDir]?.[currentRotation] || matrix?.[inboundDir];
+      const cellConfig = matrix?.[inboundDir]?.[state.rotation];
 
       if (cellConfig) {
         if (cellConfig.isDestroyed) {
@@ -259,9 +276,9 @@ function renderSandbox(pieceKey) {
   const state = tutorialStates[pieceKey];
   const CELL_SIZE = 100;
 
-  const physics = traceLaserEngine(pieceKey, state.rotation);
+  const physics = traceLaserEngine(pieceKey);
 
-  // 1. Grid Background
+  // 1. Interactive Grid Overlay
   const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   for (let y = 0; y < 3; y++) {
     for (let x = 0; x < 3; x++) {
@@ -273,12 +290,14 @@ function renderSandbox(pieceKey) {
       rect.setAttribute('fill', 'rgba(0, 0, 0, 0.65)');
       rect.setAttribute('stroke', 'rgba(255, 255, 255, 0.05)');
       rect.setAttribute('stroke-width', '1.5');
+      rect.setAttribute('class', 'cursor-crosshair hover:fill-white/5 transition-colors duration-150');
+      rect.setAttribute('onclick', `handleGridCellClick('${pieceKey}', ${x}, ${y})`);
       gridGroup.appendChild(rect);
     }
   }
   svgBoard.appendChild(gridGroup);
 
-  // 2. Vector Laser Rendering Layers
+  // 2. Vector Laser Beam Paths
   const laserGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   glow.setAttribute('d', physics.pathStr);
@@ -298,90 +317,62 @@ function renderSandbox(pieceKey) {
   laserGroup.appendChild(core);
   svgBoard.appendChild(laserGroup);
 
-  // 3. Render Sandbox UI Forms & Elements Dynamically
-  let controlsContainer = svgBoard.nextElementSibling;
-
+  // 3. Render Game Piece Modules
   if (pieceKey !== 'LASER') {
-    // Laser Source Node Layout Position Check
-    const srcDir = state.laserSourceDir || 'WEST';
-    let srcX = 5, srcY = 105, srcRot = 1;
-    if (srcDir === 'NORTH') { srcX = 105; srcY = 5;   srcRot = 2; }
-    if (srcDir === 'EAST')  { srcX = 205; srcY = 105; srcRot = 3; }
-    if (srcDir === 'SOUTH') { srcX = 105; srcY = 205; srcRot = 0; }
-
+    // Render External Laser Source Node
     const laserSrcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    laserSrcGroup.style.transformOrigin = `${srcX + 45}px ${srcY + 45}px`;
-    laserSrcGroup.style.transform = `rotate(${srcRot * 90}deg)`;
+    const lOrigX = state.laserX * CELL_SIZE + CELL_SIZE / 2;
+    const lOrigY = state.laserY * CELL_SIZE + CELL_SIZE / 2;
+    laserSrcGroup.style.transformOrigin = `${lOrigX}px ${lOrigY}px`;
+    laserSrcGroup.style.transform = `rotate(${state.laserRotation * 90}deg)`;
+    laserSrcGroup.style.transition = "transform 0.2s ease-out";
     
+    // Add glowing stroke border ring if laser source is selected
+    if (state.selectedEntity === 'LASER') {
+      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      ring.setAttribute('x', state.laserX * CELL_SIZE + 4);
+      ring.setAttribute('y', state.laserY * CELL_SIZE + 4);
+      ring.setAttribute('width', 92);
+      ring.setAttribute('height', 92);
+      ring.setAttribute('fill', 'none');
+      ring.setAttribute('stroke', 'rgba(3, 233, 244, 0.7)');
+      ring.setAttribute('stroke-width', '2');
+      svgBoard.appendChild(ring);
+    }
+
     const laserImg = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    laserImg.setAttribute('x', srcX);
-    laserImg.setAttribute('y', srcY);
+    laserImg.setAttribute('x', state.laserX * CELL_SIZE + 5);
+    laserImg.setAttribute('y', state.laserY * CELL_SIZE + 5);
     laserImg.setAttribute('width', 90);
     laserImg.setAttribute('height', 90);
     laserImg.setAttribute('href', `../pieces/bluelaser.png`);
     laserSrcGroup.appendChild(laserImg);
     svgBoard.appendChild(laserSrcGroup);
 
-    // Refresh control templates
-    if (!controlsContainer || !controlsContainer.classList.contains('sandbox-interactive-controls')) {
-      if (controlsContainer) controlsContainer.remove();
-      controlsContainer = document.createElement('div');
-      controlsContainer.className = "sandbox-interactive-controls mt-4 p-3 bg-black/40 border border-white/5 flex flex-col gap-2 rounded";
-      svgBoard.parentNode.insertBefore(controlsContainer, svgBoard.nextSibling);
-    }
-
-    controlsContainer.innerHTML = `
-      <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider mb-1">
-        <span class="text-gray-400">Piece Type:</span>
-        <select onchange="changeSandboxPieceType('${pieceKey}', this)" class="bg-black border border-white/20 text-theme text-[10px] p-1 rounded font-mono uppercase">
-          <option value="KING" ${state.activePieceType === 'KING' ? 'selected' : ''}>KING</option>
-          <option value="DEFENDER" ${state.activePieceType === 'DEFENDER' ? 'selected' : ''}>DEFENDER</option>
-          <option value="DEFLECTOR" ${state.activePieceType === 'DEFLECTOR' ? 'selected' : ''}>DEFLECTOR</option>
-          <option value="SWITCH" ${state.activePieceType === 'SWITCH' ? 'selected' : ''}>SWITCH</option>
-        </select>
-      </div>
-      <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider mb-1">
-        <span class="text-gray-400">Grid Position:</span>
-        <div class="flex gap-2">
-          <label class="text-[9px] text-gray-500 flex items-center gap-1 font-mono">X
-            <select onchange="changeSandboxPosition('${pieceKey}', 'gridX', this)" class="bg-black border border-white/20 text-white text-[10px] p-0.5 rounded font-mono">
-              <option value="0" ${state.gridX === 0 ? 'selected' : ''}>0</option>
-              <option value="1" ${state.gridX === 1 ? 'selected' : ''}>1</option>
-              <option value="2" ${state.gridX === 2 ? 'selected' : ''}>2</option>
-            </select>
-          </label>
-          <label class="text-[9px] text-gray-500 flex items-center gap-1 font-mono">Y
-            <select onchange="changeSandboxPosition('${pieceKey}', 'gridY', this)" class="bg-black border border-white/20 text-white text-[10px] p-0.5 rounded font-mono">
-              <option value="0" ${state.gridY === 0 ? 'selected' : ''}>0</option>
-              <option value="1" ${state.gridY === 1 ? 'selected' : ''}>1</option>
-              <option value="2" ${state.gridY === 2 ? 'selected' : ''}>2</option>
-            </select>
-          </label>
-        </div>
-      </div>
-      <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
-        <span class="text-gray-400">Laser Beam Source:</span>
-        <select onchange="changeLaserSourceDirection('${pieceKey}', this)" class="bg-black border border-white/20 text-theme text-[10px] p-1 rounded font-mono uppercase">
-          <option value="WEST" ${state.laserSourceDir === 'WEST' ? 'selected' : ''}>WEST (Left border)</option>
-          <option value="NORTH" ${state.laserSourceDir === 'NORTH' ? 'selected' : ''}>NORTH (Top border)</option>
-          <option value="EAST" ${state.laserSourceDir === 'EAST' ? 'selected' : ''}>EAST (Right border)</option>
-          <option value="SOUTH" ${state.laserSourceDir === 'SOUTH' ? 'selected' : ''}>SOUTH (Bottom border)</option>
-        </select>
-      </div>
-    `;
-
-    // Target Interactive Element Node Group
+    // Target piece rendering
     const pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    const computedOriginX = state.gridX * CELL_SIZE + CELL_SIZE / 2;
-    const computedOriginY = state.gridY * CELL_SIZE + CELL_SIZE / 2;
-    pieceGroup.style.transformOrigin = `${computedOriginX}px ${computedOriginY}px`;
+    const pOrigX = state.gridX * CELL_SIZE + CELL_SIZE / 2;
+    const pOrigY = state.gridY * CELL_SIZE + CELL_SIZE / 2;
+    pieceGroup.style.transformOrigin = `${pOrigX}px ${pOrigY}px`;
     pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
-    pieceGroup.style.transition = "transform 0.25s ease-out, filter 0.3s ease-in-out";
+    pieceGroup.style.transition = "transform 0.2s ease-out, filter 0.3s ease-in-out";
     
     if (physics.isDestroyed) {
       pieceGroup.style.filter = "grayscale(100%) brightness(0.4)";
     } else {
       pieceGroup.style.filter = "grayscale(0%) brightness(1.05) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6))";
+    }
+
+    if (state.selectedEntity === 'PIECE') {
+      const ring = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      ring.setAttribute('x', state.gridX * CELL_SIZE + 4);
+      ring.setAttribute('y', state.gridY * CELL_SIZE + 4);
+      ring.setAttribute('width', 92);
+      ring.setAttribute('height', 92);
+      ring.setAttribute('fill', 'none');
+      ring.setAttribute('stroke', 'rgba(3, 233, 244, 0.7)');
+      ring.setAttribute('stroke-width', '2');
+      svgBoard.appendChild(ring);
     }
 
     const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
@@ -394,43 +385,50 @@ function renderSandbox(pieceKey) {
     pieceGroup.appendChild(image);
     svgBoard.appendChild(pieceGroup);
 
-  } else {
-    // Setup controls for LASER card viewports exclusively
-    if (!controlsContainer || !controlsContainer.classList.contains('laser-sandbox-controls')) {
+    // Inject GUI selection toggles below the chessboard grid layout
+    let controlsContainer = svgBoard.nextElementSibling;
+    if (!controlsContainer || !controlsContainer.classList.contains('gui-controls')) {
       if (controlsContainer) controlsContainer.remove();
       controlsContainer = document.createElement('div');
-      controlsContainer.className = "laser-sandbox-controls mt-4 p-3 bg-black/40 border border-white/5 flex flex-col gap-2 rounded";
+      controlsContainer.className = "gui-controls mt-4 p-3 bg-black/40 border border-white/5 flex flex-col gap-3 rounded";
       svgBoard.parentNode.insertBefore(controlsContainer, svgBoard.nextSibling);
     }
 
     controlsContainer.innerHTML = `
       <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
-        <span class="text-gray-400">Move Emitter Node:</span>
-        <div class="flex gap-2">
-          <label class="text-[9px] text-gray-500 flex items-center gap-1 font-mono">X
-            <select onchange="changeSandboxPosition('${pieceKey}', 'gridX', this)" class="bg-black border border-white/20 text-white text-[10px] p-0.5 rounded font-mono">
-              <option value="0" ${state.gridX === 0 ? 'selected' : ''}>0</option>
-              <option value="1" ${state.gridX === 1 ? 'selected' : ''}>1</option>
-              <option value="2" ${state.gridX === 2 ? 'selected' : ''}>2</option>
-            </select>
-          </label>
-          <label class="text-[9px] text-gray-500 flex items-center gap-1 font-mono">Y
-            <select onchange="changeSandboxPosition('${pieceKey}', 'gridY', this)" class="bg-black border border-white/20 text-white text-[10px] p-0.5 rounded font-mono">
-              <option value="0" ${state.gridY === 0 ? 'selected' : ''}>0</option>
-              <option value="1" ${state.gridY === 1 ? 'selected' : ''}>1</option>
-              <option value="2" ${state.gridY === 2 ? 'selected' : ''}>2</option>
-            </select>
-          </label>
+        <span class="text-gray-400">Swap Active Piece:</span>
+        <select onchange="changeSandboxPieceType('${pieceKey}', this)" class="bg-black border border-white/20 text-theme text-[10px] p-1 rounded font-mono uppercase">
+          <option value="KING" ${state.activePieceType === 'KING' ? 'selected' : ''}>KING</option>
+          <option value="DEFENDER" ${state.activePieceType === 'DEFENDER' ? 'selected' : ''}>DEFENDER</option>
+          <option value="DEFLECTOR" ${state.activePieceType === 'DEFLECTOR' ? 'selected' : ''}>DEFLECTOR</option>
+          <option value="SWITCH" ${state.activePieceType === 'SWITCH' ? 'selected' : ''}>SWITCH</option>
+        </select>
+      </div>
+      <div class="flex items-center justify-between text-[11px] uppercase font-bold tracking-wider">
+        <span class="text-gray-400">Selection Control Focus:</span>
+        <div class="flex gap-1">
+          <button onclick="selectTutorialEntity('${pieceKey}', 'PIECE')" class="px-2 py-1 text-[9px] font-mono rounded border ${state.selectedEntity === 'PIECE' ? 'bg-theme/20 border-theme text-theme' : 'bg-white/5 border-white/10 text-gray-400'}">PIECE</button>
+          <button onclick="selectTutorialEntity('${pieceKey}', 'LASER')" class="px-2 py-1 text-[9px] font-mono rounded border ${state.selectedEntity === 'LASER' ? 'bg-theme/20 border-theme text-theme' : 'bg-white/5 border-white/10 text-gray-400'}">LASER SOURCE</button>
         </div>
       </div>
+      <div class="text-[10px] text-gray-500 font-mono text-center uppercase tracking-wider border-t border-white/5 pt-2">
+        💡 Tip: Click any square on the grid matrix layout above to move the selected entity.
+      </div>
     `;
+
+  } else {
+    // Specialized standalone Laser card handling
+    let controlsContainer = svgBoard.nextElementSibling;
+    if (controlsContainer && controlsContainer.classList.contains('gui-controls')) {
+      controlsContainer.remove();
+    }
 
     const laserSrcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const computedOriginX = state.gridX * CELL_SIZE + CELL_SIZE / 2;
     const computedOriginY = state.gridY * CELL_SIZE + CELL_SIZE / 2;
     laserSrcGroup.style.transformOrigin = `${computedOriginX}px ${computedOriginY}px`;
     laserSrcGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
-    laserSrcGroup.style.transition = "transform 0.25s ease-out";
+    laserSrcGroup.style.transition = "transform 0.2s ease-out";
     
     const laserImg = document.createElementNS('http://www.w3.org/2000/svg', 'image');
     laserImg.setAttribute('x', state.gridX * CELL_SIZE + 5);
