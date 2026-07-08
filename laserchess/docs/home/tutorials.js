@@ -1,6 +1,6 @@
 /**
- * LASER CHESS - TUTORIALS ENGINE (EXACT ASSET ALIGNMENT MATCH)
- * Matched precisely to raw project image orientations.
+ * LASER CHESS - TUTORIALS ENGINE (FLIPPED REFLECTION INTERACTIONS)
+ * Matched precisely to raw project image orientations with corrected mirror tracking.
  */
 
 const tutorialStates = {
@@ -63,8 +63,6 @@ function calculatePhysics(pieceKey, rotation) {
     case 'DEFENDER':
       // Native Asset: Shield is at the BOTTOM (Faces South) at rotation 0.
       // Rotation 1 (90° CW): Shield faces West (Blocks West laser safely!)
-      // Rotation 2 (180° CW): Shield faces North (Vulnerable from West)
-      // Rotation 3 (270° CW): Shield faces East (Vulnerable from West)
       if (rotation === 1) {
         pathStr = IN; 
         isDestroyed = false;
@@ -75,16 +73,13 @@ function calculatePhysics(pieceKey, rotation) {
       break;
 
     case 'DEFLECTOR':
-      // Native Asset: Mirror runs Top-Left to Bottom-Right.
-      // Rotation 0: Bounces West laser DOWN to South.
-      // Rotation 1: Exposes unmirrored back walls to West laser.
-      // Rotation 2: Bounces West laser UP to North.
-      // Rotation 3: Exposes unmirrored back walls to West laser.
-      if (rotation === 0) {
-        pathStr = `${IN} ${DOWN}`;
-        isDestroyed = false;
-      } else if (rotation === 2) {
+      // FLIPPED INTERACTION TABLE:
+      // Rotations 1 and 3 are now the active reflecting states facing the West beam.
+      if (rotation === 1) {
         pathStr = `${IN} ${UP}`;
+        isDestroyed = false;
+      } else if (rotation === 3) {
+        pathStr = `${IN} ${DOWN}`;
         isDestroyed = false;
       } else {
         pathStr = IN;
@@ -93,11 +88,12 @@ function calculatePhysics(pieceKey, rotation) {
       break;
 
     case 'SWITCH':
-      // Double sided diagonal mirror. Never destroyed.
+      // FLIPPED INTERACTION TABLE:
+      // Inverted reflection directions to match the flipped Deflector alignment.
       if (rotation === 0 || rotation === 2) {
-        pathStr = `${IN} ${DOWN}`;
-      } else {
         pathStr = `${IN} ${UP}`;
+      } else {
+        pathStr = `${IN} ${DOWN}`;
       }
       isDestroyed = false;
       break;
@@ -168,7 +164,6 @@ function renderSandbox(pieceKey) {
   pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
   pieceGroup.style.transition = "transform 0.2s ease-out, filter 0.2s ease-in-out";
   
-  // COLOR-CONSISTENT FEEDBACK: Preserves original piece blue/red integrity while projecting a structural hazard aura
   if (physics.isDestroyed) {
     pieceGroup.style.filter = "drop-shadow(0 0 16px rgba(220, 38, 38, 1)) brightness(1.1)";
   } else {
@@ -181,7 +176,6 @@ function renderSandbox(pieceKey) {
   image.setAttribute('width', 80);
   image.setAttribute('height', 80);
   
-  // Dynamic lookup to the asset folder path shown in your filetree
   const spritePath = `../pieces/blue${pieceKey.toLowerCase()}.png`;
   image.setAttribute('href', spritePath);
   image.setAttributeNS('http://www.w3.org/1999/xlink', 'href', spritePath);
