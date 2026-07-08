@@ -39,28 +39,28 @@ const PIECE_INTERACTION_TABLE = {
   },
   DEFLECTOR: {
     WEST: {
-      0: { reflect: 'NORTH', isDestroyed: false },
-      1: { reflect: 'SOUTH', isDestroyed: false },
-      2: { reflect: null, isDestroyed: true },
-      3: { reflect: 'SOUTH', isDestroyed: false }
+      0: { reflect: null, isDestroyed: true },
+      1: { reflect: null, isDestroyed: true },
+      2: { reflect: 'SOUTH', isDestroyed: false },
+      3: { reflect: 'NORTH', isDestroyed: false }
     },
     NORTH: {
-      0: { reflect: 'WEST', isDestroyed: false },
+      0: { reflect: null, isDestroyed: true },
       1: { reflect: null, isDestroyed: true },
       2: { reflect: 'EAST', isDestroyed: false },
-      3: { reflect: 'EAST', isDestroyed: false }
+      3: { reflect: 'WEST', isDestroyed: false }
     },
     EAST: {
       0: { reflect: null, isDestroyed: true },
-      1: { reflect: 'NORTH', isDestroyed: false },
+      1: { reflect: null, isDestroyed: true },
       2: { reflect: 'SOUTH', isDestroyed: false },
-      3: { reflect: 'SOUTH', isDestroyed: false }
+      3: { reflect: 'NORTH', isDestroyed: false }
     },
     SOUTH: {
-      0: { reflect: 'EAST', isDestroyed: false },
-      1: { reflect: 'EAST', isDestroyed: false },
+      0: { reflect: null, isDestroyed: false },
+      1: { reflect: null, isDestroyed: false },
       2: { reflect: 'WEST', isDestroyed: false },
-      3: { reflect: null, isDestroyed: true }
+      3: { reflect: 'EAST', isDestroyed: true }
     }
   },
   SWITCH: {
