@@ -1,40 +1,46 @@
 /**
  * LASER CHESS - TUTORIAL INTERACTIVE PHYSICS ENGINE
- * Integrated Configurable Matrix Build matching tactical UI paradigms.
+ * Complete integrated production build with a fully functional standalone multi-bounce 
+ * Laser Raycasting Engine mapped exactly to the configurable interaction table.
  */
 
 // 1. CONFIGURABLE PIECE INTERACTION MATRIX
-// Explicitly maps incoming laser trajectory from LEFT (West) -> RIGHT (East)
+// Maps the inbound direction of a laser beam to its deflection vector, absorption, or destruction behavior.
 const PIECE_INTERACTION_TABLE = {
   KING: {
-    0: { pathSuffix: '', isDestroyed: true },
-    1: { pathSuffix: '', isDestroyed: true },
-    2: { pathSuffix: '', isDestroyed: true },
-    3: { pathSuffix: '', isDestroyed: true }
+    0: { reflect: null, isDestroyed: true },
+    1: { reflect: null, isDestroyed: true },
+    2: { reflect: null, isDestroyed: true },
+    3: { reflect: null, isDestroyed: true }
   },
   DEFENDER: {
-    0: { pathSuffix: 'L 300 150', isDestroyed: true },  // THROUGH
-    1: { pathSuffix: '', isDestroyed: false },         // BLOCKED BY SHIELD Safely
-    2: { pathSuffix: 'L 300 150', isDestroyed: true },  // THROUGH
-    3: { pathSuffix: 'L 300 150', isDestroyed: true }   // THROUGH
+    // Shield at bottom at rot 0. Struck from North -> Blocks safely.
+    // In this tutorial sandbox, a mock West laser hits the piece.
+    0: { reflect: 'EAST', isDestroyed: true },   // Laser passes through / destroys
+    1: { reflect: null, isDestroyed: false },   // Shield faces West (Blocks safely!)
+    2: { reflect: 'EAST', isDestroyed: true },   
+    3: { reflect: 'EAST', isDestroyed: true }    
   },
   DEFLECTOR: {
-    0: { pathSuffix: '', isDestroyed: true },   // Reflects UP from West
-    1: { pathSuffix: ' ', isDestroyed: true }, // Reflects DOWN from West
-    2: { pathSuffix: 'L 150 300', isDestroyed: false },          // Dies from West laser
-    3: { pathSuffix: 'L 150 0', isDestroyed: false }  // Inherits rotation 2's old active path (DOWN)
+    // Explicit Interaction Rules for Tutorial Laser from West:
+    0: { reflect: 'NORTH', isDestroyed: false }, // Reflects UP
+    1: { reflect: 'SOUTH', isDestroyed: false }, // Reflects DOWN
+    2: { reflect: null, isDestroyed: true },     // Dies from West laser
+    3: { reflect: 'SOUTH', isDestroyed: false }  // Inherits rotation 2's old active path (DOWN)
   },
   SWITCH: {
-    0: { pathSuffix: 'L 150 0', isDestroyed: false },   // Companion mirror -> UP
-    1: { pathSuffix: 'L 150 300', isDestroyed: false }, // Companion mirror -> DOWN
-    2: { pathSuffix: 'L 150 300', isDestroyed: false }, // Companion mirror -> DOWN
-    3: { pathSuffix: 'L 150 300', isDestroyed: false }  // Companion mirror -> DOWN
+    // Companion double-sided mirror piece (Never destroyed):
+    0: { reflect: 'NORTH', isDestroyed: false }, // Reflects UP
+    1: { reflect: 'SOUTH', isDestroyed: false }, // Reflects DOWN
+    2: { reflect: 'SOUTH', isDestroyed: false }, // Reflects DOWN
+    3: { reflect: 'SOUTH', isDestroyed: false }  // Reflects DOWN
   },
   LASER: {
-    0: { pathOverride: 'M 150 150 L 150 0', isDestroyed: false },   // Fires North
-    1: { pathOverride: 'M 150 150 L 300 150', isDestroyed: false }, // Fires East
-    2: { pathOverride: 'M 150 150 L 150 300', isDestroyed: false }, // Fires South
-    3: { pathOverride: 'M 150 150 L 0 150', isDestroyed: false }    // Fires West
+    // Laser Emitter interactions if hit externally
+    0: { reflect: null, isDestroyed: false },
+    1: { reflect: null, isDestroyed: false },
+    2: { reflect: null, isDestroyed: false },
+    3: { reflect: null, isDestroyed: false }
   }
 };
 
@@ -75,22 +81,97 @@ window.rotateTutorialPiece = function(pieceKey, direction) {
 };
 
 /**
- * CONFIGURABLE PHYSICAL TRANSLATION
+ * STANDALONE TACTICAL LASER VECTOR ENGINE
+ * Traces steps through a 3x3 sandbox space.
+ * Automatically casts a laser ray originating from a real LASER SOURCE.
  */
-function calculatePhysics(pieceKey, rotation) {
-  const config = PIECE_INTERACTION_TABLE[pieceKey]?.[rotation];
-  if (!config) return { pathStr: 'M 0 150 L 150 150', isDestroyed: true };
+function traceLaserEngine(targetPieceKey, targetRotation) {
+  const CELL_SIZE = 100;
+  
+  // Define placement: Laser source resides at Cell (0, 1) [West Edge]. Target Piece resides at center (1, 1).
+  let currentX = 0;
+  let currentY = 1;
+  
+  // Establish direction vectors
+  const directions = {
+    NORTH: { dx: 0, dy: -1 },
+    EAST:  { dx: 1, dy: 0 },
+    SOUTH: { dx: 0, dy: 1 },
+    WEST:  { dx: -1, dy: 0 }
+  };
 
-  // If laser emitter node, use exact static override path coordinates
-  if (config.pathOverride) {
-    return { pathStr: config.pathOverride, isDestroyed: config.isDestroyed };
+  // Determine starting firing direction based on the current Laser Source rotation state
+  let laserSourceRotation = tutorialStates.LASER.rotation;
+  if (targetPieceKey === 'LASER') {
+    laserSourceRotation = targetRotation; // Dynamic sync if configuring the laser card itself
   }
 
-  // Otherwise calculate relative tracking path inbound from West grid edge
-  const basePath = 'M 0 150 L 150 150';
-  const pathStr = config.pathSuffix ? `${basePath} ${config.pathSuffix}` : basePath;
+  let currentDir = 'EAST'; // Initial sandbox traversal vectors
+  if (laserSourceRotation === 0) currentDir = 'NORTH';
+  if (laserSourceRotation === 1) currentDir = 'EAST';
+  if (laserSourceRotation === 2) currentDir = 'SOUTH';
+  if (laserSourceRotation === 3) currentDir = 'WEST';
 
-  return { pathStr, isDestroyed: config.isDestroyed };
+  // Laser beam coordinates array initialization
+  let startX = currentX * CELL_SIZE + CELL_SIZE / 2;
+  let startY = currentY * CELL_SIZE + CELL_SIZE / 2;
+  let points = [[startX, startY]];
+  
+  let isDestroyed = false;
+  let steps = 0;
+  const maxSteps = 10;
+
+  while (steps < maxSteps) {
+    steps++;
+    let vec = directions[currentDir];
+    
+    // Move to next cell center or edge point boundaries
+    let nextX = currentX + vec.dx;
+    let nextY = currentY + vec.dy;
+    
+    let targetX = nextX * CELL_SIZE + CELL_SIZE / 2;
+    let targetY = nextY * CELL_SIZE + CELL_SIZE / 2;
+
+    // Check bounds. If leaving the 3x3 sandbox, terminate segment at edge
+    if (nextX < 0 || nextX > 2 || nextY < 0 || nextY > 2) {
+      let edgeX = startX + vec.dx * (CELL_SIZE * 1.5);
+      let edgeY = startY + vec.dy * (CELL_SIZE * 1.5);
+      points.push([edgeX, edgeY]);
+      break;
+    }
+
+    // Append standard traversal grid vertex point
+    points.push([targetX, targetY]);
+    currentX = nextX;
+    currentY = nextY;
+
+    // Interaction point check: Center grid cell (1, 1) contains the sandbox element
+    if (currentX === 1 && currentY === 1 && targetPieceKey !== 'LASER') {
+      const config = PIECE_INTERACTION_TABLE[targetPieceKey]?.[targetRotation];
+      
+      if (config) {
+        if (config.isDestroyed) {
+          isDestroyed = true;
+          break; // Absorbed and terminated upon collision explosion
+        }
+        if (config.reflect === null) {
+          break; // Safely blocked or absorbed cleanly (e.g. Defender shield)
+        }
+        currentDir = config.reflect; // Modify ray projection trajectory
+      }
+    }
+
+    startX = targetX;
+    startY = targetY;
+  }
+
+  // Compile coordinates matrix into standard SVG Path definition string
+  let pathStr = `M ${points[0][0]} ${points[0][1]}`;
+  for (let i = 1; i < points.length; i++) {
+    pathStr += ` L ${points[i][0]} ${points[i][1]}`;
+  }
+
+  return { pathStr, isDestroyed };
 }
 
 function renderSandbox(pieceKey) {
@@ -101,7 +182,8 @@ function renderSandbox(pieceKey) {
   const state = tutorialStates[pieceKey];
   const CELL_SIZE = 100;
 
-  const physics = calculatePhysics(pieceKey, state.rotation);
+  // Run tracking calculations directly from the ported Laser Engine
+  const physics = traceLaserEngine(pieceKey, state.rotation);
 
   // 1. Cybernetic Grid Matrix Layer
   const gridGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -141,13 +223,30 @@ function renderSandbox(pieceKey) {
   laserGroup.appendChild(core);
   svgBoard.appendChild(laserGroup);
 
-  // 3. Piece Sprite Layer with Rotational Bounds
+  // 3. Render Sandbox Piece Entities
+  // Render Laser Source Node at Cell (0, 1) unless current card is testing the Laser piece directly
+  if (pieceKey !== 'LASER') {
+    const laserSrcGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    laserSrcGroup.style.transformOrigin = "50px 150px";
+    laserSrcGroup.style.transform = `rotate(${tutorialStates.LASER.rotation * 90}deg)`;
+    
+    const laserImg = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+    laserImg.setAttribute('x', 5);
+    laserImg.setAttribute('y', 105);
+    laserImg.setAttribute('width', 90);
+    laserImg.setAttribute('height', 90);
+    laserImg.setAttribute('href', `../pieces/bluelaser.png`);
+    laserSrcGroup.appendChild(laserImg);
+    svgBoard.appendChild(laserSrcGroup);
+  }
+
+  // Render Target Sandbox Interactive Element at center Cell (1, 1)
   const pieceGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
   pieceGroup.style.transformOrigin = "150px 150px";
   pieceGroup.style.transform = `rotate(${state.rotation * 90}deg)`;
   pieceGroup.style.transition = "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease-in-out";
   
-  // Rule Compliance: Gray out when destroyed state is met
+  // Rule Compliance: Gray out when destroyed state matrix is triggered
   if (physics.isDestroyed) {
     pieceGroup.style.filter = "grayscale(100%) brightness(0.4) contrast(0.9)";
   } else {
