@@ -1,70 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Laser Chess | Lobby</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  
-  <link rel="stylesheet" href="themes.css">
-
-  <script type="module" src="homeauthcheck.js"></script>
-  <script type="module" src="lobby.js"></script>
-  <script type="module" src="./tutorials.js"></script>
-</head>
-
-<body class="min-h-screen w-full flex flex-col m-0 p-0 text-white">
-  
-  <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] w-full box-border">
-    <div class="flex items-center space-x-4">
-      <h1 class="text-2xl font-black tracking-tighter italic drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">LASER CHESS</h1>
-    </div>
-    <div class="flex items-center space-x-6 text-[10px] tracking-widest uppercase">
-      <span class="text-gray-500 font-mono">OP ID:</span>
-      <span id="userEmail" class="text-theme font-bold shadow-theme">ACCOUNT SYNCING...</span>
-      <button id="signOutBtn" class="opacity-50 hover:opacity-100 hover:text-red-500 transition-colors font-bold ml-4">TERMINATE SESSION</button>
-    </div>
-  </header>
-
-  <main class="flex-grow flex flex-col justify-center items-center py-12 relative z-10 w-full overflow-hidden box-border">
-    <div class="text-center mt-4 mb-12 relative select-none">
-      <h1 class="text-6xl md:text-8xl lg:text-7xl font-black tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">READY FOR BATTLE?</h1>
-    </div>
-  </main>
-
-  <section id="the-rules" class="relative z-10 w-full bg-black/60 backdrop-blur-sm border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40">
-    <div class="max-w-7xl mx-auto">
+<section id="the-rules" class="relative z-10 w-full bg-black/60 backdrop-blur-sm border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40">
+  <div class="max-w-7xl mx-auto">
+    
+    <div class="mb-12 p-8 bg-theme-10 border border-theme-20 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+      <div class="flex flex-col gap-2">
+        <h3 class="text-white font-black tracking-widest uppercase text-sm">Interactive Training Modules</h3>
+        <p class="text-[10px] text-gray-400 font-mono uppercase tracking-widest">
+          Click any target piece below to initialize the live physics sandbox simulator.
+        </p>
+      </div>
       
-      <div class="mb-12 p-8 bg-theme-10 border border-theme-20 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
-        <div class="flex flex-col gap-2">
-          <h3 class="text-white font-black tracking-widest uppercase text-sm">Interactive Training Modules</h3>
-          <p class="text-[10px] text-gray-400 font-mono uppercase tracking-widest">
-            Click any target piece below to initialize the live physics sandbox simulator.
-          </p>
-        </div>
-        
-        <div class="flex flex-wrap gap-6 text-[10px] font-mono uppercase text-gray-400 bg-black/40 p-4 rounded border border-white/5">
-          <div class="flex items-center gap-2"><span class="w-4 h-4 bg-emerald-500/20 border border-emerald-500/50"></span> Legal Move</div>
-          <div class="flex items-center gap-2"><span class="w-4 h-4 border border-cyan-400/80"></span> Selected</div>
-          <div class="flex items-center gap-2"><span class="w-6 h-1 bg-cyan-400"></span> Active Laser</div>
-        </div>
+      <div class="flex flex-wrap gap-6 text-[10px] font-mono uppercase text-gray-400 bg-black/40 p-4 rounded border border-white/5">
+        <div class="flex items-center gap-2"><span class="w-4 h-4 bg-emerald-500/20 border border-emerald-500/50"></span> Legal Move</div>
+        <div class="flex items-center gap-2"><span class="w-4 h-4 border border-cyan-400/80"></span> Selected</div>
+        <div class="flex items-center gap-2"><span class="w-6 h-1 bg-cyan-400"></span> Active Laser</div>
       </div>
+    </div>
 
-      <div class="mb-24 text-left border-l-4 border-theme pl-8">
-        <h2 class="text-5xl md:text-7xl lg:text-8xl font-black italic tracking-tighter uppercase leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">THE RULES</h2>
-      </div>
+    <div class="mb-24 text-left border-l-4 border-theme pl-8">
+      <h2 class="text-5xl md:text-7xl lg:text-8xl font-black italic tracking-tighter uppercase leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">THE RULES</h2>
+    </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]"
+           data-tutorial-id="KING"
+           onclick="togglePieceTutorial(this, 'KING')">
+        </div>
+
+      <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]"
+           data-tutorial-id="SWITCH"
+           onclick="togglePieceTutorial(this, 'SWITCH')">
         </div>
       
-    </div>
-  </section>
-
-  <footer class="fixed bottom-0 left-0 w-full p-4 text-center text-gray-600 text-[9px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/90 backdrop-blur-md z-50 box-border">
-    <span>ALPHA BUILD v1.0 /// REPORT GLITCH // SUGGEST FEATURE</span>
-  </footer>
-
-</body>
-</html>
+      </div>
+    
+  </div>
+</section>
