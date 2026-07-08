@@ -34,11 +34,10 @@
     </a>
   </section>
 
-  <!-- RULES SECTION MOVED TO TOP -->
+  <!-- RULES SECTION FIRST -->
   <section id="the-rules" class="relative z-10 w-full bg-black/60 backdrop-blur-sm border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)] overflow-hidden box-border">
     <div class="max-w-7xl mx-auto">
       
-      <!-- TRAINING GUIDE INTERFACE -->
       <div class="mb-12 p-8 bg-theme-10 border border-theme-20 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
         <div class="flex flex-col gap-2">
           <h3 class="text-white font-black tracking-widest uppercase text-sm">Interactive Training Modules</h3>
@@ -47,7 +46,6 @@
           </p>
         </div>
         
-        <!-- MINI COLOR LEGEND -->
         <div class="flex flex-wrap gap-8 text-[15px] font-mono uppercase text-gray-400 bg-black/40 p-6 rounded border border-white/5">
           <div class="flex items-center gap-3"><span class="w-5 h-5 bg-emerald-500/20 border border-emerald-500/50"></span> Legal Move</div>
           <div class="flex items-center gap-3"><span class="w-5 h-5 border border-cyan-400/80"></span> Selected</div>
@@ -65,7 +63,8 @@
           <span class="text-theme mr-4 font-mono text-lg">01</span> THE PIECES
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- (Rule cards remain identical) -->
+          
+          <!-- KING -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="KING" onclick="togglePieceTutorial(this, 'KING')">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -82,13 +81,97 @@
               <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
             </div>
           </div>
-          <!-- (Remaining cards omitted for brevity, maintain standard card structure) -->
+
+          <!-- SWITCH -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="SWITCH" onclick="togglePieceTutorial(this, 'SWITCH')">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">SWITCH</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">UTILITY</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">Mirrored on both sides. It cannot be eliminated. Special: Can swap positions with an adjacent Defender or Deflector without rotating.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-SWITCH" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="flex space-x-4 mt-4">
+                <button onclick="rotateTutorialPiece('SWITCH', -1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[12px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">⟲ CCW</button>
+                <button onclick="rotateTutorialPiece('SWITCH', 1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[12px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">CW ⟳</button>
+              </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-theme font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>STATUS: INVULNERABLE</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
+          </div>
+
+          <!-- DEFENDER -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="DEFENDER" onclick="togglePieceTutorial(this, 'DEFENDER')">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">DEFENDER</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">SHIELD</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">Equipped with a shielded front that safely blocks lasers. It remains in play if hit on the shield, but is destroyed if hit on the sides or back.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-DEFENDER" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="flex space-x-4 mt-4">
+                <button onclick="rotateTutorialPiece('DEFENDER', -1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[12px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">⟲ CCW</button>
+                <button onclick="rotateTutorialPiece('DEFENDER', 1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[12px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">CW ⟳</button>
+              </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-gray-400 font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>VULNERABILITY: SIDE/REAR</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
+          </div>
+
+          <!-- DEFLECTOR -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="DEFLECTOR" onclick="togglePieceTutorial(this, 'DEFLECTOR')">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">DEFLECTOR</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">MIRROR</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">The main tactical unit. One side reflects the beam at exactly 90°. If struck on any of the other three non-mirrored sides, it is eliminated.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-DEFLECTOR" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="flex space-x-4 mt-4">
+                <button onclick="rotateTutorialPiece('DEFLECTOR', -1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[12px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">⟲ CCW</button>
+                <button onclick="rotateTutorialPiece('DEFLECTOR', 1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[12px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">CW ⟳</button>
+              </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-gray-400 font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>VULNERABILITY: 3 SIDES</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
+          </div>
+
+          <!-- LASER -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="LASER" onclick="togglePieceTutorial(this, 'LASER')">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">LASER</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">WEAPON</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">Permanent beam source located in the corner. It cannot move or be removed. It can be rotated to fire down the first column or across the first row.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center" onclick="event.stopPropagation();">
+              <svg id="svg-sandbox-LASER" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="flex space-x-4 mt-4">
+                <button onclick="rotateTutorialPiece('LASER', -1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[12px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">⟲ CCW</button>
+                <button onclick="rotateTutorialPiece('LASER', 1)" class="px-3 py-1 bg-white/5 border border-white/10 text-[12px] uppercase tracking-widest hover:bg-theme hover:text-black font-bold transition-all">CW ⟳</button>
+              </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-theme font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>STATUS: PERMANENT</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ TAP TO SIMULATE ]</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
   </section>
 
-  <!-- MAIN OPTIONS SECTION MOVED DOWN -->
+  <!-- MAIN OPTIONS SECOND -->
   <main class="flex-grow flex flex-col justify-center items-center py-20 relative z-10 w-full overflow-hidden box-border">
   
     <div class="text-center mt-4 mb-12 relative select-none">
