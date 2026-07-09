@@ -61,52 +61,55 @@
     </div>
 
     <script>
-        // --- 1. CORE CONFIGURATION & CONSTANTS ---
+        // --- 1. CORE ASSETS & CONSTANTS ---
         const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
         const CELL_SIZE = 100;
-        const DIRS = [ { dx: 0, dy: 1 }, { dx: 1, dy: 0 }, { dx: 0, dy: -1 }, { dx: -1, dy: 0 } ]; 
         
-        // Reserved spaces definition (x, y)
+        // Direction vectors matching tutorials.js physics setup
+        const DIRS_MAP = {
+            'NORTH': { dx: 0, dy: -1 },
+            'EAST':  { dx: 1, dy: 0 },
+            'SOUTH': { dx: 0, dy: 1 },
+            'WEST':  { dx: -1, dy: 0 }
+        };
+        const ROT_ARRAY = ['NORTH', 'EAST', 'SOUTH', 'WEST'];
+
+        // Reserved zones (x, y)
         const BLUE_RESERVED = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
         const RED_RESERVED = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
 
-        const INTERACTION_MAP = {
-            DEFLECTOR: {
-                0: { 0: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 2 }, 1: { action: 'destroy' }, 2: { action: 'destroy' } },
-                1: { 0: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 2 }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-                2: { 2: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 3: { action: 'destroy' } },
-                3: { 2: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 1: { action: 'destroy' } }
-            },
-            SWITCH: {
-                0: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
-                1: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } },
-                2: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
-                3: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } }
+        // Exact Comprehensive Interaction Table from tutorials.js
+        const PIECE_INTERACTION_TABLE = {
+            KING: {
+                NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+                EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+                SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+                WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
             },
             DEFENDER: {
-                0: { 0: { action: 'block' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-                1: { 1: { action: 'block' }, 0: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-                2: { 2: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 3: { action: 'destroy' } },
-                3: { 3: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' } }
+                NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+                EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
+                SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+                WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
             },
-            KING: {
-                0: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-                1: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-                2: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-                3: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } }
+            DEFLECTOR: {
+                WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
+                NORTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 'WEST', isDestroyed: false } },
+                EAST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+                SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }
             },
-            LASER: {
-                0: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
-                1: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
-                2: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
-                3: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } }
+            SWITCH: {
+                NORTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
+                EAST:  { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } },
+                SOUTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
+                WEST:  { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } }
             }
         };
 
-        // --- 2. GAME STATE (FULL BOARD SETUP) ---
+        // --- 2. INITIAL GAME STATE (FULL PASS AND PLAY LAYOUT) ---
         let gameState = {
             turn: 'BLUE', 
-            status: 'ACTIVE', // ACTIVE, BLUE_WIN, RED_WIN
+            status: 'ACTIVE',
             selected: null,
             laserPath: null,
             pieces: [
@@ -139,7 +142,7 @@
             ]
         };
 
-        // --- 3. HELPER FUNCTIONS ---
+        // --- 3. CORE LOGIC UTILITIES ---
         function log(msg, color = 'text-gray-400') {
             const l = document.getElementById('sys-log');
             l.innerHTML += `<div class="${color}">> ${msg}</div>`;
@@ -147,7 +150,6 @@
         }
 
         function getPieceAt(x, y) { return gameState.pieces.find(p => p.x === x && p.y === y); }
-        function normalizeRot(rot) { return ((rot || 0) % 4 + 4) % 4; }
         function inBounds(x, y) { return x >= 0 && x <= 9 && y >= 0 && y <= 7; }
         function isReservedSquare(x, y, color) {
             if (color === 'BLUE') return RED_RESERVED.some(s => s.x === x && s.y === y);
@@ -158,7 +160,6 @@
             const td = document.getElementById('turn-display');
             const accent = document.getElementById('turn-accent');
             td.innerText = `TURN: ${gameState.turn}`;
-            
             if (gameState.turn === 'RED') {
                 td.className = 'px-4 py-1 text-sm font-bold tracking-widest border border-red-500 text-red-500 bg-red-950/30';
                 accent.className = 'absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#f44336] to-transparent opacity-80';
@@ -168,73 +169,65 @@
             }
         }
 
-        // --- 4. PHYSICS ENGINE (LASER RAYCASTING) ---
-        function resolveLaserVector(shooterColor) {
-            const shooter = gameState.pieces.find(p => p.pieceType === 'LASER' && p.color === shooterColor);
-            if (!shooter) return null;
+        // --- 4. RAYCAST PHYSICS ENGINE (From Sandbox / tutorials.js) ---
+        function traceLaserEngine() {
+            const laser = gameState.pieces.find(p => p.pieceType === 'LASER' && p.color === gameState.turn);
+            if (!laser) return { pathStr: '', isDestroyed: false, hitPiece: null };
 
-            let dir = normalizeRot(shooter.rot);
-            let cx = shooter.x;
-            let cy = shooter.y;
+            let currentDir = ROT_ARRAY[laser.rot];
+            let cx = laser.x;
+            let cy = laser.y;
             
-            let pathStr = `M ${cx * CELL_SIZE + 50} ${(7 - cy) * CELL_SIZE + 50}`;
+            let points = [[cx * CELL_SIZE + 50, (7 - cy) * CELL_SIZE + 50]];
             let isDestroyed = false;
             let hitPiece = null;
-            let seen = new Set(); // Prevent infinite loops
+            let seen = new Set();
 
-            for (let step = 0; step < 30; step++) {
-                cx += DIRS[dir].dx;
-                cy += DIRS[dir].dy;
+            for (let step = 0; step < 35; step++) {
+                let vec = DIRS_MAP[currentDir];
+                cx += vec.dx; cy += vec.dy;
+                points.push([cx * CELL_SIZE + 50, (7 - cy) * CELL_SIZE + 50]);
 
-                // Hit boundary
-                if (!inBounds(cx, cy)) {
-                    pathStr += ` L ${cx * CELL_SIZE + 50} ${(7 - cy) * CELL_SIZE + 50}`;
-                    break;
-                }
+                if (!inBounds(cx, cy)) break;
 
-                pathStr += ` L ${cx * CELL_SIZE + 50} ${(7 - cy) * CELL_SIZE + 50}`;
-
-                const stateKey = `${cx},${cy},${dir}`;
-                if (seen.has(stateKey)) break; // Infinite loop detected
+                let stateKey = `${cx},${cy},${currentDir}`;
+                if (seen.has(stateKey)) break; // Prevent loop lockups
                 seen.add(stateKey);
 
-                const piece = getPieceAt(cx, cy);
-                if (piece) {
-                    const outcomeMap = INTERACTION_MAP[piece.pieceType];
-                    const outcome = outcomeMap ? outcomeMap[normalizeRot(piece.rot)]?.[dir] : null;
-
-                    if (!outcome || outcome.action === 'destroy') {
-                        isDestroyed = true;
-                        hitPiece = piece;
-                        break;
-                    } else if (outcome.action === 'block') {
-                        break;
-                    } else if (outcome.action === 'reflect') {
-                        dir = outcome.nextDir;
+                let hit = getPieceAt(cx, cy);
+                if (hit) {
+                    if (hit.pieceType === 'LASER') { break; } // Stopped on shooter body boundary block
+                    
+                    let inboundDir = { 'NORTH':'SOUTH', 'SOUTH':'NORTH', 'EAST':'WEST', 'WEST':'EAST' }[currentDir];
+                    let config = PIECE_INTERACTION_TABLE[hit.pieceType]?.[inboundDir]?.[ROT_ARRAY[hit.rot]];
+                    
+                    if (!config || config.isDestroyed) { 
+                        isDestroyed = true; 
+                        hitPiece = hit; 
+                        break; 
                     }
+                    if (!config.reflect) break;
+                    currentDir = config.reflect;
                 }
             }
-            return { pathStr, hitPiece, isDestroyed };
+            
+            const pathStr = points.reduce((acc, p, i) => acc + (i === 0 ? `M ${p[0]} ${p[1]}` : ` L ${p[0]} ${p[1]}`), '');
+            return { pathStr, isDestroyed, hitPiece };
         }
 
-        // --- 5. GAME LOGIC & TURN EXECUTION ---
+        // --- 5. TURN FIRE CONTROL FLOW ---
         function executeFireSequence() {
-            // Unselect visually
             gameState.selected = null;
             document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
 
-            // Raycast
-            const trace = resolveLaserVector(gameState.turn);
+            const trace = traceLaserEngine();
             gameState.laserPath = trace;
-            
-            renderBoard(); // Render the laser beam
+            renderBoard();
 
-            // Wait 1 second to show the beam, then resolve damages
             setTimeout(() => {
                 if (trace && trace.isDestroyed && trace.hitPiece) {
                     log(`Laser destroyed ${trace.hitPiece.color} ${trace.hitPiece.pieceType} at (${trace.hitPiece.x}, ${trace.hitPiece.y})`, 'text-red-500 font-bold');
-                    
-                    gameState.pieces = gameState.pieces.filter(p => p.id !== trace.hitPiece.id); // Remove dead piece
+                    gameState.pieces = gameState.pieces.filter(p => p.id !== trace.hitPiece.id);
                     
                     if (trace.hitPiece.pieceType === 'KING') {
                         const winner = trace.hitPiece.color === 'RED' ? 'BLUE' : 'RED';
@@ -242,33 +235,31 @@
                         alert(`GAME OVER! ${winner} WINS!`);
                         log(`MATCH CONCLUDED. ${winner} IS VICTORIOUS.`, 'text-yellow-400 font-bold');
                         renderBoard();
-                        return; // Stop game loop
+                        return;
                     }
                 }
 
-                // Swap turns if game is still active
                 if (gameState.status === 'ACTIVE') {
                     gameState.turn = gameState.turn === 'RED' ? 'BLUE' : 'RED';
-                    gameState.laserPath = null; // Clear laser for next turn
+                    gameState.laserPath = null;
                     updateTurnUI();
-                    log(`Turn swapped to ${gameState.turn}.`, 'text-white');
+                    log(`Turn shifted to ${gameState.turn}.`, 'text-white');
                     renderBoard();
                 }
             }, 1200);
         }
 
+        // --- 6. MOVEMENT AND INTERACTION CONTROL HANDLERS ---
         window.handleCellClick = (x, y) => {
             if (gameState.status !== 'ACTIVE') return;
             const clickedPiece = getPieceAt(x, y);
 
-            // Logic 1: We have a piece selected, attempting to MOVE or SWAP
             if (gameState.selected) {
                 const sx = gameState.selected.x;
                 const sy = gameState.selected.y;
                 const dx = Math.abs(x - sx);
                 const dy = Math.abs(y - sy);
 
-                // Clicking the same piece deselects
                 if (dx === 0 && dy === 0) {
                     clearSelection();
                     return;
@@ -278,50 +269,44 @@
                     const movingPiece = getPieceAt(sx, sy);
                     
                     if (movingPiece.pieceType === 'LASER') {
-                        log(`[!] Lasers cannot move.`, 'text-red-400');
+                        log(`[!] Lasers are statically fixed structures.`, 'text-red-400');
                         clearSelection();
                         return;
                     }
                     if (isReservedSquare(x, y, movingPiece.color)) {
-                        log(`[!] Cannot enter opponent's reserved zone.`, 'text-red-400');
+                        log(`[!] Movement blocked: Zone restricted to opponent.`, 'text-red-400');
                         clearSelection();
                         return;
                     }
 
-                    // Handle Swap Logic or Collision
                     if (clickedPiece) {
+                        // Switch Piece special swapping feature
                         if (movingPiece.pieceType === 'SWITCH' && (clickedPiece.pieceType === 'DEFLECTOR' || clickedPiece.pieceType === 'DEFENDER')) {
-                            // Valid Swap
                             if (isReservedSquare(sx, sy, clickedPiece.color)) {
                                 log(`[!] Swap failed: Pushes enemy into invalid zone.`, 'text-red-400');
                                 clearSelection();
                                 return;
                             }
-                            clickedPiece.x = sx;
-                            clickedPiece.y = sy;
-                            movingPiece.x = x;
-                            movingPiece.y = y;
+                            clickedPiece.x = sx; clickedPiece.y = sy;
+                            movingPiece.x = x; movingPiece.y = y;
                             log(`Swapped ${movingPiece.color} SWITCH with ${clickedPiece.color} ${clickedPiece.pieceType}.`, 'text-theme');
                             executeFireSequence();
                         } else {
-                            log(`[!] Square occupied.`, 'text-red-400');
+                            log(`[!] Target coordinates occupied.`, 'text-red-400');
                             clearSelection();
                         }
                     } else {
-                        // Standard Move
-                        movingPiece.x = x;
-                        movingPiece.y = y;
+                        movingPiece.x = x; movingPiece.y = y;
                         log(`Moved ${movingPiece.pieceType} to (${x}, ${y}).`, 'text-theme');
                         executeFireSequence();
                     }
                 } else {
-                    log(`[!] Invalid move range. Max 1 square.`, 'text-red-400');
+                    log(`[!] Invalid range grid space delta.`, 'text-red-400');
                 }
             } 
-            // Logic 2: Select a piece
             else if (clickedPiece) {
                 if (clickedPiece.color !== gameState.turn) {
-                    log(`[!] It is ${gameState.turn}'s turn.`, 'text-red-400');
+                    log(`[!] Operation blocked: Selection must belong to active player.`, 'text-red-400');
                     return;
                 }
                 gameState.selected = {x, y};
@@ -336,33 +321,32 @@
             
             if (p) {
                 if (p.pieceType === 'KING') {
-                    log(`[!] Kings cannot rotate.`, 'text-red-400');
+                    log(`[!] Critical error: Kings cannot be rotated.`, 'text-red-400');
                     return;
                 }
 
-                const newRot = normalizeRot(p.rot + dir);
+                const newRot = (p.rot + dir + 4) % 4;
 
-                // Laser rotation limits
                 if (p.pieceType === 'LASER') {
                     if (p.color === 'BLUE' && (newRot === 1 || newRot === 2)) {
-                        log(`[!] Blue Laser must face North(0) or West(3).`, 'text-red-400');
+                        log(`[!] Laser orientation out of bounds for current player.`, 'text-red-400');
                         return;
                     }
                     if (p.color === 'RED' && (newRot === 0 || newRot === 3)) {
-                        log(`[!] Red Laser must face South(2) or East(1).`, 'text-red-400');
+                        log(`[!] Laser orientation out of bounds for current player.`, 'text-red-400');
                         return;
                     }
                 }
 
                 p.rot = newRot;
-                log(`Rotated ${p.pieceType}.`, 'text-theme');
+                log(`Rotated ${p.pieceType} to ${ROT_ARRAY[p.rot]}.`, 'text-theme');
                 executeFireSequence();
             }
         };
 
         window.skipTurnAndFire = () => {
             if (gameState.status !== 'ACTIVE') return;
-            log(`Turn manually skipped. Initiating fire.`, 'text-yellow-400');
+            log(`Skip turn action declared. Firing weapon system...`, 'text-yellow-400');
             executeFireSequence();
         };
 
@@ -372,17 +356,15 @@
             renderBoard();
         };
 
-        // --- 6. SVG RENDERING ---
+        // --- 7. SVG GENERATION ENGINE (Isolated Origin Rotations) ---
         function renderBoard() {
             const svg = document.getElementById('game-board');
             svg.innerHTML = '';
             
-            // Draw Grid
+            // Generate Grid Squares
             for (let y = 0; y < 8; y++) {
                 for (let x = 0; x < 10; x++) {
                     const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    // Invert Y axis for drawing so (0,0) is bottom left mathematically for game logic, 
-                    // but visually drawn correctly in SVG space.
                     const drawY = 7 - y; 
                     r.setAttribute('x', x * CELL_SIZE); 
                     r.setAttribute('y', drawY * CELL_SIZE);
@@ -390,8 +372,7 @@
                     r.setAttribute('height', CELL_SIZE);
                     
                     let cls = 'grid-cell';
-                    if (isReservedSquare(x, y, 'BLUE') && isReservedSquare(x, y, 'RED')) cls += ''; // Overlap failsafe
-                    else if (isReservedSquare(x, y, 'RED')) cls += ' reserved-blue'; // Blue reserved blocks red
+                    if (isReservedSquare(x, y, 'RED')) cls += ' reserved-blue';
                     else if (isReservedSquare(x, y, 'BLUE')) cls += ' reserved-red'; 
 
                     if (gameState.selected?.x === x && gameState.selected?.y === y) cls += ' selected';
@@ -404,7 +385,7 @@
                 }
             }
 
-            // Draw Laser Path
+            // Draw Beam Path Artifacts
             if (gameState.laserPath) {
                 const c = gameState.turn === 'RED' ? 'rgba(244, 67, 54,' : 'rgba(3, 233, 244,';
                 const isD = gameState.laserPath.isDestroyed;
@@ -423,7 +404,7 @@
                 svg.appendChild(core);
             }
             
-            // Draw Pieces
+            // Render Piece Objects
             gameState.pieces.forEach(p => {
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 g.setAttribute('class', 'piece-group');
@@ -447,9 +428,9 @@
             });
         }
 
-        // Init Game
-        log("Tactical Grid Initialized.", "text-cyan-400 font-bold");
-        log("Pass and Play Local Mode.", "text-white");
+        // Initialize Core System
+        log("Tactical Grid System Hydrated.", "text-cyan-400 font-bold");
+        log("Pass and Play Mode online.", "text-white");
         updateTurnUI();
         renderBoard();
     </script>
