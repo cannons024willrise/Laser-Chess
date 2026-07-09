@@ -3,140 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laser Chess | Tactical Interface</title>
+    <title>Laser Chess | Tactical Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root {
-            --theme-color: #03e9f4;
-            --theme-rgb: 3, 233, 244;
-            --red-theme: #f44336;
-        }
-        body { font-family: "Quantico", sans-serif; background: #0a0a0a; color: white; min-height: 100vh; }
-        .rule-card { background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
-        .play-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(3, 233, 244, 0.3); color: var(--theme-color); transition: all 0.3s; }
-        .play-btn:hover { background: rgba(var(--theme-rgb), 0.2); box-shadow: 0 0 10px var(--theme-color); }
-        .grid-cell { transition: fill 0.2s; cursor: pointer; }
-        .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 3; }
-        .piece-group { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+        :root { --theme: #03e9f4; }
+        body { background: #0a0a0a; color: white; font-family: sans-serif; }
+        .grid-cell { cursor: crosshair; transition: fill 0.2s; }
+        .piece-group { transition: transform 0.3s cubic-bezier(0.17, 0.88, 0.32, 1.27); cursor: pointer; }
     </style>
 </head>
-<body class="p-8 flex justify-center">
+<body class="p-8">
 
-    <div class="flex gap-8 max-w-[1200px] w-full">
-        <div class="rule-card p-8 rounded-lg flex-grow">
-            <h2 class="text-2xl font-black uppercase mb-6 tracking-widest">Tactical Grid</h2>
-            <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/50 border border-white/10 w-full"></svg>
-        </div>
-
-        <div class="rule-card p-6 w-[300px] flex flex-col gap-4">
-            <h3 class="text-cyan-400 font-bold uppercase tracking-widest">Controls</h3>
-            <div id="selection-status" class="text-[10px] text-gray-500 uppercase font-mono mb-2">NO PIECE SELECTED</div>
-            <button onclick="rotateSelected(-1)" class="play-btn py-2">Rotate Left ⟲</button>
-            <button onclick="rotateSelected(1)" class="play-btn py-2">Rotate Right ⟳</button>
-            <button onclick="clearSelection()" class="play-btn py-2 border-red-500 text-red-500">Deselect</button>
-            <div id="sys-log" class="h-40 bg-black/50 p-2 text-[10px] font-mono text-gray-400 overflow-y-auto"></div>
-        </div>
+    <div class="max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold mb-6 text-cyan-400">Tactical Gameplay</h2>
+        <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/80 border border-white/10 w-full rounded shadow-2xl"></svg>
     </div>
 
     <script>
-        const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
-        const CELL_SIZE = 100;
-        let gameState = {
-            selected: null,
-            pieces: [
-                { id: 1, type: "KING", color: "BLUE", rot: 0, x: 4, y: 7 },
-                { id: 2, type: "KING", color: "RED", rot: 0, x: 5, y: 0 },
-                { id: 3, type: "LASER", color: "RED", rot: 0, x: 0, y: 0 },
-                { id: 4, type: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 4 }
-            ]
+        // 1. DATA & PHYSICS CONSTANTS
+        const PIECE_INTERACTION_TABLE = {
+            DEFLECTOR: {
+                WEST:  { 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
+                NORTH: { 0: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'WEST', isDestroyed: false } },
+                EAST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false } },
+                SOUTH: { 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false } }
+            }
         };
 
+        let gameState = {
+            pieces: [
+                { type: "LASER", color: "blue", x: 0, y: 0, rot: 1 },
+                { type: "DEFLECTOR", color: "blue", x: 2, y: 2, rot: 2 }
+            ],
+            selected: null
+        };
+
+        // 2. RAYCAST PHYSICS ENGINE
+        function traceLaser() {
+            const laser = gameState.pieces.find(p => p.type === 'LASER');
+            if (!laser) return { pathStr: '', isDestroyed: false };
+
+            let currentDir = ['NORTH', 'EAST', 'SOUTH', 'WEST'][laser.rot];
+            let cx = laser.x, cy = laser.y;
+            let points = [[cx * 100 + 50, cy * 100 + 50]];
+            let isDestroyed = false;
+
+            const DIRS = { NORTH: {dx:0, dy:-1}, EAST: {dx:1, dy:0}, SOUTH: {dx:0, dy:1}, WEST: {dx:-1, dy:0} };
+
+            for (let step = 0; step < 15; step++) {
+                let vec = DIRS[currentDir];
+                cx += vec.dx; cy += vec.dy;
+                points.push([cx * 100 + 50, cy * 100 + 50]);
+
+                let hit = gameState.pieces.find(p => p.x === cx && p.y === cy);
+                if (hit) {
+                    if (hit.type === 'KING') { isDestroyed = true; break; }
+                    let inbound = { NORTH:'SOUTH', SOUTH:'NORTH', EAST:'WEST', WEST:'EAST' }[currentDir];
+                    let config = PIECE_INTERACTION_TABLE[hit.type]?.[inbound]?.[hit.rot];
+                    if (!config || config.isDestroyed) { isDestroyed = true; break; }
+                    if (!config.reflect) break;
+                    currentDir = config.reflect;
+                }
+                if (cx < 0 || cx > 9 || cy < 0 || cy > 7) break;
+            }
+            return { pathStr: points.reduce((acc, p, i) => acc + (i === 0 ? `M ${p[0]} ${p[1]}` : ` L ${p[0]} ${p[1]}`), ''), isDestroyed };
+        }
+
+        // 3. RENDER ENGINE
         function renderBoard() {
             const svg = document.getElementById('game-board');
+            const physics = traceLaser();
             svg.innerHTML = '';
-            
-            // Draw Grid
-            for (let y = 0; y < 8; y++) {
-                for (let x = 0; x < 10; x++) {
-                    const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    r.setAttribute('x', x * CELL_SIZE); r.setAttribute('y', y * CELL_SIZE);
-                    r.setAttribute('width', CELL_SIZE); r.setAttribute('height', CELL_SIZE);
-                    r.setAttribute('class', `grid-cell ${gameState.selected?.x === x && gameState.selected?.y === y ? 'selected' : ''}`);
-                    r.setAttribute('fill', 'transparent');
-                    r.setAttribute('stroke', 'rgba(255,255,255,0.05)');
-                    r.setAttribute('onclick', `handleCellClick(${x},${y})`);
-                    svg.appendChild(r);
-                }
-            }
-            
+
+            // Draw Path
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', physics.pathStr);
+            path.setAttribute('stroke', physics.isDestroyed ? '#ef4444' : '#03e9f4');
+            path.setAttribute('stroke-width', '8');
+            path.setAttribute('fill', 'none');
+            svg.appendChild(path);
+
             // Draw Pieces
             gameState.pieces.forEach(p => {
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 g.setAttribute('class', 'piece-group');
-                g.style.transformOrigin = `${p.x * CELL_SIZE + 50}px ${p.y * CELL_SIZE + 50}px`;
+                g.style.transformOrigin = `${p.x * 100 + 50}px ${p.y * 100 + 50}px`;
                 g.style.transform = `rotate(${p.rot * 90}deg)`;
                 
                 const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-                img.setAttribute('x', p.x * CELL_SIZE + 5);
-                img.setAttribute('y', p.y * CELL_SIZE + 5);
+                img.setAttribute('href', `https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces/${p.color}${p.type.toLowerCase()}.png`);
+                img.setAttribute('x', p.x * 100 + 5);
+                img.setAttribute('y', p.y * 100 + 5);
                 img.setAttribute('width', 90); img.setAttribute('height', 90);
-                img.setAttribute('href', `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.type.toLowerCase()}.png`);
                 
                 g.appendChild(img);
-                g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
+                g.onclick = () => { p.rot = (p.rot + 1) % 4; renderBoard(); };
                 svg.appendChild(g);
             });
         }
-
-        window.handleCellClick = (x, y) => {
-            const clickedPiece = gameState.pieces.find(pc => pc.x === x && pc.y === y);
-
-            // Movement Logic
-            if (gameState.selected && !clickedPiece) {
-                const sx = gameState.selected.x;
-                const sy = gameState.selected.y;
-                const dx = Math.abs(x - sx);
-                const dy = Math.abs(y - sy);
-                
-                if (dx <= 1 && dy <= 1) {
-                    const movingPiece = gameState.pieces.find(pc => pc.x === sx && pc.y === sy);
-                    if (movingPiece.type === 'LASER') {
-                        document.getElementById('sys-log').innerHTML += `> [!] Error: Lasers are fixed.<br>`;
-                    } else {
-                        movingPiece.x = x;
-                        movingPiece.y = y;
-                        gameState.selected = null;
-                        document.getElementById('sys-log').innerHTML += `> Moved ${movingPiece.type} to (${x}, ${y})<br>`;
-                    }
-                } else {
-                    document.getElementById('sys-log').innerHTML += `> [!] Invalid move range.<br>`;
-                }
-            } 
-            // Selection Logic
-            else if (clickedPiece) {
-                gameState.selected = {x, y};
-                document.getElementById('selection-status').innerText = `SELECTED: ${clickedPiece.color} ${clickedPiece.type}`;
-            }
-            renderBoard();
-        };
-
-        window.rotateSelected = (dir) => {
-            if (!gameState.selected) return;
-            const p = gameState.pieces.find(pc => pc.x === gameState.selected.x && pc.y === gameState.selected.y);
-            if (p) {
-                p.rot = (p.rot + dir + 4) % 4;
-                document.getElementById('sys-log').innerHTML += `> Rotated ${p.type} to ${p.rot * 90}°<br>`;
-            }
-            renderBoard();
-        };
-
-        window.clearSelection = () => {
-            gameState.selected = null;
-            document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
-            renderBoard();
-        };
 
         renderBoard();
     </script>
