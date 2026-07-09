@@ -100,8 +100,6 @@ button.play-now-btn {
   height: 64px !important;
   background: #000 !important;
   color: var(--theme-color) !important;
-  font-family: 'customfont', sans-serif !important;
-  font-weight: 900 !important;
   letter-spacing: 0.4em !important;
   text-transform: uppercase !important;
   border: none !important; /* Removes default button border */
