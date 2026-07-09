@@ -91,13 +91,33 @@
         }
 
         window.handleCellClick = (x, y) => {
-            const p = gameState.pieces.find(pc => pc.x === x && pc.y === y);
-            if (p) {
+            const clickedPiece = gameState.pieces.find(pc => pc.x === x && pc.y === y);
+
+            // Movement Logic
+            if (gameState.selected && !clickedPiece) {
+                const sx = gameState.selected.x;
+                const sy = gameState.selected.y;
+                const dx = Math.abs(x - sx);
+                const dy = Math.abs(y - sy);
+                
+                if (dx <= 1 && dy <= 1) {
+                    const movingPiece = gameState.pieces.find(pc => pc.x === sx && pc.y === sy);
+                    if (movingPiece.type === 'LASER') {
+                        document.getElementById('sys-log').innerHTML += `> [!] Error: Lasers are fixed.<br>`;
+                    } else {
+                        movingPiece.x = x;
+                        movingPiece.y = y;
+                        gameState.selected = null;
+                        document.getElementById('sys-log').innerHTML += `> Moved ${movingPiece.type} to (${x}, ${y})<br>`;
+                    }
+                } else {
+                    document.getElementById('sys-log').innerHTML += `> [!] Invalid move range.<br>`;
+                }
+            } 
+            // Selection Logic
+            else if (clickedPiece) {
                 gameState.selected = {x, y};
-                document.getElementById('selection-status').innerText = `SELECTED: ${p.color} ${p.type}`;
-            } else {
-                gameState.selected = null;
-                document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
+                document.getElementById('selection-status').innerText = `SELECTED: ${clickedPiece.color} ${clickedPiece.type}`;
             }
             renderBoard();
         };
