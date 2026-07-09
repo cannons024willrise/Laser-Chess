@@ -23,7 +23,6 @@
         .grid-cell.reserved-blue { fill: rgba(3, 233, 244, 0.05); }
         .grid-cell.reserved-red { fill: rgba(244, 67, 54, 0.05); }
         .piece-group { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
-        #sys-log div { margin-bottom: 4px; }
     </style>
 </head>
 <body class="p-8 flex justify-center">
@@ -65,8 +64,6 @@
         const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
         const CELL_SIZE = 100;
         
-        // Fixed vectors to match visual SVG top-to-bottom matrix orientation 
-        // (NORTH goes UP visually, meaning y gets smaller; SOUTH goes DOWN visually, meaning y gets larger)
         const DIRS_MAP = {
             'NORTH': { dx: 0, dy: -1 },
             'EAST':  { dx: 1, dy: 0 },
@@ -75,11 +72,9 @@
         };
         const ROT_ARRAY = ['NORTH', 'EAST', 'SOUTH', 'WEST'];
 
-        // Reserved zones scaled to pure visual 0-7 vertical configuration
         const BLUE_RESERVED = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
         const RED_RESERVED = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
 
-        // Absolute verification maps from tutorials.js
         const PIECE_INTERACTION_TABLE = {
             KING: {
                 NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
@@ -107,7 +102,7 @@
             }
         };
 
-        // --- 2. INITIAL GAME STATE (CORRECT UNIFIED Y-AXIS FORMAT) ---
+        // --- 2. GAME STATE ---
         let gameState = {
             turn: 'BLUE', 
             status: 'ACTIVE',
@@ -143,10 +138,13 @@
             ]
         };
 
-        // --- 3. UI CONSOLE LOGGER ---
-        function log(msg, color = 'text-gray-400') {
+        // --- 3. SANITIZED INTERFACE LOGGING ---
+        function log(msg, colorClass = 'text-gray-400') {
             const l = document.getElementById('sys-log');
-            l.innerHTML += `<div class="${color}">> ${msg}</div>`;
+            const row = document.createElement('div');
+            row.className = colorClass;
+            row.innerText = "> " + msg;
+            l.appendChild(row);
             l.scrollTop = l.scrollHeight;
         }
 
@@ -161,7 +159,7 @@
         function updateTurnUI() {
             const td = document.getElementById('turn-display');
             const accent = document.getElementById('turn-accent');
-            td.innerText = `TURN: ${gameState.turn}`;
+            td.innerText = "TURN: " + gameState.turn;
             if (gameState.turn === 'RED') {
                 td.className = 'px-4 py-1 text-sm font-bold tracking-widest border border-red-500 text-red-500 bg-red-950/30';
                 accent.className = 'absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#f44336] to-transparent opacity-80';
@@ -171,7 +169,7 @@
             }
         }
 
-        // --- 4. UNIFIED RAYCAST ENGINE ---
+        // --- 4. RAYCAST ENGINE ---
         function traceLaserEngine() {
             const laser = gameState.pieces.find(p => p.pieceType === 'LASER' && p.color === gameState.turn);
             if (!laser) return { pathStr: '', isDestroyed: false, hitPiece: null };
@@ -190,20 +188,19 @@
                 cx += vec.dx; cy += vec.dy;
 
                 if (!inBounds(cx, cy)) {
-                    // Path hit out-of-bounds wall cleanly, draw final tip and stop
                     points.push([cx * CELL_SIZE + 50, cy * CELL_SIZE + 50]);
                     break;
                 }
 
                 points.push([cx * CELL_SIZE + 50, cy * CELL_SIZE + 50]);
 
-                let stateKey = `${cx},${cy},${currentDir}`;
+                let stateKey = cx + "," + cy + "," + currentDir;
                 if (seen.has(stateKey)) break;
                 seen.add(stateKey);
 
                 let hit = getPieceAt(cx, cy);
                 if (hit) {
-                    if (hit.pieceType === 'LASER') { break; } // Stopped right at weapon origin housing block
+                    if (hit.pieceType === 'LASER') break;
                     
                     let inboundDir = { 'NORTH':'SOUTH', 'SOUTH':'NORTH', 'EAST':'WEST', 'WEST':'EAST' }[currentDir];
                     let config = PIECE_INTERACTION_TABLE[hit.pieceType]?.[inboundDir]?.[ROT_ARRAY[hit.rot]];
@@ -213,16 +210,16 @@
                         hitPiece = hit; 
                         break; 
                     }
-                    if (!config.reflect) break; // Trapped safely inside armor grouping (Defender Block)
+                    if (!config.reflect) break;
                     currentDir = config.reflect;
                 }
             }
             
-            const pathStr = points.reduce((acc, p, i) => acc + (i === 0 ? `M ${p[0]} ${p[1]}` : ` L ${p[0]} ${p[1]}`), '');
+            const pathStr = points.reduce((acc, p, i) => acc + (i === 0 ? "M " + p[0] + " " + p[1] : " L " + p[0] + " " + p[1]), '');
             return { pathStr, isDestroyed, hitPiece };
         }
 
-        // --- 5. SEQUENTIAL GAMEPLAY CONTROL ---
+        // --- 5. TURN FIRE SEQUENCE ---
         function executeFireSequence() {
             gameState.selected = null;
             document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
@@ -233,14 +230,14 @@
 
             setTimeout(() => {
                 if (trace && trace.isDestroyed && trace.hitPiece) {
-                    log(`Laser scorched ${trace.hitPiece.color} ${trace.hitPiece.pieceType} at (${trace.hitPiece.x}, ${trace.hitPiece.y})`, 'text-red-500 font-bold');
+                    log("Laser scorched " + trace.hitPiece.color + " " + trace.hitPiece.pieceType + " at (" + trace.hitPiece.x + ", " + trace.hitPiece.y + ")", 'text-red-500 font-bold');
                     gameState.pieces = gameState.pieces.filter(p => p.id !== trace.hitPiece.id);
                     
                     if (trace.hitPiece.pieceType === 'KING') {
                         const winner = trace.hitPiece.color === 'RED' ? 'BLUE' : 'RED';
-                        gameState.status = `${winner}_WIN`;
-                        alert(`GAME OVER! ${winner} WINS!`);
-                        log(`CRITICAL CRASH: ${winner} CAPTURED VICTORY OBJECTIVE.`, 'text-yellow-400 font-bold');
+                        gameState.status = winner + "_WIN";
+                        alert("GAME OVER! " + winner + " WINS!");
+                        log("CRITICAL METRIC: " + winner + " IS VICTORIOUS.", 'text-yellow-400 font-bold');
                         renderBoard();
                         return;
                     }
@@ -250,13 +247,13 @@
                     gameState.turn = gameState.turn === 'RED' ? 'BLUE' : 'RED';
                     gameState.laserPath = null;
                     updateTurnUI();
-                    log(`Control systems initialized for ${gameState.turn}.`, 'text-white');
+                    log("Control terminal updated for " + gameState.turn + ".", 'text-white');
                     renderBoard();
                 }
             }, 1200);
         }
 
-        // --- 6. PLAYER SELECTION & ACTION HANDLERS ---
+        // --- 6. ACTION INTERACTION CONTROL ---
         window.handleCellClick = (x, y) => {
             if (gameState.status !== 'ACTIVE') return;
             const clickedPiece = getPieceAt(x, y);
@@ -276,48 +273,47 @@
                     const movingPiece = getPieceAt(sx, sy);
                     
                     if (movingPiece.pieceType === 'LASER') {
-                        log(`[!] Systems Error: Laser structure anchor points cannot move.`, 'text-red-400');
+                        log("Selection Error: Lasers are static frame structural nodes.", 'text-red-400');
                         clearSelection();
                         return;
                     }
                     if (isReservedSquare(x, y, movingPiece.color)) {
-                        log(`[!] Boundary Error: Access to territory denied.`, 'text-red-400');
+                        log("Boundary Error: Access to sector lane is restricted.", 'text-red-400');
                         clearSelection();
                         return;
                     }
 
                     if (clickedPiece) {
-                        // Switch swapping mechanism
                         if (movingPiece.pieceType === 'SWITCH' && (clickedPiece.pieceType === 'DEFLECTOR' || clickedPiece.pieceType === 'DEFENDER')) {
                             if (isReservedSquare(sx, sy, clickedPiece.color)) {
-                                log(`[!] Swap Conflict: Cannot move enemy into protected matrix.`, 'text-red-400');
+                                log("Swap Conflict: Target node calculation errors out.", 'text-red-400');
                                 clearSelection();
                                 return;
                             }
                             clickedPiece.x = sx; clickedPiece.y = sy;
                             movingPiece.x = x; movingPiece.y = y;
-                            log(`Displaced ${clickedPiece.color} ${clickedPiece.pieceType} using Switch displacement.`, 'text-theme');
+                            log("Displaced " + clickedPiece.color + " " + clickedPiece.pieceType + " via Switch.", 'text-theme');
                             executeFireSequence();
                         } else {
-                            log(`[!] Target sector fully occupied.`, 'text-red-400');
+                            log("Vector Blocked: Node location is currently occupied.", 'text-red-400');
                             clearSelection();
                         }
                     } else {
                         movingPiece.x = x; movingPiece.y = y;
-                        log(`Relocated ${movingPiece.pieceType} to grid node (${x}, ${y}).`, 'text-theme');
+                        log("Moved " + movingPiece.pieceType + " to cell coordinates (" + x + ", " + y + ").", 'text-theme');
                         executeFireSequence();
                     }
                 } else {
-                    log(`[!] Navigation Error: Range vector exceeds limitations.`, 'text-red-400');
+                    log("Range Error: Path calculation exceeds layout guidelines.", 'text-red-400');
                 }
             } 
             else if (clickedPiece) {
                 if (clickedPiece.color !== gameState.turn) {
-                    log(`[!] Command Error: Cannot interact with rival structures.`, 'text-red-400');
+                    log("Command Error: Selected object belongs to rival team.", 'text-red-400');
                     return;
                 }
                 gameState.selected = {x, y};
-                document.getElementById('selection-status').innerText = `SELECTED: ${clickedPiece.color} ${clickedPiece.pieceType}`;
+                document.getElementById('selection-status').innerText = "SELECTED: " + clickedPiece.color + " " + clickedPiece.pieceType;
                 renderBoard();
             }
         };
@@ -328,7 +324,7 @@
             
             if (p) {
                 if (p.pieceType === 'KING') {
-                    log(`[!] Command Error: Core structures cannot change alignment.`, 'text-red-400');
+                    log("Command Error: Kings cannot be rotated.", 'text-red-400');
                     return;
                 }
 
@@ -336,24 +332,24 @@
 
                 if (p.pieceType === 'LASER') {
                     if (p.color === 'BLUE' && (newRot === 1 || newRot === 2)) {
-                        log(`[!] Calibration Failed: System safety limits manual alignment.`, 'text-red-400');
+                        log("Calibration Failure: Safe directional locks triggered.", 'text-red-400');
                         return;
                     }
                     if (p.color === 'RED' && (newRot === 0 || newRot === 3)) {
-                        log(`[!] Calibration Failed: System safety limits manual alignment.`, 'text-red-400');
+                        log("Calibration Failure: Safe directional locks triggered.", 'text-red-400');
                         return;
                     }
                 }
 
                 p.rot = newRot;
-                log(`Realigned ${p.pieceType} toward vector axis: ${ROT_ARRAY[p.rot]}.`, 'text-theme');
+                log("Realigned " + p.pieceType + " along alignment vector " + ROT_ARRAY[p.rot] + ".", 'text-theme');
                 executeFireSequence();
             }
         };
 
         window.skipTurnAndFire = () => {
             if (gameState.status !== 'ACTIVE') return;
-            log(`Weapon terminal manual override initiated. Firing...`, 'text-yellow-400');
+            log("Manual loop override: Weapon discharge sequence triggered.", 'text-yellow-400');
             executeFireSequence();
         };
 
@@ -368,7 +364,7 @@
             const svg = document.getElementById('game-board');
             svg.innerHTML = '';
             
-            // Generate Grid Cells
+            // Draw Map Blocks
             for (let y = 0; y < 8; y++) {
                 for (let x = 0; x < 10; x++) {
                     const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -386,19 +382,19 @@
                     r.setAttribute('class', cls);
                     r.setAttribute('fill', 'transparent');
                     r.setAttribute('stroke', 'rgba(255,255,255,0.05)');
-                    r.setAttribute('onclick', `handleCellClick(${x},${y})`);
+                    r.setAttribute('onclick', "handleCellClick(" + x + "," + y + ")");
                     svg.appendChild(r);
                 }
             }
 
-            // Draw Weapon Output Beam Paths
+            // Render Particle Lasers
             if (gameState.laserPath) {
                 const c = gameState.turn === 'RED' ? 'rgba(244, 67, 54,' : 'rgba(3, 233, 244,';
                 const isD = gameState.laserPath.isDestroyed;
                 
                 const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 glow.setAttribute('d', gameState.laserPath.pathStr);
-                glow.setAttribute('stroke', isD ? 'rgba(255, 0, 0, 0.4)' : `${c} 0.35)`);
+                glow.setAttribute('stroke', isD ? 'rgba(255, 0, 0, 0.4)' : c + " 0.35)");
                 glow.setAttribute('stroke-width', '14'); glow.setAttribute('fill', 'none');
                 
                 const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -410,7 +406,7 @@
                 svg.appendChild(core);
             }
             
-            // Populate Functional Entities
+            // Draw Pieces
             gameState.pieces.forEach(p => {
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 g.setAttribute('class', 'piece-group');
@@ -418,24 +414,24 @@
                 const ox = p.x * CELL_SIZE + 50;
                 const oy = p.y * CELL_SIZE + 50;
                 
-                g.style.transformOrigin = `${ox}px ${oy}px`;
-                g.style.transform = `rotate(${p.rot * 90}deg)`;
+                g.style.transformOrigin = ox + "px " + oy + "px";
+                g.style.transform = "rotate(" + (p.rot * 90) + "deg)";
                 
                 const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
                 img.setAttribute('x', p.x * CELL_SIZE + 5);
                 img.setAttribute('y', p.y * CELL_SIZE + 5);
                 img.setAttribute('width', 90); img.setAttribute('height', 90);
-                img.setAttribute('href', `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.pieceType.toLowerCase()}.png`);
+                img.setAttribute('href', BASE_ASSET_URL + "/" + p.color.toLowerCase() + p.pieceType.toLowerCase() + ".png");
                 
                 g.appendChild(img);
-                g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
+                g.setAttribute('onclick', "handleCellClick(" + p.x + "," + p.y + ")");
                 svg.appendChild(g);
             });
         }
 
-        // Core execution sequence initializers
-        log("Tactical Grid Core Engine Stabilized.", "text-cyan-400 font-bold");
-        log("Pass and Play systems operating within nominal parameters.", "text-white");
+        // Initialize Base Runtime Loop
+        log("Tactical Grid Core Engine Hydrated.", "text-cyan-400 font-bold");
+        log("Pass and Play systems operational.", "text-white");
         updateTurnUI();
         renderBoard();
     </script>
