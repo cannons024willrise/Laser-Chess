@@ -34,6 +34,7 @@
     </a>
   </section>
 
+  <!-- RULES SECTION FIRST -->
   <section id="the-rules" class="relative z-10 w-full bg-black/60 backdrop-blur-sm border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)] overflow-hidden box-border">
     <div class="max-w-7xl mx-auto">
       
@@ -62,8 +63,10 @@
           <span class="text-theme mr-4 font-mono text-lg">01</span> THE PIECES
         </h3>
         
+        <!-- INTERACTIVE PIECES GRID -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
+          <!-- KING -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="KING">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -81,6 +84,7 @@
             </div>
           </div>
 
+          <!-- SWITCH -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="SWITCH">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -97,6 +101,7 @@
             </div>
           </div>
 
+          <!-- DEFENDER -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="DEFENDER">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -113,6 +118,7 @@
             </div>
           </div>
 
+          <!-- DEFLECTOR -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="DEFLECTOR">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -129,6 +135,7 @@
             </div>
           </div>
 
+          <!-- LASER -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="LASER">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -148,7 +155,9 @@
         </div>
       </div>
       
-      <div class="mb-32 grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <!-- STATIC INFO CARDS SECTION -->
+      <!-- ROW 1 (CARDS 02 & 03) -->
+      <div class="mb-12 grid grid-cols-1 lg:grid-cols-2 gap-12">
         
         <div class="rule-card relative p-10 lg:p-12">
           <div class="rule-card-accent"></div>
@@ -208,20 +217,53 @@
         </div>
       </div>
 
-      <div class="rule-card relative p-12 lg:p-16 text-center overflow-hidden border-theme-20 bg-theme-10">
-        <div class="rule-card-accent bottom-0 top-auto"></div>
-        <div class="relative z-10">
-          <h3 class="text-3xl font-black tracking-[0.3em] uppercase mb-6 text-theme">04 // AUTO FIRE SEQUENCE</h3>
-          <div class="w-24 h-1 bg-theme mx-auto mb-8 shadow-theme"></div>
-          <p class="max-w-3xl mx-auto text-[12px] uppercase tracking-[0.25em] leading-loose">
-            After every turn, your laser automatically fires. The beam bounces off mirrors until it leaves the board or hits a piece. Any piece struck on a non-mirrored side is instantly removed. You may rotate your Laser before firing.<span class="font-black bg-theme-10 border border-theme-20 px-4 py-2 block mt-6 text-sm">FRIENDLY FIRE COUNTS. WATCH YOUR OWN BEAM.</span>
+      <!-- ROW 2 (CARDS 04 & 05) -->
+      <div class="mb-32 grid grid-cols-1 lg:grid-cols-2 gap-12">
+        
+        <div class="rule-card relative p-10 lg:p-12 bg-theme-10 border-theme-20">
+          <div class="absolute top-0 left-0 w-full h-1 gradient-line-theme opacity-80"></div>
+          <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 text-theme flex items-center">
+            <span class="text-white mr-4 font-mono text-lg opacity-50">04</span> AUTO FIRE SEQUENCE
+          </h3>
+          <p class="text-gray-500 text-xs mb-6 uppercase tracking-widest font-mono border-b border-theme-20 pb-4">Post-Turn Automation Execution:</p>
+          <p class="text-[11px] text-gray-300 uppercase tracking-widest leading-relaxed mb-6">
+            After every turn, your laser automatically fires. The beam bounces off mirrors until it leaves the board or hits a piece. Any piece struck on a non-mirrored side is instantly removed. You may rotate your Laser before firing.
           </p>
+          <div class="p-3 bg-red-950/30 border border-red-500/20 text-center text-[10px] font-black tracking-wider text-red-400 uppercase rounded">
+            FRIENDLY FIRE COUNTS. WATCH YOUR OWN BEAM.
+          </div>
         </div>
+
+        <div class="rule-card relative p-10 lg:p-12">
+          <div class="rule-card-accent"></div>
+          <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 flex items-center">
+            <span class="text-theme mr-4 font-mono text-lg opacity-80">05</span> THREEFOLD REPETITION
+          </h3>
+          <p class="text-gray-500 text-xs mb-8 uppercase tracking-widest font-mono border-b border-theme-20 pb-4">Anti-Loop Stalemate Protocol:</p>
+          <div class="space-y-6">
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
+              <div>
+                <p class="text-[12px] font-bold uppercase tracking-widest mb-1">THE PROTOCOL</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">If the exact same tactical board configuration occurs three times during a single match, the system terminates operations and declares a draw.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
+              <div>
+                <p class="text-[12px] font-bold uppercase tracking-widest mb-1">STATE MATRIX VERIFICATION</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">An identical position requires all surviving pieces to occupy the exact same grid fields, retain identical rotation parameters, and have the same player's turn sequence active.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
   </section>
 
+  <!-- MAIN OPTIONS SECOND -->
   <main class="flex-grow flex flex-col justify-center items-center py-20 relative z-10 w-full overflow-hidden box-border">
   
     <div class="text-center mt-4 mb-12 relative select-none">
