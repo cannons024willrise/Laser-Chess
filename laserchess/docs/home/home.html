@@ -13,6 +13,12 @@
   
   <link rel="stylesheet" href="themes.css">
 
+  <script>
+    if (Math.random() < 0.5) {
+      document.documentElement.classList.add('theme-red');
+    }
+  </script>
+
   <style>
     body {
       font-family: "Quantico", sans-serif;
@@ -38,7 +44,6 @@
     </a>
   </section>
 
-  <!-- RULES SECTION FIRST -->
   <section id="the-rules" class="relative z-10 w-full bg-black/60 backdrop-blur-sm border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)] overflow-hidden box-border">
     <div class="max-w-7xl mx-auto">
       
@@ -67,10 +72,8 @@
           <span class="text-theme mr-4 font-mono text-lg">01</span> The pieces
         </h3>
         
-        <!-- INTERACTIVE PIECES GRID -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          <!-- KING -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="KING">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -88,7 +91,6 @@
             </div>
           </div>
 
-          <!-- SWITCH -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="SWITCH">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -105,7 +107,6 @@
             </div>
           </div>
 
-          <!-- DEFENDER -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="DEFENDER">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -122,7 +123,6 @@
             </div>
           </div>
 
-          <!-- DEFLECTOR -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="DEFLECTOR">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -139,7 +139,6 @@
             </div>
           </div>
 
-          <!-- LASER -->
           <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="LASER">
             <div class="rule-card-accent"></div>
             <div class="flex justify-between items-start mb-6">
@@ -159,8 +158,6 @@
         </div>
       </div>
       
-      <!-- STATIC INFO CARDS SECTION -->
-      <!-- ROW 1 (CARDS 02 & 03) -->
       <div class="mb-12 grid grid-cols-1 lg:grid-cols-2 gap-12">
         
         <div class="rule-card relative p-10 lg:p-12">
@@ -221,7 +218,6 @@
         </div>
       </div>
 
-      <!-- ROW 2 (CARDS 04 & 05) -->
       <div class="mb-32 grid grid-cols-1 lg:grid-cols-2 gap-12">
         
         <div class="rule-card relative p-10 lg:p-12 bg-theme-10 border-theme-20">
@@ -267,7 +263,6 @@
     </div>
   </section>
 
-  <!-- MAIN OPTIONS SECOND -->
   <main class="flex-grow flex flex-col justify-center items-center py-20 relative z-10 w-full overflow-hidden box-border">
   
     <div class="text-center mt-4 mb-12 relative select-none">
