@@ -52,7 +52,7 @@
     </div>
 
     <script>
-        const BASE_URL = "https://cannons024willrise.github.io/Laser-Chess";
+        const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
         const CELL_SIZE = 100;
         let gameState = {
             turn: 'RED', selected: null, laserPath: null,
@@ -91,9 +91,9 @@
                 img.setAttribute('y', p.y * CELL_SIZE + 5);
                 img.setAttribute('width', 90); img.setAttribute('height', 90);
                 
-                // Absolute Path Construction
+                // Using exact external URL pattern requested
                 const fileName = `${p.color.toLowerCase()}${p.type.toLowerCase()}.png`;
-                img.setAttribute('href', `${BASE_URL}/laserchess/docs/pieces/${fileName}`);
+                img.setAttribute('href', `${BASE_ASSET_URL}/${fileName}`);
                 
                 g.appendChild(img);
                 g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
