@@ -4,491 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laser Chess | Tactical Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap');
-
         :root {
             --theme-color: #03e9f4;
+            --theme-rgb: 3, 233, 244;
             --red-theme: #f44336;
-            --bg-color: #0a0a0a;
-            --panel-bg: rgba(20, 20, 20, 0.8);
-            --border-color: rgba(255, 255, 255, 0.1);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: "Quantico", sans-serif;
-            background-color: var(--bg-color);
-            color: white;
-            min-height: 100vh;
-            padding: 2rem;
-            display: flex;
-            justify-content: center;
-        }
-
-        /* --- LAYOUT --- */
-        .layout-wrapper {
-            display: flex;
-            gap: 2rem;
-            max-width: 1200px;
-            width: 100%;
-            flex-direction: column;
-        }
-        @media (min-width: 1024px) {
-            .layout-wrapper { flex-direction: row; }
-            .controls-panel { width: 350px; flex-shrink: 0; }
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            position: relative;
-        }
-
-        .board-panel {
-            flex-grow: 1;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- HEADER & UI ELEMENTS --- */
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        h2 { font-size: 1.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; }
-        h3 { color: var(--theme-color); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
-
-        .turn-display {
-            padding: 0.25rem 1rem;
-            font-size: 0.875rem;
-            font-weight: bold;
-            letter-spacing: 0.1em;
-            border: 1px solid var(--theme-color);
-            color: var(--theme-color);
-            background: rgba(3, 233, 244, 0.1);
-        }
-        .turn-display.red-turn {
-            border-color: var(--red-theme);
-            color: var(--red-theme);
-            background: rgba(244, 67, 54, 0.1);
-        }
-
-        .accent-bar {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(to right, transparent, var(--theme-color), transparent);
-        }
-        .accent-bar.red-turn {
-            background: linear-gradient(to right, transparent, var(--red-theme), transparent);
-        }
-
-        /* --- BOARD & SVG --- */
-        #game-board {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
-            width: 100%;
-            height: auto;
-            user-select: none;
-            display: block;
-        }
-
+        body { font-family: "Quantico", sans-serif; background: #0a0a0a; color: white; min-height: 100vh; }
+        .rule-card { background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        .play-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(3, 233, 244, 0.3); color: var(--theme-color); transition: all 0.3s; }
+        .play-btn:hover { background: rgba(var(--theme-rgb), 0.2); box-shadow: 0 0 10px var(--theme-color); }
         .grid-cell { transition: fill 0.2s; cursor: pointer; }
-        .grid-cell:hover { fill: rgba(255, 255, 255, 0.05); }
         .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 3; }
-        .grid-cell.reserved-blue { fill: rgba(3, 233, 244, 0.05); }
-        .grid-cell.reserved-red { fill: rgba(244, 67, 54, 0.05); }
         .piece-group { cursor: pointer; }
-
-        /* --- CONTROLS --- */
-        .status-text {
-            font-size: 10px; color: #888; text-transform: uppercase; font-family: monospace;
-            border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;
-        }
-
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
-        
-        .play-btn {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(3, 233, 244, 0.3);
-            color: var(--theme-color);
-            padding: 0.75rem;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            margin-bottom: 0.5rem;
-        }
-        .play-btn:hover { background: rgba(3, 233, 244, 0.2); box-shadow: 0 0 10px var(--theme-color); }
-        .play-btn:active { transform: scale(0.98); }
-        
-        .play-btn.btn-fire { border-color: #eab308; color: #eab308; }
-        .play-btn.btn-fire:hover { background: rgba(234, 179, 8, 0.2); box-shadow: 0 0 10px rgba(234, 179, 8, 0.5); }
-        
-        .play-btn.btn-deselect { border-color: var(--red-theme); color: var(--red-theme); }
-        .play-btn.btn-deselect:hover { background: rgba(244, 67, 54, 0.2); box-shadow: 0 0 10px rgba(244, 67, 54, 0.5); }
-
-        /* --- LOGGING --- */
-        .log-container {
-            flex-grow: 1;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
-            padding: 0.75rem;
-            font-size: 10px;
-            font-family: monospace;
-            overflow-y: auto;
-            height: 250px;
-            display: flex;
-            flex-direction: column;
-            margin-top: 1rem;
-        }
-        .log-container div { margin-bottom: 4px; }
-        .text-cyan { color: var(--theme-color); font-weight: bold; }
-        .text-white { color: #fff; }
-        .text-red { color: var(--red-theme); font-weight: bold; }
-        .text-yellow { color: #eab308; font-weight: bold; }
-        .text-gray { color: #aaa; }
     </style>
 </head>
-<body>
+<body class="p-8 flex justify-center">
 
-    <div class="layout-wrapper">
-        <div class="panel board-panel">
-            <div class="accent-bar" id="turn-accent"></div>
-            
-            <div class="header-row">
-                <h2>Tactical Grid</h2>
-                <div class="turn-display" id="turn-display">TURN: BLUE</div>
-            </div>
-            
-            <svg id="game-board" viewBox="0 0 1000 800"></svg>
+    <div class="flex gap-8 max-w-[1200px] w-full">
+        <div class="rule-card p-8 rounded-lg flex-grow">
+            <h2 class="text-2xl font-black uppercase mb-6 tracking-widest">Tactical Grid</h2>
+            <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/50 border border-white/10 w-full"></svg>
         </div>
 
-        <div class="panel controls-panel">
-            <h3>Controls</h3>
-            <div class="status-text" id="selection-status">NO PIECE SELECTED</div>
-            
-            <div class="btn-grid">
-                <button onclick="rotateSelected(-1)" class="play-btn">Rotate Left ⟲</button>
-                <button onclick="rotateSelected(1)" class="play-btn">Rotate Right ⟳</button>
-            </div>
-            
-            <button onclick="skipTurnAndFire()" class="play-btn btn-fire">🔥 Fire (Skip Move)</button>
-            <button onclick="clearSelection()" class="play-btn btn-deselect">Deselect</button>
-            
-            <h3 style="margin-top: 1rem; font-size: 0.75rem; color: #888;">System Log</h3>
-            <div class="log-container" id="sys-log"></div>
+        <div class="rule-card p-6 w-[300px] flex flex-col gap-4">
+            <h3 class="text-cyan-400 font-bold uppercase tracking-widest">Controls</h3>
+            <div id="selection-status" class="text-[10px] text-gray-500 uppercase font-mono mb-2">NO PIECE SELECTED</div>
+            <button onclick="rotateSelected(-1)" class="play-btn py-2">Rotate Left ⟲</button>
+            <button onclick="rotateSelected(1)" class="play-btn py-2">Rotate Right ⟳</button>
+            <button onclick="clearSelection()" class="play-btn py-2 border-red-500 text-red-500">Deselect</button>
+            <div id="sys-log" class="h-40 bg-black/50 p-2 text-[10px] font-mono text-gray-400 overflow-y-auto"></div>
         </div>
     </div>
 
     <script>
-        // --- 1. CORE ASSETS & CONSTANTS ---
         const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
         const CELL_SIZE = 100;
-        
-        const DIRS_MAP = {
-            'NORTH': { dx: 0, dy: -1 },
-            'EAST':  { dx: 1, dy: 0 },
-            'SOUTH': { dx: 0, dy: 1 },
-            'WEST':  { dx: -1, dy: 0 }
-        };
-        const ROT_ARRAY = ['NORTH', 'EAST', 'SOUTH', 'WEST'];
-
-        const BLUE_RESERVED = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
-        const RED_RESERVED = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
-
-        const PIECE_INTERACTION_TABLE = {
-            KING: {
-                NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-                EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-                SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-                WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-            },
-            DEFENDER: {
-                NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-                EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
-                SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-                WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-            },
-            DEFLECTOR: {
-                WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
-                NORTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 'WEST', isDestroyed: false } },
-                EAST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-                SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }
-            },
-            SWITCH: {
-                NORTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
-                EAST:  { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } },
-                SOUTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
-                WEST:  { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } }
-            }
-        };
-
-        // --- 2. GAME STATE ---
         let gameState = {
-            turn: 'BLUE', 
-            status: 'ACTIVE',
             selected: null,
-            laserPath: null,
             pieces: [
-                {id: 1, pieceType: "KING", color: "BLUE", rot: 2, x: 4, y: 7},
-                {id: 2, pieceType: "KING", color: "RED", rot: 0, x: 5, y: 0},
-                {id: 3, pieceType: "DEFENDER", color: "RED", rot: 2, x: 4, y: 0},
-                {id: 4, pieceType: "DEFENDER", color: "RED", rot: 2, x: 6, y: 0},
-                {id: 5, pieceType: "DEFENDER", color: "BLUE", rot: 0, x: 5, y: 7},
-                {id: 6, pieceType: "DEFENDER", color: "BLUE", rot: 0, x: 3, y: 7},
-                {id: 7, pieceType: "SWITCH", color: "BLUE", rot: 0, x: 5, y: 4},
-                {id: 8, pieceType: "SWITCH", color: "BLUE", rot: 1, x: 4, y: 4},
-                {id: 9, pieceType: "SWITCH", color: "RED", rot: 0, x: 4, y: 3},
-                {id: 10, pieceType: "SWITCH", color: "RED", rot: 1, x: 5, y: 3},
-                {id: 11, pieceType: "LASER", color: "RED", rot: 2, x: 0, y: 0},
-                {id: 12, pieceType: "DEFLECTOR", color: "BLUE", rot: 0, x: 2, y: 7},
-                {id: 13, pieceType: "DEFLECTOR", color: "BLUE", rot: 0, x: 2, y: 4},
-                {id: 14, pieceType: "DEFLECTOR", color: "BLUE", rot: 1, x: 2, y: 3},
-                {id: 15, pieceType: "DEFLECTOR", color: "RED", rot: 2, x: 0, y: 4},
-                {id: 16, pieceType: "DEFLECTOR", color: "RED", rot: 3, x: 0, y: 3},
-                {id: 17, pieceType: "DEFLECTOR", color: "BLUE", rot: 3, x: 7, y: 6},
-                {id: 18, pieceType: "DEFLECTOR", color: "RED", rot: 2, x: 6, y: 5},
-                {id: 19, pieceType: "DEFLECTOR", color: "RED", rot: 2, x: 7, y: 3},
-                {id: 20, pieceType: "DEFLECTOR", color: "RED", rot: 3, x: 7, y: 4},
-                {id: 21, pieceType: "DEFLECTOR", color: "BLUE", rot: 1, x: 9, y: 4},
-                {id: 22, pieceType: "DEFLECTOR", color: "BLUE", rot: 0, x: 9, y: 3},
-                {id: 23, pieceType: "DEFLECTOR", color: "BLUE", rot: 0, x: 3, y: 2},
-                {id: 24, pieceType: "DEFLECTOR", color: "RED", rot: 1, x: 2, y: 1},
-                {id: 25, pieceType: "DEFLECTOR", color: "RED", rot: 2, x: 7, y: 0},
-                {id: 26, pieceType: "LASER", color: "BLUE", rot: 0, x: 9, y: 7}
+                { id: 1, type: "KING", color: "BLUE", rot: 0, x: 4, y: 7 },
+                { id: 2, type: "KING", color: "RED", rot: 0, x: 5, y: 0 },
+                { id: 3, type: "LASER", color: "RED", rot: 0, x: 0, y: 0 },
+                { id: 4, type: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 4 }
             ]
         };
 
-        // --- 3. SANITIZED LOGGING ---
-        function log(msg, colorClass = 'text-gray') {
-            const l = document.getElementById('sys-log');
-            const row = document.createElement('div');
-            row.className = colorClass;
-            row.innerText = "> " + msg;
-            l.appendChild(row);
-            l.scrollTop = l.scrollHeight;
-        }
-
-        function getPieceAt(x, y) { return gameState.pieces.find(p => p.x === x && p.y === y); }
-        function inBounds(x, y) { return x >= 0 && x <= 9 && y >= 0 && y <= 7; }
-        
-        function isReservedSquare(x, y, color) {
-            if (color === 'BLUE') return RED_RESERVED.some(s => s.x === x && s.y === y);
-            return BLUE_RESERVED.some(s => s.x === x && s.y === y);
-        }
-
-        function updateTurnUI() {
-            const td = document.getElementById('turn-display');
-            const accent = document.getElementById('turn-accent');
-            td.innerText = "TURN: " + gameState.turn;
-            if (gameState.turn === 'RED') {
-                td.className = "turn-display red-turn";
-                accent.className = "accent-bar red-turn";
-            } else {
-                td.className = "turn-display";
-                accent.className = "accent-bar";
-            }
-        }
-
-        // --- 4. RAYCAST ENGINE ---
-        function traceLaserEngine() {
-            const laser = gameState.pieces.find(p => p.pieceType === 'LASER' && p.color === gameState.turn);
-            if (!laser) return { pathStr: '', isDestroyed: false, hitPiece: null };
-
-            let currentDir = ROT_ARRAY[laser.rot];
-            let cx = laser.x;
-            let cy = laser.y;
+        function renderBoard() {
+            const svg = document.getElementById('game-board');
+            svg.innerHTML = '';
             
-            let points = [[cx * CELL_SIZE + 50, cy * CELL_SIZE + 50]];
-            let isDestroyed = false;
-            let hitPiece = null;
-            let seen = new Set();
-
-            for (let step = 0; step < 40; step++) {
-                let vec = DIRS_MAP[currentDir];
-                cx += vec.dx; cy += vec.dy;
-
-                if (!inBounds(cx, cy)) {
-                    points.push([cx * CELL_SIZE + 50, cy * CELL_SIZE + 50]);
-                    break;
-                }
-
-                points.push([cx * CELL_SIZE + 50, cy * CELL_SIZE + 50]);
-
-                let stateKey = cx + "," + cy + "," + currentDir;
-                if (seen.has(stateKey)) break;
-                seen.add(stateKey);
-
-                let hit = getPieceAt(cx, cy);
-                if (hit) {
-                    if (hit.pieceType === 'LASER') break;
-                    
-                    let inboundDir = { 'NORTH':'SOUTH', 'SOUTH':'NORTH', 'EAST':'WEST', 'WEST':'EAST' }[currentDir];
-                    let config = PIECE_INTERACTION_TABLE[hit.pieceType]?.[inboundDir]?.[ROT_ARRAY[hit.rot]];
-                    
-                    if (!config || config.isDestroyed) { 
-                        isDestroyed = true; 
-                        hitPiece = hit; 
-                        break; 
-                    }
-                    if (!config.reflect) break;
-                    currentDir = config.reflect;
+            // Draw Grid
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    r.setAttribute('x', x * CELL_SIZE); r.setAttribute('y', y * CELL_SIZE);
+                    r.setAttribute('width', CELL_SIZE); r.setAttribute('height', CELL_SIZE);
+                    r.setAttribute('class', `grid-cell ${gameState.selected?.x === x && gameState.selected?.y === y ? 'selected' : ''}`);
+                    r.setAttribute('fill', 'transparent');
+                    r.setAttribute('stroke', 'rgba(255,255,255,0.05)');
+                    r.setAttribute('onclick', `handleCellClick(${x},${y})`);
+                    svg.appendChild(r);
                 }
             }
             
-            const pathStr = points.reduce((acc, p, i) => acc + (i === 0 ? "M " + p[0] + " " + p[1] : " L " + p[0] + " " + p[1]), '');
-            return { pathStr, isDestroyed, hitPiece };
+            // Draw Pieces
+            gameState.pieces.forEach(p => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', 'piece-group');
+                
+                // Calculate the exact pixel center of the current cell
+                const centerX = p.x * CELL_SIZE + 50;
+                const centerY = p.y * CELL_SIZE + 50;
+                
+                // FIXED METHOD: Use native SVG attribute transforms instead of CSS styles
+                g.setAttribute('transform', `rotate(${p.rot * 90} ${centerX} ${centerY})`);
+                
+                const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+                img.setAttribute('x', p.x * CELL_SIZE + 5);
+                img.setAttribute('y', p.y * CELL_SIZE + 5);
+                img.setAttribute('width', 90); img.setAttribute('height', 90);
+                img.setAttribute('href', `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.type.toLowerCase()}.png`);
+                
+                g.appendChild(img);
+                g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
+                svg.appendChild(g);
+            });
         }
 
-        // --- 5. TURN FIRE SEQUENCE ---
-        function executeFireSequence() {
-            gameState.selected = null;
-            document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
-
-            const trace = traceLaserEngine();
-            gameState.laserPath = trace;
-            renderBoard();
-
-            setTimeout(() => {
-                if (trace && trace.isDestroyed && trace.hitPiece) {
-                    log("Laser scorched " + trace.hitPiece.color + " " + trace.hitPiece.pieceType + " at (" + trace.hitPiece.x + ", " + trace.hitPiece.y + ")", 'text-red');
-                    gameState.pieces = gameState.pieces.filter(p => p.id !== trace.hitPiece.id);
-                    
-                    if (trace.hitPiece.pieceType === 'KING') {
-                        const winner = trace.hitPiece.color === 'RED' ? 'BLUE' : 'RED';
-                        gameState.status = winner + "_WIN";
-                        alert("GAME OVER! " + winner + " WINS!");
-                        log("CRITICAL METRIC: " + winner + " IS VICTORIOUS.", 'text-yellow');
-                        renderBoard();
-                        return;
-                    }
-                }
-
-                if (gameState.status === 'ACTIVE') {
-                    gameState.turn = gameState.turn === 'RED' ? 'BLUE' : 'RED';
-                    gameState.laserPath = null;
-                    updateTurnUI();
-                    log("Control terminal updated for " + gameState.turn + ".", 'text-white');
-                    renderBoard();
-                }
-            }, 1200);
-        }
-
-        // --- 6. ACTION INTERACTION CONTROL ---
         window.handleCellClick = (x, y) => {
-            if (gameState.status !== 'ACTIVE') return;
-            const clickedPiece = getPieceAt(x, y);
+            const clickedPiece = gameState.pieces.find(pc => pc.x === x && pc.y === y);
 
-            if (gameState.selected) {
+            // Movement Logic
+            if (gameState.selected && !clickedPiece) {
                 const sx = gameState.selected.x;
                 const sy = gameState.selected.y;
                 const dx = Math.abs(x - sx);
                 const dy = Math.abs(y - sy);
-
-                if (dx === 0 && dy === 0) {
-                    clearSelection();
-                    return;
-                }
                 
                 if (dx <= 1 && dy <= 1) {
-                    const movingPiece = getPieceAt(sx, sy);
-                    
-                    if (movingPiece.pieceType === 'LASER') {
-                        log("Selection Error: Lasers are static frame nodes.", 'text-red');
-                        clearSelection();
-                        return;
-                    }
-                    if (isReservedSquare(x, y, movingPiece.color)) {
-                        log("Boundary Error: Access to sector lane is restricted.", 'text-red');
-                        clearSelection();
-                        return;
-                    }
-
-                    if (clickedPiece) {
-                        if (movingPiece.pieceType === 'SWITCH' && (clickedPiece.pieceType === 'DEFLECTOR' || clickedPiece.pieceType === 'DEFENDER')) {
-                            if (isReservedSquare(sx, sy, clickedPiece.color)) {
-                                log("Swap Conflict: Target node calculation errors out.", 'text-red');
-                                clearSelection();
-                                return;
-                            }
-                            clickedPiece.x = sx; clickedPiece.y = sy;
-                            movingPiece.x = x; movingPiece.y = y;
-                            log("Displaced " + clickedPiece.color + " " + clickedPiece.pieceType + " via Switch.", 'text-cyan');
-                            executeFireSequence();
-                        } else {
-                            log("Vector Blocked: Node location is currently occupied.", 'text-red');
-                            clearSelection();
-                        }
+                    const movingPiece = gameState.pieces.find(pc => pc.x === sx && pc.y === sy);
+                    if (movingPiece.type === 'LASER') {
+                        document.getElementById('sys-log').innerHTML += `> [!] Error: Lasers are fixed.<br>`;
                     } else {
-                        movingPiece.x = x; movingPiece.y = y;
-                        log("Moved " + movingPiece.pieceType + " to cell coordinates (" + x + ", " + y + ").", 'text-cyan');
-                        executeFireSequence();
+                        movingPiece.x = x;
+                        movingPiece.y = y;
+                        gameState.selected = null;
+                        document.getElementById('sys-log').innerHTML += `> Moved ${movingPiece.type} to (${x}, ${y})<br>`;
                     }
                 } else {
-                    log("Range Error: Path calculation exceeds layout guidelines.", 'text-red');
+                    document.getElementById('sys-log').innerHTML += `> [!] Invalid move range.<br>`;
                 }
             } 
+            // Selection Logic
             else if (clickedPiece) {
-                if (clickedPiece.color !== gameState.turn) {
-                    log("Command Error: Selected object belongs to rival team.", 'text-red');
-                    return;
-                }
                 gameState.selected = {x, y};
-                document.getElementById('selection-status').innerText = "SELECTED: " + clickedPiece.color + " " + clickedPiece.pieceType;
-                renderBoard();
+                document.getElementById('selection-status').innerText = `SELECTED: ${clickedPiece.color} ${clickedPiece.type}`;
             }
+            renderBoard();
         };
 
         window.rotateSelected = (dir) => {
-            if (gameState.status !== 'ACTIVE' || !gameState.selected) return;
-            const p = getPieceAt(gameState.selected.x, gameState.selected.y);
-            
+            if (!gameState.selected) return;
+            const p = gameState.pieces.find(pc => pc.x === gameState.selected.x && pc.y === gameState.selected.y);
             if (p) {
-                if (p.pieceType === 'KING') {
-                    log("Command Error: Kings cannot be rotated.", 'text-red');
-                    return;
-                }
-
-                const newRot = (p.rot + dir + 4) % 4;
-
-                if (p.pieceType === 'LASER') {
-                    if (p.color === 'BLUE' && (newRot === 1 || newRot === 2)) {
-                        log("Calibration Failure: Safe directional locks triggered.", 'text-red');
-                        return;
-                    }
-                    if (p.color === 'RED' && (newRot === 0 || newRot === 3)) {
-                        log("Calibration Failure: Safe directional locks triggered.", 'text-red');
-                        return;
-                    }
-                }
-
-                p.rot = newRot;
-                log("Realigned " + p.pieceType + " along alignment vector " + ROT_ARRAY[p.rot] + ".", 'text-cyan');
-                executeFireSequence();
+                p.rot = (p.rot + dir + 4) % 4;
+                document.getElementById('sys-log').innerHTML += `> Rotated ${p.type} to ${p.rot * 90}°<br>`;
             }
-        };
-
-        window.skipTurnAndFire = () => {
-            if (gameState.status !== 'ACTIVE') return;
-            log("Manual loop override: Weapon discharge sequence triggered.", 'text-yellow');
-            executeFireSequence();
+            renderBoard();
         };
 
         window.clearSelection = () => {
@@ -497,85 +143,6 @@
             renderBoard();
         };
 
-        // --- 7. SVG RENDER ENGINE ---
-        function renderBoard() {
-            const svg = document.getElementById('game-board');
-            svg.innerHTML = '';
-            
-            // Draw Map Blocks
-            for (let y = 0; y < 8; y++) {
-                for (let x = 0; x < 10; x++) {
-                    const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    r.setAttribute('x', x * CELL_SIZE); 
-                    r.setAttribute('y', y * CELL_SIZE);
-                    r.setAttribute('width', CELL_SIZE); 
-                    r.setAttribute('height', CELL_SIZE);
-                    
-                    let cls = 'grid-cell';
-                    if (isReservedSquare(x, y, 'RED')) cls += ' reserved-blue';
-                    else if (isReservedSquare(x, y, 'BLUE')) cls += ' reserved-red'; 
-
-                    if (gameState.selected?.x === x && gameState.selected?.y === y) cls += ' selected';
-                    
-                    r.setAttribute('class', cls);
-                    r.setAttribute('fill', 'transparent');
-                    r.setAttribute('stroke', 'rgba(255,255,255,0.05)');
-                    r.setAttribute('onclick', "handleCellClick(" + x + "," + y + ")");
-                    svg.appendChild(r);
-                }
-            }
-
-            // Render Particle Lasers
-            if (gameState.laserPath) {
-                const c = gameState.turn === 'RED' ? 'rgba(244, 67, 54,' : 'rgba(3, 233, 244,';
-                const isD = gameState.laserPath.isDestroyed;
-                
-                const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                glow.setAttribute('d', gameState.laserPath.pathStr);
-                glow.setAttribute('stroke', isD ? 'rgba(255, 0, 0, 0.4)' : c + " 0.35)");
-                glow.setAttribute('stroke-width', '14'); glow.setAttribute('fill', 'none');
-                
-                const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                core.setAttribute('d', gameState.laserPath.pathStr);
-                core.setAttribute('stroke', isD ? 'rgba(255, 100, 100, 0.9)' : 'white');
-                core.setAttribute('stroke-width', '3.5'); core.setAttribute('fill', 'none');
-                
-                svg.appendChild(glow);
-                svg.appendChild(core);
-            }
-            
-            // Draw Pieces
-            gameState.pieces.forEach(p => {
-                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                g.setAttribute('class', 'piece-group');
-                
-                const ox = p.x * CELL_SIZE + 50;
-                const oy = p.y * CELL_SIZE + 50;
-                
-                // BUG FIX: Use native SVG transform space rotations to avoid CSS box matrix misalignment
-                g.setAttribute('transform', "rotate(" + (p.rot * 90) + " " + ox + " " + oy + ")");
-                
-                const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-                img.setAttribute('x', p.x * CELL_SIZE + 5);
-                img.setAttribute('y', p.y * CELL_SIZE + 5);
-                img.setAttribute('width', 90); img.setAttribute('height', 90);
-                
-                const assetUrl = BASE_ASSET_URL + "/" + p.color.toLowerCase() + p.pieceType.toLowerCase() + ".png";
-                
-                // BUG FIX: Declare standard href attribute alongside fallback legacy xlink declaration
-                img.setAttribute('href', assetUrl);
-                img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', assetUrl);
-                
-                g.appendChild(img);
-                g.setAttribute('onclick', "handleCellClick(" + p.x + "," + p.y + ")");
-                svg.appendChild(g);
-            });
-        }
-
-        // Initialize Base Runtime Loop
-        log("Tactical Grid Core Engine Hydrated.", "text-cyan");
-        log("Pass and Play systems operational.", "text-white");
-        updateTurnUI();
         renderBoard();
     </script>
 </body>
