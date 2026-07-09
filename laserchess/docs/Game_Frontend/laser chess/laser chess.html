@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laser Chess - Tactical Interface</title>
 
+    <!-- Tailwind & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
     
@@ -81,6 +82,7 @@
 
     <div class="flex flex-col lg:flex-row gap-8 w-full max-w-[1200px]">
         
+        <!-- MAIN BOARD RENDERER -->
         <div class="rule-card p-6 lg:p-8 rounded-lg flex-grow border-theme-20 relative">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#03e9f4] to-transparent opacity-80"></div>
             
@@ -91,11 +93,13 @@
                 </div>
             </div>
 
+            <!-- SVG Viewport (10x8 Engine Grid) -->
             <div class="flex justify-center w-full">
                 <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/80 border border-white/10 rounded shadow-2xl w-full max-w-[800px] h-auto select-none"></svg>
             </div>
         </div>
 
+        <!-- COMMAND CONSOLE -->
         <div class="rule-card p-6 rounded-lg w-full lg:w-[350px] flex flex-col gap-6 border-theme-20 shrink-0">
             <div>
                 <h3 class="text-theme font-black tracking-widest uppercase text-lg mb-2">Controls</h3>
@@ -358,40 +362,32 @@
                 svg.appendChild(glow); svg.appendChild(core);
             }
 
-            // Draw Pieces
+            // Draw Pieces using actual .png assets
             gameState.pieces.forEach(p => {
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                const ox = p.x * CELL_SIZE + 50; const oy = p.y * CELL_SIZE + 50;
+                
+                // Calculate center pivot point for rotation
+                const ox = p.x * CELL_SIZE + 50; 
+                const oy = p.y * CELL_SIZE + 50;
                 
                 g.style.transformOrigin = `${ox}px ${oy}px`;
                 g.style.transform = `rotate(${p.rot * 90}deg)`;
                 
-                // Fallback geometry since we don't have local image assets in this standalone
-                const pieceGeo = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                const fill = p.color === 'RED' ? 'rgba(244, 67, 54, 0.8)' : 'rgba(3, 233, 244, 0.8)';
+                // Create Image node
+                const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
                 
-                // Shapes based on type to emulate the assets
-                if (p.type === 'KING') pieceGeo.setAttribute('points', '-20,-20 20,-20 20,20 -20,20');
-                else if (p.type === 'LASER') pieceGeo.setAttribute('points', '-30,30 0,-30 30,30');
-                else if (p.type === 'DEFENDER') pieceGeo.setAttribute('points', '-30,-10 30,-10 30,30 -30,30');
-                else if (p.type === 'DEFLECTOR') pieceGeo.setAttribute('points', '-30,-30 30,30 -30,30');
-                else if (p.type === 'SWITCH') pieceGeo.setAttribute('points', '-30,-30 -20,-30 30,20 30,30');
-
-                pieceGeo.setAttribute('fill', fill);
-                pieceGeo.setAttribute('transform', `translate(${ox}, ${oy})`);
+                // Offset by 5px so the 90x90 image sits perfectly centered inside the 100x100 cell
+                img.setAttribute('x', p.x * CELL_SIZE + 5); 
+                img.setAttribute('y', p.y * CELL_SIZE + 5);
+                img.setAttribute('width', 90); 
+                img.setAttribute('height', 90);
                 
-                g.appendChild(pieceGeo);
+                // Dynamically build the filename (e.g., "redking.png" or "bluedeflector.png")
+                // Adjust the path string if your prototype is saved in a different directory relative to the images
+                const fileName = `${p.color.toLowerCase()}${p.type.toLowerCase()}.png`;
+                img.setAttribute('href', `laserchess/docs/pieces/${fileName}`); 
                 
-                // Overlay text label
-                const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                txt.setAttribute('x', ox); txt.setAttribute('y', oy + 4);
-                txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('alignment-baseline', 'middle');
-                txt.setAttribute('fill', 'white'); txt.setAttribute('font-size', '12px');
-                txt.textContent = p.type.charAt(0);
-                
-                // Negate rotation for text so it's always readable
-                txt.setAttribute('transform', `rotate(${-p.rot * 90}, ${ox}, ${oy})`);
-                g.appendChild(txt);
+                g.appendChild(img);
 
                 // Add pass-through click handler to trigger the rect below it
                 g.setAttribute('onclick', `handleCellClick(${p.x}, ${p.y})`);
