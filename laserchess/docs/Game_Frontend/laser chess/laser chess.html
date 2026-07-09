@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laser Chess | Tactical Interface</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -13,30 +12,152 @@
             --theme-rgb: 3, 233, 244;
             --red-theme: #f44336;
         }
-        body { font-family: "Quantico", sans-serif; background: #0a0a0a; color: white; min-height: 100vh; }
-        .rule-card { background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
-        .play-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(3, 233, 244, 0.3); color: var(--theme-color); transition: all 0.3s; }
-        .play-btn:hover { background: rgba(var(--theme-rgb), 0.2); box-shadow: 0 0 10px var(--theme-color); }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body { 
+            font-family: "Quantico", sans-serif; 
+            background: #0a0a0a; 
+            color: white; 
+            min-height: 100vh; 
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* --- NATIVE LAYOUT REPLACE FOR TAILWIND --- */
+        .main-wrapper {
+            display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .main-wrapper {
+                flex-direction: column;
+            }
+            .controls-sidebar {
+                width: 100% !important;
+            }
+        }
+
+        .rule-card { 
+            background: rgba(20, 20, 20, 0.8); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px); 
+            border-radius: 0.5rem;
+        }
+        
+        .board-container {
+            padding: 2rem;
+            flex-grow: 1;
+        }
+
+        .controls-sidebar {
+            padding: 1.5rem;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* --- INTERFACE TYPOGRAPHY & BUTTONS --- */
+        .board-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .sidebar-title {
+            color: #22d3ee;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .status-text {
+            font-size: 10px;
+            color: #6b7280;
+            text-transform: uppercase;
+            font-family: monospace;
+            margin-bottom: 0.5rem;
+        }
+
+        .play-btn { 
+            background: rgba(0,0,0,0.5); 
+            border: 1px solid rgba(3, 233, 244, 0.3); 
+            color: var(--theme-color); 
+            transition: all 0.3s; 
+            padding: 0.5rem 0;
+            width: 100%;
+            cursor: pointer;
+            font-family: inherit;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .play-btn:hover { 
+            background: rgba(3, 233, 244, 0.2); 
+            box-shadow: 0 0 10px var(--theme-color); 
+        }
+        
+        .btn-deselect {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .btn-deselect:hover {
+            background: rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        .sys-log-box {
+            height: 10rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem;
+            font-size: 10px;
+            font-family: monospace;
+            color: #9ca3af;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* --- SVG GRID & PIECES --- */
+        #game-board {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            height: auto;
+            display: block;
+        }
         .grid-cell { transition: fill 0.2s; cursor: pointer; }
+        .grid-cell:hover { fill: rgba(255, 255, 255, 0.02); }
         .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 3; }
         .piece-group { cursor: pointer; }
     </style>
 </head>
-<body class="p-8 flex justify-center">
+<body>
 
-    <div class="flex gap-8 max-w-[1200px] w-full">
-        <div class="rule-card p-8 rounded-lg flex-grow">
-            <h2 class="text-2xl font-black uppercase mb-6 tracking-widest">Tactical Grid</h2>
-            <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/50 border border-white/10 w-full"></svg>
+    <div class="main-wrapper">
+        <div class="rule-card board-container">
+            <h2 class="board-title">Tactical Grid</h2>
+            <svg id="game-board" viewBox="0 0 1000 800"></svg>
         </div>
 
-        <div class="rule-card p-6 w-[300px] flex flex-col gap-4">
-            <h3 class="text-cyan-400 font-bold uppercase tracking-widest">Controls</h3>
-            <div id="selection-status" class="text-[10px] text-gray-500 uppercase font-mono mb-2">NO PIECE SELECTED</div>
-            <button onclick="rotateSelected(-1)" class="play-btn py-2">Rotate Left ⟲</button>
-            <button onclick="rotateSelected(1)" class="play-btn py-2">Rotate Right ⟳</button>
-            <button onclick="clearSelection()" class="play-btn py-2 border-red-500 text-red-500">Deselect</button>
-            <div id="sys-log" class="h-40 bg-black/50 p-2 text-[10px] font-mono text-gray-400 overflow-y-auto"></div>
+        <div class="rule-card controls-sidebar">
+            <h3 class="sidebar-title">Controls</h3>
+            <div id="selection-status" class="status-text">NO PIECE SELECTED</div>
+            
+            <button onclick="rotateSelected(-1)" class="play-btn">Rotate Left ⟲</button>
+            <button onclick="rotateSelected(1)" class="play-btn">Rotate Right ⟳</button>
+            <button onclick="clearSelection()" class="play-btn btn-deselect">Deselect</button>
+            
+            <div id="sys-log" class="sys-log-box"></div>
         </div>
     </div>
 
@@ -76,18 +197,21 @@
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 g.setAttribute('class', 'piece-group');
                 
-                // Calculate the exact pixel center of the current cell
+                // Calculate precise coordinates for rotation pivot anchor
                 const centerX = p.x * CELL_SIZE + 50;
                 const centerY = p.y * CELL_SIZE + 50;
                 
-                // FIXED METHOD: Use native SVG attribute transforms instead of CSS styles
+                // FIXED: Use native SVG transform matrix rotation to handle cross-browser layout engines smoothly
                 g.setAttribute('transform', `rotate(${p.rot * 90} ${centerX} ${centerY})`);
                 
                 const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
                 img.setAttribute('x', p.x * CELL_SIZE + 5);
                 img.setAttribute('y', p.y * CELL_SIZE + 5);
                 img.setAttribute('width', 90); img.setAttribute('height', 90);
-                img.setAttribute('href', `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.type.toLowerCase()}.png`);
+                
+                const imgUrl = `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.type.toLowerCase()}.png`;
+                img.setAttribute('href', imgUrl);
+                img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imgUrl);
                 
                 g.appendChild(img);
                 g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
