@@ -65,7 +65,8 @@
         const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
         const CELL_SIZE = 100;
         
-        // Direction vectors matching tutorials.js physics setup
+        // Fixed vectors to match visual SVG top-to-bottom matrix orientation 
+        // (NORTH goes UP visually, meaning y gets smaller; SOUTH goes DOWN visually, meaning y gets larger)
         const DIRS_MAP = {
             'NORTH': { dx: 0, dy: -1 },
             'EAST':  { dx: 1, dy: 0 },
@@ -74,11 +75,11 @@
         };
         const ROT_ARRAY = ['NORTH', 'EAST', 'SOUTH', 'WEST'];
 
-        // Reserved zones (x, y)
+        // Reserved zones scaled to pure visual 0-7 vertical configuration
         const BLUE_RESERVED = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
         const RED_RESERVED = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
 
-        // Exact Comprehensive Interaction Table from tutorials.js
+        // Absolute verification maps from tutorials.js
         const PIECE_INTERACTION_TABLE = {
             KING: {
                 NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
@@ -106,43 +107,43 @@
             }
         };
 
-        // --- 2. INITIAL GAME STATE (FULL PASS AND PLAY LAYOUT) ---
+        // --- 2. INITIAL GAME STATE (CORRECT UNIFIED Y-AXIS FORMAT) ---
         let gameState = {
             turn: 'BLUE', 
             status: 'ACTIVE',
             selected: null,
             laserPath: null,
             pieces: [
-                {id: 1, pieceType: "KING", color: "BLUE", rot: 0, x: 4, y: 0},
-                {id: 2, pieceType: "KING", color: "RED", rot: 0, x: 5, y: 7},
-                {id: 3, pieceType: "DEFENDER", color: "RED", rot: 0, x: 4, y: 7},
-                {id: 4, pieceType: "DEFENDER", color: "RED", rot: 2, x: 6, y: 7},
-                {id: 5, pieceType: "DEFENDER", color: "BLUE", rot: 2, x: 5, y: 0},
-                {id: 6, pieceType: "DEFENDER", color: "BLUE", rot: 2, x: 3, y: 0},
-                {id: 7, pieceType: "SWITCH", color: "BLUE", rot: 0, x: 5, y: 3},
-                {id: 8, pieceType: "SWITCH", color: "BLUE", rot: 1, x: 4, y: 3},
-                {id: 9, pieceType: "SWITCH", color: "RED", rot: 0, x: 4, y: 4},
-                {id: 10, pieceType: "SWITCH", color: "RED", rot: 1, x: 5, y: 4},
-                {id: 11, pieceType: "LASER", color: "RED", rot: 2, x: 0, y: 7},
-                {id: 12, pieceType: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 0},
-                {id: 13, pieceType: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 3},
-                {id: 14, pieceType: "DEFLECTOR", color: "BLUE", rot: 1, x: 2, y: 4},
-                {id: 15, pieceType: "DEFLECTOR", color: "RED", rot: 0, x: 0, y: 3},
-                {id: 16, pieceType: "DEFLECTOR", color: "RED", rot: 3, x: 0, y: 4},
-                {id: 17, pieceType: "DEFLECTOR", color: "BLUE", rot: 3, x: 7, y: 1},
-                {id: 18, pieceType: "DEFLECTOR", color: "RED", rot: 0, x: 6, y: 2},
-                {id: 19, pieceType: "DEFLECTOR", color: "RED", rot: 0, x: 7, y: 4},
-                {id: 20, pieceType: "DEFLECTOR", color: "RED", rot: 3, x: 7, y: 3},
-                {id: 21, pieceType: "DEFLECTOR", color: "BLUE", rot: 1, x: 9, y: 3},
-                {id: 22, pieceType: "DEFLECTOR", color: "BLUE", rot: 2, x: 9, y: 4},
-                {id: 23, pieceType: "DEFLECTOR", color: "BLUE", rot: 2, x: 3, y: 5},
-                {id: 24, pieceType: "DEFLECTOR", color: "RED", rot: 1, x: 2, y: 6},
-                {id: 25, pieceType: "DEFLECTOR", color: "RED", rot: 0, x: 7, y: 7},
-                {id: 26, pieceType: "LASER", color: "BLUE", rot: 0, x: 9, y: 0}
+                {id: 1, pieceType: "KING", color: "BLUE", rot: 2, x: 4, y: 7},
+                {id: 2, pieceType: "KING", color: "RED", rot: 0, x: 5, y: 0},
+                {id: 3, pieceType: "DEFENDER", color: "RED", rot: 2, x: 4, y: 0},
+                {id: 4, pieceType: "DEFENDER", color: "RED", rot: 2, x: 6, y: 0},
+                {id: 5, pieceType: "DEFENDER", color: "BLUE", rot: 0, x: 5, y: 7},
+                {id: 6, pieceType: "DEFENDER", color: "BLUE", rot: 0, x: 3, y: 7},
+                {id: 7, pieceType: "SWITCH", color: "BLUE", rot: 0, x: 5, y: 4},
+                {id: 8, pieceType: "SWITCH", color: "BLUE", rot: 1, x: 4, y: 4},
+                {id: 9, pieceType: "SWITCH", color: "RED", rot: 0, x: 4, y: 3},
+                {id: 10, pieceType: "SWITCH", color: "RED", rot: 1, x: 5, y: 3},
+                {id: 11, pieceType: "LASER", color: "RED", rot: 2, x: 0, y: 0},
+                {id: 12, pieceType: "DEFLECTOR", color: "BLUE", rot: 0, x: 2, y: 7},
+                {id: 13, pieceType: "DEFLECTOR", color: "BLUE", rot: 0, x: 2, y: 4},
+                {id: 14, pieceType: "DEFLECTOR", color: "BLUE", rot: 1, x: 2, y: 3},
+                {id: 15, pieceType: "DEFLECTOR", color: "RED", rot: 2, x: 0, y: 4},
+                {id: 16, pieceType: "DEFLECTOR", color: "RED", rot: 3, x: 0, y: 3},
+                {id: 17, pieceType: "DEFLECTOR", color: "BLUE", rot: 3, x: 7, y: 6},
+                {id: 18, pieceType: "DEFLECTOR", color: "RED", rot: 2, x: 6, y: 5},
+                {id: 19, pieceType: "DEFLECTOR", color: "RED", rot: 2, x: 7, y: 3},
+                {id: 20, pieceType: "DEFLECTOR", color: "RED", rot: 3, x: 7, y: 4},
+                {id: 21, pieceType: "DEFLECTOR", color: "BLUE", rot: 1, x: 9, y: 4},
+                {id: 22, pieceType: "DEFLECTOR", color: "BLUE", rot: 0, x: 9, y: 3},
+                {id: 23, pieceType: "DEFLECTOR", color: "BLUE", rot: 0, x: 3, y: 2},
+                {id: 24, pieceType: "DEFLECTOR", color: "RED", rot: 1, x: 2, y: 1},
+                {id: 25, pieceType: "DEFLECTOR", color: "RED", rot: 2, x: 7, y: 0},
+                {id: 26, pieceType: "LASER", color: "BLUE", rot: 0, x: 9, y: 7}
             ]
         };
 
-        // --- 3. CORE LOGIC UTILITIES ---
+        // --- 3. UI CONSOLE LOGGER ---
         function log(msg, color = 'text-gray-400') {
             const l = document.getElementById('sys-log');
             l.innerHTML += `<div class="${color}">> ${msg}</div>`;
@@ -151,6 +152,7 @@
 
         function getPieceAt(x, y) { return gameState.pieces.find(p => p.x === x && p.y === y); }
         function inBounds(x, y) { return x >= 0 && x <= 9 && y >= 0 && y <= 7; }
+        
         function isReservedSquare(x, y, color) {
             if (color === 'BLUE') return RED_RESERVED.some(s => s.x === x && s.y === y);
             return BLUE_RESERVED.some(s => s.x === x && s.y === y);
@@ -169,7 +171,7 @@
             }
         }
 
-        // --- 4. RAYCAST PHYSICS ENGINE (From Sandbox / tutorials.js) ---
+        // --- 4. UNIFIED RAYCAST ENGINE ---
         function traceLaserEngine() {
             const laser = gameState.pieces.find(p => p.pieceType === 'LASER' && p.color === gameState.turn);
             if (!laser) return { pathStr: '', isDestroyed: false, hitPiece: null };
@@ -178,25 +180,30 @@
             let cx = laser.x;
             let cy = laser.y;
             
-            let points = [[cx * CELL_SIZE + 50, (7 - cy) * CELL_SIZE + 50]];
+            let points = [[cx * CELL_SIZE + 50, cy * CELL_SIZE + 50]];
             let isDestroyed = false;
             let hitPiece = null;
             let seen = new Set();
 
-            for (let step = 0; step < 35; step++) {
+            for (let step = 0; step < 40; step++) {
                 let vec = DIRS_MAP[currentDir];
                 cx += vec.dx; cy += vec.dy;
-                points.push([cx * CELL_SIZE + 50, (7 - cy) * CELL_SIZE + 50]);
 
-                if (!inBounds(cx, cy)) break;
+                if (!inBounds(cx, cy)) {
+                    // Path hit out-of-bounds wall cleanly, draw final tip and stop
+                    points.push([cx * CELL_SIZE + 50, cy * CELL_SIZE + 50]);
+                    break;
+                }
+
+                points.push([cx * CELL_SIZE + 50, cy * CELL_SIZE + 50]);
 
                 let stateKey = `${cx},${cy},${currentDir}`;
-                if (seen.has(stateKey)) break; // Prevent loop lockups
+                if (seen.has(stateKey)) break;
                 seen.add(stateKey);
 
                 let hit = getPieceAt(cx, cy);
                 if (hit) {
-                    if (hit.pieceType === 'LASER') { break; } // Stopped on shooter body boundary block
+                    if (hit.pieceType === 'LASER') { break; } // Stopped right at weapon origin housing block
                     
                     let inboundDir = { 'NORTH':'SOUTH', 'SOUTH':'NORTH', 'EAST':'WEST', 'WEST':'EAST' }[currentDir];
                     let config = PIECE_INTERACTION_TABLE[hit.pieceType]?.[inboundDir]?.[ROT_ARRAY[hit.rot]];
@@ -206,7 +213,7 @@
                         hitPiece = hit; 
                         break; 
                     }
-                    if (!config.reflect) break;
+                    if (!config.reflect) break; // Trapped safely inside armor grouping (Defender Block)
                     currentDir = config.reflect;
                 }
             }
@@ -215,7 +222,7 @@
             return { pathStr, isDestroyed, hitPiece };
         }
 
-        // --- 5. TURN FIRE CONTROL FLOW ---
+        // --- 5. SEQUENTIAL GAMEPLAY CONTROL ---
         function executeFireSequence() {
             gameState.selected = null;
             document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
@@ -226,14 +233,14 @@
 
             setTimeout(() => {
                 if (trace && trace.isDestroyed && trace.hitPiece) {
-                    log(`Laser destroyed ${trace.hitPiece.color} ${trace.hitPiece.pieceType} at (${trace.hitPiece.x}, ${trace.hitPiece.y})`, 'text-red-500 font-bold');
+                    log(`Laser scorched ${trace.hitPiece.color} ${trace.hitPiece.pieceType} at (${trace.hitPiece.x}, ${trace.hitPiece.y})`, 'text-red-500 font-bold');
                     gameState.pieces = gameState.pieces.filter(p => p.id !== trace.hitPiece.id);
                     
                     if (trace.hitPiece.pieceType === 'KING') {
                         const winner = trace.hitPiece.color === 'RED' ? 'BLUE' : 'RED';
                         gameState.status = `${winner}_WIN`;
                         alert(`GAME OVER! ${winner} WINS!`);
-                        log(`MATCH CONCLUDED. ${winner} IS VICTORIOUS.`, 'text-yellow-400 font-bold');
+                        log(`CRITICAL CRASH: ${winner} CAPTURED VICTORY OBJECTIVE.`, 'text-yellow-400 font-bold');
                         renderBoard();
                         return;
                     }
@@ -243,13 +250,13 @@
                     gameState.turn = gameState.turn === 'RED' ? 'BLUE' : 'RED';
                     gameState.laserPath = null;
                     updateTurnUI();
-                    log(`Turn shifted to ${gameState.turn}.`, 'text-white');
+                    log(`Control systems initialized for ${gameState.turn}.`, 'text-white');
                     renderBoard();
                 }
             }, 1200);
         }
 
-        // --- 6. MOVEMENT AND INTERACTION CONTROL HANDLERS ---
+        // --- 6. PLAYER SELECTION & ACTION HANDLERS ---
         window.handleCellClick = (x, y) => {
             if (gameState.status !== 'ACTIVE') return;
             const clickedPiece = getPieceAt(x, y);
@@ -269,44 +276,44 @@
                     const movingPiece = getPieceAt(sx, sy);
                     
                     if (movingPiece.pieceType === 'LASER') {
-                        log(`[!] Lasers are statically fixed structures.`, 'text-red-400');
+                        log(`[!] Systems Error: Laser structure anchor points cannot move.`, 'text-red-400');
                         clearSelection();
                         return;
                     }
                     if (isReservedSquare(x, y, movingPiece.color)) {
-                        log(`[!] Movement blocked: Zone restricted to opponent.`, 'text-red-400');
+                        log(`[!] Boundary Error: Access to territory denied.`, 'text-red-400');
                         clearSelection();
                         return;
                     }
 
                     if (clickedPiece) {
-                        // Switch Piece special swapping feature
+                        // Switch swapping mechanism
                         if (movingPiece.pieceType === 'SWITCH' && (clickedPiece.pieceType === 'DEFLECTOR' || clickedPiece.pieceType === 'DEFENDER')) {
                             if (isReservedSquare(sx, sy, clickedPiece.color)) {
-                                log(`[!] Swap failed: Pushes enemy into invalid zone.`, 'text-red-400');
+                                log(`[!] Swap Conflict: Cannot move enemy into protected matrix.`, 'text-red-400');
                                 clearSelection();
                                 return;
                             }
                             clickedPiece.x = sx; clickedPiece.y = sy;
                             movingPiece.x = x; movingPiece.y = y;
-                            log(`Swapped ${movingPiece.color} SWITCH with ${clickedPiece.color} ${clickedPiece.pieceType}.`, 'text-theme');
+                            log(`Displaced ${clickedPiece.color} ${clickedPiece.pieceType} using Switch displacement.`, 'text-theme');
                             executeFireSequence();
                         } else {
-                            log(`[!] Target coordinates occupied.`, 'text-red-400');
+                            log(`[!] Target sector fully occupied.`, 'text-red-400');
                             clearSelection();
                         }
                     } else {
                         movingPiece.x = x; movingPiece.y = y;
-                        log(`Moved ${movingPiece.pieceType} to (${x}, ${y}).`, 'text-theme');
+                        log(`Relocated ${movingPiece.pieceType} to grid node (${x}, ${y}).`, 'text-theme');
                         executeFireSequence();
                     }
                 } else {
-                    log(`[!] Invalid range grid space delta.`, 'text-red-400');
+                    log(`[!] Navigation Error: Range vector exceeds limitations.`, 'text-red-400');
                 }
             } 
             else if (clickedPiece) {
                 if (clickedPiece.color !== gameState.turn) {
-                    log(`[!] Operation blocked: Selection must belong to active player.`, 'text-red-400');
+                    log(`[!] Command Error: Cannot interact with rival structures.`, 'text-red-400');
                     return;
                 }
                 gameState.selected = {x, y};
@@ -321,7 +328,7 @@
             
             if (p) {
                 if (p.pieceType === 'KING') {
-                    log(`[!] Critical error: Kings cannot be rotated.`, 'text-red-400');
+                    log(`[!] Command Error: Core structures cannot change alignment.`, 'text-red-400');
                     return;
                 }
 
@@ -329,24 +336,24 @@
 
                 if (p.pieceType === 'LASER') {
                     if (p.color === 'BLUE' && (newRot === 1 || newRot === 2)) {
-                        log(`[!] Laser orientation out of bounds for current player.`, 'text-red-400');
+                        log(`[!] Calibration Failed: System safety limits manual alignment.`, 'text-red-400');
                         return;
                     }
                     if (p.color === 'RED' && (newRot === 0 || newRot === 3)) {
-                        log(`[!] Laser orientation out of bounds for current player.`, 'text-red-400');
+                        log(`[!] Calibration Failed: System safety limits manual alignment.`, 'text-red-400');
                         return;
                     }
                 }
 
                 p.rot = newRot;
-                log(`Rotated ${p.pieceType} to ${ROT_ARRAY[p.rot]}.`, 'text-theme');
+                log(`Realigned ${p.pieceType} toward vector axis: ${ROT_ARRAY[p.rot]}.`, 'text-theme');
                 executeFireSequence();
             }
         };
 
         window.skipTurnAndFire = () => {
             if (gameState.status !== 'ACTIVE') return;
-            log(`Skip turn action declared. Firing weapon system...`, 'text-yellow-400');
+            log(`Weapon terminal manual override initiated. Firing...`, 'text-yellow-400');
             executeFireSequence();
         };
 
@@ -356,18 +363,17 @@
             renderBoard();
         };
 
-        // --- 7. SVG GENERATION ENGINE (Isolated Origin Rotations) ---
+        // --- 7. SVG RENDER ENGINE ---
         function renderBoard() {
             const svg = document.getElementById('game-board');
             svg.innerHTML = '';
             
-            // Generate Grid Squares
+            // Generate Grid Cells
             for (let y = 0; y < 8; y++) {
                 for (let x = 0; x < 10; x++) {
                     const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    const drawY = 7 - y; 
                     r.setAttribute('x', x * CELL_SIZE); 
-                    r.setAttribute('y', drawY * CELL_SIZE);
+                    r.setAttribute('y', y * CELL_SIZE);
                     r.setAttribute('width', CELL_SIZE); 
                     r.setAttribute('height', CELL_SIZE);
                     
@@ -385,7 +391,7 @@
                 }
             }
 
-            // Draw Beam Path Artifacts
+            // Draw Weapon Output Beam Paths
             if (gameState.laserPath) {
                 const c = gameState.turn === 'RED' ? 'rgba(244, 67, 54,' : 'rgba(3, 233, 244,';
                 const isD = gameState.laserPath.isDestroyed;
@@ -404,21 +410,20 @@
                 svg.appendChild(core);
             }
             
-            // Render Piece Objects
+            // Populate Functional Entities
             gameState.pieces.forEach(p => {
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 g.setAttribute('class', 'piece-group');
                 
-                const drawY = 7 - p.y;
                 const ox = p.x * CELL_SIZE + 50;
-                const oy = drawY * CELL_SIZE + 50;
+                const oy = p.y * CELL_SIZE + 50;
                 
                 g.style.transformOrigin = `${ox}px ${oy}px`;
                 g.style.transform = `rotate(${p.rot * 90}deg)`;
                 
                 const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
                 img.setAttribute('x', p.x * CELL_SIZE + 5);
-                img.setAttribute('y', drawY * CELL_SIZE + 5);
+                img.setAttribute('y', p.y * CELL_SIZE + 5);
                 img.setAttribute('width', 90); img.setAttribute('height', 90);
                 img.setAttribute('href', `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.pieceType.toLowerCase()}.png`);
                 
@@ -428,9 +433,9 @@
             });
         }
 
-        // Initialize Core System
-        log("Tactical Grid System Hydrated.", "text-cyan-400 font-bold");
-        log("Pass and Play Mode online.", "text-white");
+        // Core execution sequence initializers
+        log("Tactical Grid Core Engine Stabilized.", "text-cyan-400 font-bold");
+        log("Pass and Play systems operating within nominal parameters.", "text-white");
         updateTurnUI();
         renderBoard();
     </script>
