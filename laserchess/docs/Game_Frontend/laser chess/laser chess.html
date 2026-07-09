@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laser Chess | Tactical Local Pass & Play</title>
+    <title>Laser Chess | Tactical Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
     
@@ -15,44 +15,443 @@
         }
         body { font-family: "Quantico", sans-serif; background: #0a0a0a; color: white; min-height: 100vh; }
         .rule-card { background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
-        .play-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(3, 233, 244, 0.3); color: var(--theme-color); transition: all 0.3s; }
+        .play-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(3, 233, 244, 0.3); color: var(--theme-color); transition: all 0.3s; font-weight: bold; text-transform: uppercase; }
         .play-btn:hover { background: rgba(var(--theme-rgb), 0.2); box-shadow: 0 0 10px var(--theme-color); }
+        .play-btn:active { transform: scale(0.98); }
         .grid-cell { transition: fill 0.2s; cursor: pointer; }
-        .grid-cell.selected { fill: rgba(3, 233, 244, 0.15); stroke: var(--theme-color); stroke-width: 3; }
+        .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 3; }
+        .grid-cell.reserved-blue { fill: rgba(3, 233, 244, 0.05); }
+        .grid-cell.reserved-red { fill: rgba(244, 67, 54, 0.05); }
         .piece-group { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+        #sys-log div { margin-bottom: 4px; }
     </style>
 </head>
 <body class="p-8 flex justify-center">
 
-    <div class="flex gap-8 max-w-[1300px] w-full">
-        <div class="rule-card p-8 rounded-lg flex-grow">
+    <div class="flex gap-8 max-w-[1200px] w-full flex-col lg:flex-row">
+        <div class="rule-card p-8 rounded-lg flex-grow relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#03e9f4] to-transparent opacity-80" id="turn-accent"></div>
+            
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-black uppercase tracking-widest">Tactical Local Grid</h2>
-                <div id="turn-indicator" class="px-4 py-2 border rounded font-bold tracking-widest text-cyan-400 border-cyan-400">
+                <h2 class="text-2xl font-black uppercase tracking-widest">Tactical Grid</h2>
+                <div id="turn-display" class="px-4 py-1 text-sm font-bold tracking-widest border border-cyan-400 text-cyan-400 bg-cyan-950/30">
                     TURN: BLUE
                 </div>
             </div>
-            <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/50 border border-white/10 w-full rounded"></svg>
+            <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/50 border border-white/10 w-full select-none"></svg>
         </div>
 
-        <div class="rule-card p-6 w-[320px] flex flex-col gap-4">
-            <h3 class="text-cyan-400 font-bold uppercase tracking-widest">System Controls</h3>
-            <div id="selection-status" class="text-[11px] text-gray-500 uppercase font-mono mb-2">NO PIECE SELECTED</div>
+        <div class="rule-card p-6 w-full lg:w-[350px] flex flex-col gap-4 shrink-0">
+            <h3 class="text-cyan-400 font-bold uppercase tracking-widest">Controls</h3>
+            <div id="selection-status" class="text-[10px] text-gray-500 uppercase font-mono mb-2 border-b border-white/10 pb-2">NO PIECE SELECTED</div>
             
-            <button onclick="rotateSelected(-1)" class="play-btn py-2 rounded font-bold">Rotate Left ⟲</button>
-            <button onclick="rotateSelected(1)" class="play-btn py-2 rounded font-bold">Rotate Right ⟳</button>
-            <button onclick="fireLaserSequence()" class="bg-red-900/40 border border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-all py-3 rounded font-bold tracking-wider uppercase shadow-lg">Fire Photonic Laser ⚡</button>
-            <button onclick="clearSelection()" class="play-btn py-2 border-white/20 text-gray-400 rounded">Deselect</button>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="rotateSelected(-1)" class="play-btn py-3 text-[11px]">Rotate Left ⟲</button>
+                <button onclick="rotateSelected(1)" class="play-btn py-3 text-[11px]">Rotate Right ⟳</button>
+            </div>
             
-            <div class="border-t border-white/10 pt-3">
-                <span class="text-[11px] text-gray-400 font-mono block mb-1">REAL-TIME COMBAT LOG</span>
-                <div id="sys-log" class="h-56 bg-black/70 border border-white/5 p-2 text-[11px] font-mono text-gray-400 overflow-y-auto rounded flex flex-col gap-1">
-                    <div class="text-gray-500">> System diagnostics loaded. Local Pass & Play initialized.</div>
-                </div>
+            <button onclick="skipTurnAndFire()" class="play-btn py-3 text-[11px] border-yellow-500 text-yellow-500 hover:shadow-[0_0_10px_rgba(234,179,8,0.5)] hover:bg-yellow-500/20">🔥 Fire (Skip Move)</button>
+            <button onclick="clearSelection()" class="play-btn py-3 text-[11px] border-red-500 text-red-500 hover:shadow-[0_0_10px_rgba(244,67,54,0.5)] hover:bg-red-500/20">Deselect</button>
+            
+            <div class="flex-grow flex flex-col mt-4">
+                <h3 class="text-gray-500 font-black tracking-widest uppercase text-xs mb-2">System Log</h3>
+                <div id="sys-log" class="flex-grow bg-black/50 border border-white/5 p-3 text-[10px] font-mono overflow-y-auto h-[250px] flex flex-col justify-end"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // --- 1. CORE CONFIGURATION & CONSTANTS ---
         const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
         const CELL_SIZE = 100;
+        const DIRS = [ { dx: 0, dy: 1 }, { dx: 1, dy: 0 }, { dx: 0, dy: -1 }, { dx: -1, dy: 0 } ]; 
+        
+        // Reserved spaces definition (x, y)
+        const BLUE_RESERVED = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
+        const RED_RESERVED = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
+
+        const INTERACTION_MAP = {
+            DEFLECTOR: {
+                0: { 0: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 2 }, 1: { action: 'destroy' }, 2: { action: 'destroy' } },
+                1: { 0: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 2 }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+                2: { 2: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 3: { action: 'destroy' } },
+                3: { 2: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 1: { action: 'destroy' } }
+            },
+            SWITCH: {
+                0: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
+                1: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } },
+                2: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
+                3: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } }
+            },
+            DEFENDER: {
+                0: { 0: { action: 'block' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+                1: { 1: { action: 'block' }, 0: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+                2: { 2: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 3: { action: 'destroy' } },
+                3: { 3: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' } }
+            },
+            KING: {
+                0: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+                1: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+                2: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+                3: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } }
+            },
+            LASER: {
+                0: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+                1: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+                2: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+                3: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } }
+            }
+        };
+
+        // --- 2. GAME STATE (FULL BOARD SETUP) ---
+        let gameState = {
+            turn: 'BLUE', 
+            status: 'ACTIVE', // ACTIVE, BLUE_WIN, RED_WIN
+            selected: null,
+            laserPath: null,
+            pieces: [
+                {id: 1, pieceType: "KING", color: "BLUE", rot: 0, x: 4, y: 0},
+                {id: 2, pieceType: "KING", color: "RED", rot: 0, x: 5, y: 7},
+                {id: 3, pieceType: "DEFENDER", color: "RED", rot: 0, x: 4, y: 7},
+                {id: 4, pieceType: "DEFENDER", color: "RED", rot: 2, x: 6, y: 7},
+                {id: 5, pieceType: "DEFENDER", color: "BLUE", rot: 2, x: 5, y: 0},
+                {id: 6, pieceType: "DEFENDER", color: "BLUE", rot: 2, x: 3, y: 0},
+                {id: 7, pieceType: "SWITCH", color: "BLUE", rot: 0, x: 5, y: 3},
+                {id: 8, pieceType: "SWITCH", color: "BLUE", rot: 1, x: 4, y: 3},
+                {id: 9, pieceType: "SWITCH", color: "RED", rot: 0, x: 4, y: 4},
+                {id: 10, pieceType: "SWITCH", color: "RED", rot: 1, x: 5, y: 4},
+                {id: 11, pieceType: "LASER", color: "RED", rot: 2, x: 0, y: 7},
+                {id: 12, pieceType: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 0},
+                {id: 13, pieceType: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 3},
+                {id: 14, pieceType: "DEFLECTOR", color: "BLUE", rot: 1, x: 2, y: 4},
+                {id: 15, pieceType: "DEFLECTOR", color: "RED", rot: 0, x: 0, y: 3},
+                {id: 16, pieceType: "DEFLECTOR", color: "RED", rot: 3, x: 0, y: 4},
+                {id: 17, pieceType: "DEFLECTOR", color: "BLUE", rot: 3, x: 7, y: 1},
+                {id: 18, pieceType: "DEFLECTOR", color: "RED", rot: 0, x: 6, y: 2},
+                {id: 19, pieceType: "DEFLECTOR", color: "RED", rot: 0, x: 7, y: 4},
+                {id: 20, pieceType: "DEFLECTOR", color: "RED", rot: 3, x: 7, y: 3},
+                {id: 21, pieceType: "DEFLECTOR", color: "BLUE", rot: 1, x: 9, y: 3},
+                {id: 22, pieceType: "DEFLECTOR", color: "BLUE", rot: 2, x: 9, y: 4},
+                {id: 23, pieceType: "DEFLECTOR", color: "BLUE", rot: 2, x: 3, y: 5},
+                {id: 24, pieceType: "DEFLECTOR", color: "RED", rot: 1, x: 2, y: 6},
+                {id: 25, pieceType: "DEFLECTOR", color: "RED", rot: 0, x: 7, y: 7},
+                {id: 26, pieceType: "LASER", color: "BLUE", rot: 0, x: 9, y: 0}
+            ]
+        };
+
+        // --- 3. HELPER FUNCTIONS ---
+        function log(msg, color = 'text-gray-400') {
+            const l = document.getElementById('sys-log');
+            l.innerHTML += `<div class="${color}">> ${msg}</div>`;
+            l.scrollTop = l.scrollHeight;
+        }
+
+        function getPieceAt(x, y) { return gameState.pieces.find(p => p.x === x && p.y === y); }
+        function normalizeRot(rot) { return ((rot || 0) % 4 + 4) % 4; }
+        function inBounds(x, y) { return x >= 0 && x <= 9 && y >= 0 && y <= 7; }
+        function isReservedSquare(x, y, color) {
+            if (color === 'BLUE') return RED_RESERVED.some(s => s.x === x && s.y === y);
+            return BLUE_RESERVED.some(s => s.x === x && s.y === y);
+        }
+
+        function updateTurnUI() {
+            const td = document.getElementById('turn-display');
+            const accent = document.getElementById('turn-accent');
+            td.innerText = `TURN: ${gameState.turn}`;
+            
+            if (gameState.turn === 'RED') {
+                td.className = 'px-4 py-1 text-sm font-bold tracking-widest border border-red-500 text-red-500 bg-red-950/30';
+                accent.className = 'absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#f44336] to-transparent opacity-80';
+            } else {
+                td.className = 'px-4 py-1 text-sm font-bold tracking-widest border border-cyan-400 text-cyan-400 bg-cyan-950/30';
+                accent.className = 'absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#03e9f4] to-transparent opacity-80';
+            }
+        }
+
+        // --- 4. PHYSICS ENGINE (LASER RAYCASTING) ---
+        function resolveLaserVector(shooterColor) {
+            const shooter = gameState.pieces.find(p => p.pieceType === 'LASER' && p.color === shooterColor);
+            if (!shooter) return null;
+
+            let dir = normalizeRot(shooter.rot);
+            let cx = shooter.x;
+            let cy = shooter.y;
+            
+            let pathStr = `M ${cx * CELL_SIZE + 50} ${(7 - cy) * CELL_SIZE + 50}`;
+            let isDestroyed = false;
+            let hitPiece = null;
+            let seen = new Set(); // Prevent infinite loops
+
+            for (let step = 0; step < 30; step++) {
+                cx += DIRS[dir].dx;
+                cy += DIRS[dir].dy;
+
+                // Hit boundary
+                if (!inBounds(cx, cy)) {
+                    pathStr += ` L ${cx * CELL_SIZE + 50} ${(7 - cy) * CELL_SIZE + 50}`;
+                    break;
+                }
+
+                pathStr += ` L ${cx * CELL_SIZE + 50} ${(7 - cy) * CELL_SIZE + 50}`;
+
+                const stateKey = `${cx},${cy},${dir}`;
+                if (seen.has(stateKey)) break; // Infinite loop detected
+                seen.add(stateKey);
+
+                const piece = getPieceAt(cx, cy);
+                if (piece) {
+                    const outcomeMap = INTERACTION_MAP[piece.pieceType];
+                    const outcome = outcomeMap ? outcomeMap[normalizeRot(piece.rot)]?.[dir] : null;
+
+                    if (!outcome || outcome.action === 'destroy') {
+                        isDestroyed = true;
+                        hitPiece = piece;
+                        break;
+                    } else if (outcome.action === 'block') {
+                        break;
+                    } else if (outcome.action === 'reflect') {
+                        dir = outcome.nextDir;
+                    }
+                }
+            }
+            return { pathStr, hitPiece, isDestroyed };
+        }
+
+        // --- 5. GAME LOGIC & TURN EXECUTION ---
+        function executeFireSequence() {
+            // Unselect visually
+            gameState.selected = null;
+            document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
+
+            // Raycast
+            const trace = resolveLaserVector(gameState.turn);
+            gameState.laserPath = trace;
+            
+            renderBoard(); // Render the laser beam
+
+            // Wait 1 second to show the beam, then resolve damages
+            setTimeout(() => {
+                if (trace && trace.isDestroyed && trace.hitPiece) {
+                    log(`Laser destroyed ${trace.hitPiece.color} ${trace.hitPiece.pieceType} at (${trace.hitPiece.x}, ${trace.hitPiece.y})`, 'text-red-500 font-bold');
+                    
+                    gameState.pieces = gameState.pieces.filter(p => p.id !== trace.hitPiece.id); // Remove dead piece
+                    
+                    if (trace.hitPiece.pieceType === 'KING') {
+                        const winner = trace.hitPiece.color === 'RED' ? 'BLUE' : 'RED';
+                        gameState.status = `${winner}_WIN`;
+                        alert(`GAME OVER! ${winner} WINS!`);
+                        log(`MATCH CONCLUDED. ${winner} IS VICTORIOUS.`, 'text-yellow-400 font-bold');
+                        renderBoard();
+                        return; // Stop game loop
+                    }
+                }
+
+                // Swap turns if game is still active
+                if (gameState.status === 'ACTIVE') {
+                    gameState.turn = gameState.turn === 'RED' ? 'BLUE' : 'RED';
+                    gameState.laserPath = null; // Clear laser for next turn
+                    updateTurnUI();
+                    log(`Turn swapped to ${gameState.turn}.`, 'text-white');
+                    renderBoard();
+                }
+            }, 1200);
+        }
+
+        window.handleCellClick = (x, y) => {
+            if (gameState.status !== 'ACTIVE') return;
+            const clickedPiece = getPieceAt(x, y);
+
+            // Logic 1: We have a piece selected, attempting to MOVE or SWAP
+            if (gameState.selected) {
+                const sx = gameState.selected.x;
+                const sy = gameState.selected.y;
+                const dx = Math.abs(x - sx);
+                const dy = Math.abs(y - sy);
+
+                // Clicking the same piece deselects
+                if (dx === 0 && dy === 0) {
+                    clearSelection();
+                    return;
+                }
+                
+                if (dx <= 1 && dy <= 1) {
+                    const movingPiece = getPieceAt(sx, sy);
+                    
+                    if (movingPiece.pieceType === 'LASER') {
+                        log(`[!] Lasers cannot move.`, 'text-red-400');
+                        clearSelection();
+                        return;
+                    }
+                    if (isReservedSquare(x, y, movingPiece.color)) {
+                        log(`[!] Cannot enter opponent's reserved zone.`, 'text-red-400');
+                        clearSelection();
+                        return;
+                    }
+
+                    // Handle Swap Logic or Collision
+                    if (clickedPiece) {
+                        if (movingPiece.pieceType === 'SWITCH' && (clickedPiece.pieceType === 'DEFLECTOR' || clickedPiece.pieceType === 'DEFENDER')) {
+                            // Valid Swap
+                            if (isReservedSquare(sx, sy, clickedPiece.color)) {
+                                log(`[!] Swap failed: Pushes enemy into invalid zone.`, 'text-red-400');
+                                clearSelection();
+                                return;
+                            }
+                            clickedPiece.x = sx;
+                            clickedPiece.y = sy;
+                            movingPiece.x = x;
+                            movingPiece.y = y;
+                            log(`Swapped ${movingPiece.color} SWITCH with ${clickedPiece.color} ${clickedPiece.pieceType}.`, 'text-theme');
+                            executeFireSequence();
+                        } else {
+                            log(`[!] Square occupied.`, 'text-red-400');
+                            clearSelection();
+                        }
+                    } else {
+                        // Standard Move
+                        movingPiece.x = x;
+                        movingPiece.y = y;
+                        log(`Moved ${movingPiece.pieceType} to (${x}, ${y}).`, 'text-theme');
+                        executeFireSequence();
+                    }
+                } else {
+                    log(`[!] Invalid move range. Max 1 square.`, 'text-red-400');
+                }
+            } 
+            // Logic 2: Select a piece
+            else if (clickedPiece) {
+                if (clickedPiece.color !== gameState.turn) {
+                    log(`[!] It is ${gameState.turn}'s turn.`, 'text-red-400');
+                    return;
+                }
+                gameState.selected = {x, y};
+                document.getElementById('selection-status').innerText = `SELECTED: ${clickedPiece.color} ${clickedPiece.pieceType}`;
+                renderBoard();
+            }
+        };
+
+        window.rotateSelected = (dir) => {
+            if (gameState.status !== 'ACTIVE' || !gameState.selected) return;
+            const p = getPieceAt(gameState.selected.x, gameState.selected.y);
+            
+            if (p) {
+                if (p.pieceType === 'KING') {
+                    log(`[!] Kings cannot rotate.`, 'text-red-400');
+                    return;
+                }
+
+                const newRot = normalizeRot(p.rot + dir);
+
+                // Laser rotation limits
+                if (p.pieceType === 'LASER') {
+                    if (p.color === 'BLUE' && (newRot === 1 || newRot === 2)) {
+                        log(`[!] Blue Laser must face North(0) or West(3).`, 'text-red-400');
+                        return;
+                    }
+                    if (p.color === 'RED' && (newRot === 0 || newRot === 3)) {
+                        log(`[!] Red Laser must face South(2) or East(1).`, 'text-red-400');
+                        return;
+                    }
+                }
+
+                p.rot = newRot;
+                log(`Rotated ${p.pieceType}.`, 'text-theme');
+                executeFireSequence();
+            }
+        };
+
+        window.skipTurnAndFire = () => {
+            if (gameState.status !== 'ACTIVE') return;
+            log(`Turn manually skipped. Initiating fire.`, 'text-yellow-400');
+            executeFireSequence();
+        };
+
+        window.clearSelection = () => {
+            gameState.selected = null;
+            document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
+            renderBoard();
+        };
+
+        // --- 6. SVG RENDERING ---
+        function renderBoard() {
+            const svg = document.getElementById('game-board');
+            svg.innerHTML = '';
+            
+            // Draw Grid
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    // Invert Y axis for drawing so (0,0) is bottom left mathematically for game logic, 
+                    // but visually drawn correctly in SVG space.
+                    const drawY = 7 - y; 
+                    r.setAttribute('x', x * CELL_SIZE); 
+                    r.setAttribute('y', drawY * CELL_SIZE);
+                    r.setAttribute('width', CELL_SIZE); 
+                    r.setAttribute('height', CELL_SIZE);
+                    
+                    let cls = 'grid-cell';
+                    if (isReservedSquare(x, y, 'BLUE') && isReservedSquare(x, y, 'RED')) cls += ''; // Overlap failsafe
+                    else if (isReservedSquare(x, y, 'RED')) cls += ' reserved-blue'; // Blue reserved blocks red
+                    else if (isReservedSquare(x, y, 'BLUE')) cls += ' reserved-red'; 
+
+                    if (gameState.selected?.x === x && gameState.selected?.y === y) cls += ' selected';
+                    
+                    r.setAttribute('class', cls);
+                    r.setAttribute('fill', 'transparent');
+                    r.setAttribute('stroke', 'rgba(255,255,255,0.05)');
+                    r.setAttribute('onclick', `handleCellClick(${x},${y})`);
+                    svg.appendChild(r);
+                }
+            }
+
+            // Draw Laser Path
+            if (gameState.laserPath) {
+                const c = gameState.turn === 'RED' ? 'rgba(244, 67, 54,' : 'rgba(3, 233, 244,';
+                const isD = gameState.laserPath.isDestroyed;
+                
+                const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                glow.setAttribute('d', gameState.laserPath.pathStr);
+                glow.setAttribute('stroke', isD ? 'rgba(255, 0, 0, 0.4)' : `${c} 0.35)`);
+                glow.setAttribute('stroke-width', '14'); glow.setAttribute('fill', 'none');
+                
+                const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                core.setAttribute('d', gameState.laserPath.pathStr);
+                core.setAttribute('stroke', isD ? 'rgba(255, 100, 100, 0.9)' : 'white');
+                core.setAttribute('stroke-width', '3.5'); core.setAttribute('fill', 'none');
+                
+                svg.appendChild(glow);
+                svg.appendChild(core);
+            }
+            
+            // Draw Pieces
+            gameState.pieces.forEach(p => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', 'piece-group');
+                
+                const drawY = 7 - p.y;
+                const ox = p.x * CELL_SIZE + 50;
+                const oy = drawY * CELL_SIZE + 50;
+                
+                g.style.transformOrigin = `${ox}px ${oy}px`;
+                g.style.transform = `rotate(${p.rot * 90}deg)`;
+                
+                const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+                img.setAttribute('x', p.x * CELL_SIZE + 5);
+                img.setAttribute('y', drawY * CELL_SIZE + 5);
+                img.setAttribute('width', 90); img.setAttribute('height', 90);
+                img.setAttribute('href', `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.pieceType.toLowerCase()}.png`);
+                
+                g.appendChild(img);
+                g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
+                svg.appendChild(g);
+            });
+        }
+
+        // Init Game
+        log("Tactical Grid Initialized.", "text-cyan-400 font-bold");
+        log("Pass and Play Local Mode.", "text-white");
+        updateTurnUI();
+        renderBoard();
+    </script>
+</body>
+</html>
