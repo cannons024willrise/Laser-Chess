@@ -4,58 +4,196 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laser Chess | Tactical Interface</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap');
+
         :root {
             --theme-color: #03e9f4;
-            --theme-rgb: 3, 233, 244;
             --red-theme: #f44336;
+            --bg-color: #0a0a0a;
+            --panel-bg: rgba(20, 20, 20, 0.8);
+            --border-color: rgba(255, 255, 255, 0.1);
         }
-        body { font-family: "Quantico", sans-serif; background: #0a0a0a; color: white; min-height: 100vh; }
-        .rule-card { background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
-        .play-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(3, 233, 244, 0.3); color: var(--theme-color); transition: all 0.3s; font-weight: bold; text-transform: uppercase; }
-        .play-btn:hover { background: rgba(var(--theme-rgb), 0.2); box-shadow: 0 0 10px var(--theme-color); }
-        .play-btn:active { transform: scale(0.98); }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Quantico", sans-serif;
+            background-color: var(--bg-color);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* --- LAYOUT --- */
+        .layout-wrapper {
+            display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            flex-direction: column;
+        }
+        @media (min-width: 1024px) {
+            .layout-wrapper { flex-direction: row; }
+            .controls-panel { width: 350px; flex-shrink: 0; }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .board-panel {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HEADER & UI ELEMENTS --- */
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 { font-size: 1.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; }
+        h3 { color: var(--theme-color); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+
+        .turn-display {
+            padding: 0.25rem 1rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            border: 1px solid var(--theme-color);
+            color: var(--theme-color);
+            background: rgba(3, 233, 244, 0.1);
+        }
+        .turn-display.red-turn {
+            border-color: var(--red-theme);
+            color: var(--red-theme);
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .accent-bar {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(to right, transparent, var(--theme-color), transparent);
+        }
+        .accent-bar.red-turn {
+            background: linear-gradient(to right, transparent, var(--red-theme), transparent);
+        }
+
+        /* --- BOARD & SVG --- */
+        #game-board {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            height: auto;
+            user-select: none;
+            display: block;
+        }
+
         .grid-cell { transition: fill 0.2s; cursor: pointer; }
+        .grid-cell:hover { fill: rgba(255, 255, 255, 0.05); }
         .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 3; }
         .grid-cell.reserved-blue { fill: rgba(3, 233, 244, 0.05); }
         .grid-cell.reserved-red { fill: rgba(244, 67, 54, 0.05); }
         .piece-group { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+
+        /* --- CONTROLS --- */
+        .status-text {
+            font-size: 10px; color: #888; text-transform: uppercase; font-family: monospace;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 1rem;
+        }
+
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+        
+        .play-btn {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(3, 233, 244, 0.3);
+            color: var(--theme-color);
+            padding: 0.75rem;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        .play-btn:hover { background: rgba(3, 233, 244, 0.2); box-shadow: 0 0 10px var(--theme-color); }
+        .play-btn:active { transform: scale(0.98); }
+        
+        .play-btn.btn-fire { border-color: #eab308; color: #eab308; }
+        .play-btn.btn-fire:hover { background: rgba(234, 179, 8, 0.2); box-shadow: 0 0 10px rgba(234, 179, 8, 0.5); }
+        
+        .play-btn.btn-deselect { border-color: var(--red-theme); color: var(--red-theme); }
+        .play-btn.btn-deselect:hover { background: rgba(244, 67, 54, 0.2); box-shadow: 0 0 10px rgba(244, 67, 54, 0.5); }
+
+        /* --- LOGGING --- */
+        .log-container {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            font-size: 10px;
+            font-family: monospace;
+            overflow-y: auto;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            margin-top: 1rem;
+        }
+        .log-container div { margin-bottom: 4px; }
+        .text-cyan { color: var(--theme-color); font-weight: bold; }
+        .text-white { color: #fff; }
+        .text-red { color: var(--red-theme); font-weight: bold; }
+        .text-yellow { color: #eab308; font-weight: bold; }
+        .text-gray { color: #aaa; }
     </style>
 </head>
-<body class="p-8 flex justify-center">
+<body>
 
-    <div class="flex gap-8 max-w-[1200px] w-full flex-col lg:flex-row">
-        <div class="rule-card p-8 rounded-lg flex-grow relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#03e9f4] to-transparent opacity-80" id="turn-accent"></div>
+    <div class="layout-wrapper">
+        <div class="panel board-panel">
+            <div class="accent-bar" id="turn-accent"></div>
             
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-black uppercase tracking-widest">Tactical Grid</h2>
-                <div id="turn-display" class="px-4 py-1 text-sm font-bold tracking-widest border border-cyan-400 text-cyan-400 bg-cyan-950/30">
-                    TURN: BLUE
-                </div>
+            <div class="header-row">
+                <h2>Tactical Grid</h2>
+                <div class="turn-display" id="turn-display">TURN: BLUE</div>
             </div>
-            <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/50 border border-white/10 w-full select-none"></svg>
+            
+            <svg id="game-board" viewBox="0 0 1000 800"></svg>
         </div>
 
-        <div class="rule-card p-6 w-full lg:w-[350px] flex flex-col gap-4 shrink-0">
-            <h3 class="text-cyan-400 font-bold uppercase tracking-widest">Controls</h3>
-            <div id="selection-status" class="text-[10px] text-gray-500 uppercase font-mono mb-2 border-b border-white/10 pb-2">NO PIECE SELECTED</div>
+        <div class="panel controls-panel">
+            <h3>Controls</h3>
+            <div class="status-text" id="selection-status">NO PIECE SELECTED</div>
             
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="rotateSelected(-1)" class="play-btn py-3 text-[11px]">Rotate Left ⟲</button>
-                <button onclick="rotateSelected(1)" class="play-btn py-3 text-[11px]">Rotate Right ⟳</button>
+            <div class="btn-grid">
+                <button onclick="rotateSelected(-1)" class="play-btn">Rotate Left ⟲</button>
+                <button onclick="rotateSelected(1)" class="play-btn">Rotate Right ⟳</button>
             </div>
             
-            <button onclick="skipTurnAndFire()" class="play-btn py-3 text-[11px] border-yellow-500 text-yellow-500 hover:shadow-[0_0_10px_rgba(234,179,8,0.5)] hover:bg-yellow-500/20">🔥 Fire (Skip Move)</button>
-            <button onclick="clearSelection()" class="play-btn py-3 text-[11px] border-red-500 text-red-500 hover:shadow-[0_0_10px_rgba(244,67,54,0.5)] hover:bg-red-500/20">Deselect</button>
+            <button onclick="skipTurnAndFire()" class="play-btn btn-fire">🔥 Fire (Skip Move)</button>
+            <button onclick="clearSelection()" class="play-btn btn-deselect">Deselect</button>
             
-            <div class="flex-grow flex flex-col mt-4">
-                <h3 class="text-gray-500 font-black tracking-widest uppercase text-xs mb-2">System Log</h3>
-                <div id="sys-log" class="flex-grow bg-black/50 border border-white/5 p-3 text-[10px] font-mono overflow-y-auto h-[250px] flex flex-col justify-end"></div>
-            </div>
+            <h3 style="margin-top: 1rem; font-size: 0.75rem; color: #888;">System Log</h3>
+            <div class="log-container" id="sys-log"></div>
         </div>
     </div>
 
@@ -138,8 +276,8 @@
             ]
         };
 
-        // --- 3. SANITIZED INTERFACE LOGGING ---
-        function log(msg, colorClass = 'text-gray-400') {
+        // --- 3. SANITIZED LOGGING ---
+        function log(msg, colorClass = 'text-gray') {
             const l = document.getElementById('sys-log');
             const row = document.createElement('div');
             row.className = colorClass;
@@ -161,11 +299,11 @@
             const accent = document.getElementById('turn-accent');
             td.innerText = "TURN: " + gameState.turn;
             if (gameState.turn === 'RED') {
-                td.className = 'px-4 py-1 text-sm font-bold tracking-widest border border-red-500 text-red-500 bg-red-950/30';
-                accent.className = 'absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#f44336] to-transparent opacity-80';
+                td.className = "turn-display red-turn";
+                accent.className = "accent-bar red-turn";
             } else {
-                td.className = 'px-4 py-1 text-sm font-bold tracking-widest border border-cyan-400 text-cyan-400 bg-cyan-950/30';
-                accent.className = 'absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#03e9f4] to-transparent opacity-80';
+                td.className = "turn-display";
+                accent.className = "accent-bar";
             }
         }
 
@@ -230,14 +368,14 @@
 
             setTimeout(() => {
                 if (trace && trace.isDestroyed && trace.hitPiece) {
-                    log("Laser scorched " + trace.hitPiece.color + " " + trace.hitPiece.pieceType + " at (" + trace.hitPiece.x + ", " + trace.hitPiece.y + ")", 'text-red-500 font-bold');
+                    log("Laser scorched " + trace.hitPiece.color + " " + trace.hitPiece.pieceType + " at (" + trace.hitPiece.x + ", " + trace.hitPiece.y + ")", 'text-red');
                     gameState.pieces = gameState.pieces.filter(p => p.id !== trace.hitPiece.id);
                     
                     if (trace.hitPiece.pieceType === 'KING') {
                         const winner = trace.hitPiece.color === 'RED' ? 'BLUE' : 'RED';
                         gameState.status = winner + "_WIN";
                         alert("GAME OVER! " + winner + " WINS!");
-                        log("CRITICAL METRIC: " + winner + " IS VICTORIOUS.", 'text-yellow-400 font-bold');
+                        log("CRITICAL METRIC: " + winner + " IS VICTORIOUS.", 'text-yellow');
                         renderBoard();
                         return;
                     }
@@ -273,12 +411,12 @@
                     const movingPiece = getPieceAt(sx, sy);
                     
                     if (movingPiece.pieceType === 'LASER') {
-                        log("Selection Error: Lasers are static frame structural nodes.", 'text-red-400');
+                        log("Selection Error: Lasers are static frame nodes.", 'text-red');
                         clearSelection();
                         return;
                     }
                     if (isReservedSquare(x, y, movingPiece.color)) {
-                        log("Boundary Error: Access to sector lane is restricted.", 'text-red-400');
+                        log("Boundary Error: Access to sector lane is restricted.", 'text-red');
                         clearSelection();
                         return;
                     }
@@ -286,30 +424,30 @@
                     if (clickedPiece) {
                         if (movingPiece.pieceType === 'SWITCH' && (clickedPiece.pieceType === 'DEFLECTOR' || clickedPiece.pieceType === 'DEFENDER')) {
                             if (isReservedSquare(sx, sy, clickedPiece.color)) {
-                                log("Swap Conflict: Target node calculation errors out.", 'text-red-400');
+                                log("Swap Conflict: Target node calculation errors out.", 'text-red');
                                 clearSelection();
                                 return;
                             }
                             clickedPiece.x = sx; clickedPiece.y = sy;
                             movingPiece.x = x; movingPiece.y = y;
-                            log("Displaced " + clickedPiece.color + " " + clickedPiece.pieceType + " via Switch.", 'text-theme');
+                            log("Displaced " + clickedPiece.color + " " + clickedPiece.pieceType + " via Switch.", 'text-cyan');
                             executeFireSequence();
                         } else {
-                            log("Vector Blocked: Node location is currently occupied.", 'text-red-400');
+                            log("Vector Blocked: Node location is currently occupied.", 'text-red');
                             clearSelection();
                         }
                     } else {
                         movingPiece.x = x; movingPiece.y = y;
-                        log("Moved " + movingPiece.pieceType + " to cell coordinates (" + x + ", " + y + ").", 'text-theme');
+                        log("Moved " + movingPiece.pieceType + " to cell coordinates (" + x + ", " + y + ").", 'text-cyan');
                         executeFireSequence();
                     }
                 } else {
-                    log("Range Error: Path calculation exceeds layout guidelines.", 'text-red-400');
+                    log("Range Error: Path calculation exceeds layout guidelines.", 'text-red');
                 }
             } 
             else if (clickedPiece) {
                 if (clickedPiece.color !== gameState.turn) {
-                    log("Command Error: Selected object belongs to rival team.", 'text-red-400');
+                    log("Command Error: Selected object belongs to rival team.", 'text-red');
                     return;
                 }
                 gameState.selected = {x, y};
@@ -324,7 +462,7 @@
             
             if (p) {
                 if (p.pieceType === 'KING') {
-                    log("Command Error: Kings cannot be rotated.", 'text-red-400');
+                    log("Command Error: Kings cannot be rotated.", 'text-red');
                     return;
                 }
 
@@ -332,24 +470,24 @@
 
                 if (p.pieceType === 'LASER') {
                     if (p.color === 'BLUE' && (newRot === 1 || newRot === 2)) {
-                        log("Calibration Failure: Safe directional locks triggered.", 'text-red-400');
+                        log("Calibration Failure: Safe directional locks triggered.", 'text-red');
                         return;
                     }
                     if (p.color === 'RED' && (newRot === 0 || newRot === 3)) {
-                        log("Calibration Failure: Safe directional locks triggered.", 'text-red-400');
+                        log("Calibration Failure: Safe directional locks triggered.", 'text-red');
                         return;
                     }
                 }
 
                 p.rot = newRot;
-                log("Realigned " + p.pieceType + " along alignment vector " + ROT_ARRAY[p.rot] + ".", 'text-theme');
+                log("Realigned " + p.pieceType + " along alignment vector " + ROT_ARRAY[p.rot] + ".", 'text-cyan');
                 executeFireSequence();
             }
         };
 
         window.skipTurnAndFire = () => {
             if (gameState.status !== 'ACTIVE') return;
-            log("Manual loop override: Weapon discharge sequence triggered.", 'text-yellow-400');
+            log("Manual loop override: Weapon discharge sequence triggered.", 'text-yellow');
             executeFireSequence();
         };
 
@@ -430,7 +568,7 @@
         }
 
         // Initialize Base Runtime Loop
-        log("Tactical Grid Core Engine Hydrated.", "text-cyan-400 font-bold");
+        log("Tactical Grid Core Engine Hydrated.", "text-cyan");
         log("Pass and Play systems operational.", "text-white");
         updateTurnUI();
         renderBoard();
