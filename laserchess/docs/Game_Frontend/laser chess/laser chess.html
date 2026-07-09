@@ -3,401 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laser Chess - Tactical Interface</title>
-
-    <!-- Tailwind & Fonts -->
+    <title>Laser Chess | Tactical Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Extracted from themes.css */
         :root {
             --theme-color: #03e9f4;
             --theme-rgb: 3, 233, 244;
             --red-theme: #f44336;
         }
-
         body {
-            font-family: "Quantico", sans-serif !important;
-            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), #0a0a0a;
+            font-family: "Quantico", sans-serif;
+            background: radial-gradient(circle at center, #1a1a1a, #0a0a0a);
             color: white;
-            overflow-x: hidden;
-            margin: 0; min-height: 100vh;
+            min-height: 100vh;
         }
-
-        .text-theme { color: var(--theme-color); }
-        .text-red-theme { color: var(--red-theme); }
-        .border-theme-20 { border-color: rgba(var(--theme-rgb), 0.2) !important; }
-        .bg-theme-10 { background-color: rgba(var(--theme-rgb), 0.05); }
-        
         .rule-card {
             background: rgba(20, 20, 20, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(12px);
-            box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.9);
         }
-
-        /* Recreated Play Button from themes.css */
-        button.play-btn {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 48px;
+        .play-btn {
             background: rgba(0,0,0,0.5);
-            color: var(--theme-color);
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
             border: 1px solid rgba(3, 233, 244, 0.3);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            font-size: 12px;
-            font-weight: bold;
+            color: var(--theme-color);
+            transition: all 0.3s;
         }
-        button.play-btn:hover {
-            background: rgba(var(--theme-rgb), 0.2);
-            box-shadow: 0 0 15px rgba(var(--theme-rgb), 0.4);
-            color: #fff;
-        }
-        button.play-btn.red-btn {
-            color: var(--red-theme);
-            border-color: rgba(244, 67, 54, 0.3);
-        }
-        button.play-btn.red-btn:hover {
-            background: rgba(244, 67, 54, 0.2);
-            box-shadow: 0 0 15px rgba(244, 67, 54, 0.4);
-        }
-
-        /* SVG Rendering Specifics */
-        .grid-cell { transition: fill 0.2s ease; }
-        .grid-cell:hover { fill: rgba(255, 255, 255, 0.1); cursor: crosshair; }
-        .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 2px; }
-        .grid-cell.reserved-red { fill: rgba(244, 67, 54, 0.05); }
-        .grid-cell.reserved-blue { fill: rgba(3, 233, 244, 0.05); }
+        .play-btn:hover { background: rgba(var(--theme-rgb), 0.2); box-shadow: 0 0 10px var(--theme-color); }
+        .grid-cell { transition: fill 0.2s; cursor: pointer; }
+        .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 lg:p-8">
+<body class="p-8 flex justify-center">
 
-    <div class="flex flex-col lg:flex-row gap-8 w-full max-w-[1200px]">
-        
-        <!-- MAIN BOARD RENDERER -->
-        <div class="rule-card p-6 lg:p-8 rounded-lg flex-grow border-theme-20 relative">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#03e9f4] to-transparent opacity-80"></div>
-            
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-black tracking-[0.3em] uppercase">Tactical Grid</h2>
-                <div id="turn-display" class="px-4 py-1 text-sm font-bold tracking-widest border border-red-500 text-red-500 bg-red-950/30">
-                    TURN: RED
-                </div>
-            </div>
-
-            <!-- SVG Viewport (10x8 Engine Grid) -->
-            <div class="flex justify-center w-full">
-                <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/80 border border-white/10 rounded shadow-2xl w-full max-w-[800px] h-auto select-none"></svg>
-            </div>
+    <div class="flex gap-8 max-w-[1200px] w-full">
+        <div class="rule-card p-8 rounded-lg flex-grow">
+            <h2 class="text-2xl font-black uppercase mb-6 tracking-widest">Tactical Grid</h2>
+            <svg id="game-board" viewBox="0 0 1000 800" class="bg-black/50 border border-white/10 w-full"></svg>
         </div>
 
-        <!-- COMMAND CONSOLE -->
-        <div class="rule-card p-6 rounded-lg w-full lg:w-[350px] flex flex-col gap-6 border-theme-20 shrink-0">
-            <div>
-                <h3 class="text-theme font-black tracking-widest uppercase text-lg mb-2">Controls</h3>
-                <p class="text-[11px] text-gray-400 font-mono uppercase tracking-widest mb-4 pb-4 border-b border-white/10">
-                    Select a piece, choose a target cell, or rotate. Laser fires automatically.
-                </p>
-                
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <button onclick="rotateSelected(-1)" class="play-btn">◄ Rotate L</button>
-                    <button onclick="rotateSelected(1)" class="play-btn">Rotate R ►</button>
-                </div>
-                <button onclick="fireLaser()" class="play-btn mb-3">Fire Laser (Skip)</button>
-                <button onclick="resetGame()" class="play-btn red-btn">Resign / Reset</button>
-            </div>
-
-            <div class="flex-grow flex flex-col">
-                <h3 class="text-gray-500 font-black tracking-widest uppercase text-sm mb-2">System Log</h3>
-                <div id="sys-log" class="flex-grow bg-black/60 border border-white/5 p-3 rounded font-mono text-[10px] text-gray-400 overflow-y-auto h-[200px] flex flex-col gap-1">
-                    <div class="text-theme">System Initialized. Awaiting Input.</div>
-                </div>
-            </div>
+        <div class="rule-card p-6 w-[300px] flex flex-col gap-4">
+            <h3 class="text-cyan-400 font-bold uppercase">System Console</h3>
+            <button onclick="rotateSelected(-1)" class="play-btn py-2">Rotate Left</button>
+            <button onclick="rotateSelected(1)" class="play-btn py-2">Rotate Right</button>
+            <div id="sys-log" class="h-40 bg-black/50 p-2 text-[10px] font-mono text-gray-400 overflow-y-auto"></div>
         </div>
     </div>
 
     <script>
-        // --- 1. ENGINE CONFIGURATION ---
         const CELL_SIZE = 100;
-        const COLS = 10;
-        const ROWS = 8;
-        const DIRS = [ { dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 } ]; // N, E, S, W
-        
-        // Simplified Interaction Map for MVP translation
-        const INTERACTION_MAP = {
-            DEFLECTOR: {
-                0: { 0: null, 1: null, 2: 3, 3: 0 }, // Mirrored surface reflects
-                1: { 0: 1, 1: null, 2: null, 3: 2 },
-                2: { 0: 3, 1: 2, 2: null, 3: null },
-                3: { 0: null, 1: 0, 2: 1, 3: null }
-            },
-            DEFENDER: {
-                0: { 2: 'block' }, 1: { 3: 'block' }, 2: { 0: 'block' }, 3: { 1: 'block' }
-            },
-            SWITCH: {
-                0: { 0: 1, 1: 0, 2: 3, 3: 2 }, 1: { 0: 3, 1: 2, 2: 1, 3: 0 },
-                2: { 0: 1, 1: 0, 2: 3, 3: 2 }, 3: { 0: 3, 1: 2, 2: 1, 3: 0 }
-            }
-        };
-
-        // Standard setup from index.html
         let gameState = {
-            turn: 'RED',
-            selected: null,
-            laserPath: null,
+            turn: 'RED', selected: null, laserPath: null,
             pieces: [
                 { id: 1, type: "KING", color: "BLUE", rot: 0, x: 4, y: 7 },
                 { id: 2, type: "KING", color: "RED", rot: 0, x: 5, y: 0 },
                 { id: 3, type: "LASER", color: "RED", rot: 0, x: 0, y: 0 },
-                { id: 4, type: "LASER", color: "BLUE", rot: 2, x: 9, y: 7 },
-                { id: 5, type: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 4 },
-                { id: 6, type: "DEFLECTOR", color: "RED", rot: 0, x: 7, y: 3 },
-                { id: 7, type: "DEFENDER", color: "RED", rot: 0, x: 4, y: 0 },
-                { id: 8, type: "SWITCH", color: "BLUE", rot: 1, x: 4, y: 4 }
+                { id: 4, type: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 4 }
             ]
         };
 
-        // --- 2. LOGIC & RAYCASTING ---
-        function log(msg, color = 'text-gray-400') {
-            const l = document.getElementById('sys-log');
-            l.innerHTML += `<div class="${color}">> ${msg}</div>`;
-            l.scrollTop = l.scrollHeight;
-        }
-
-        function toggleTurn() {
-            gameState.turn = gameState.turn === 'RED' ? 'BLUE' : 'RED';
-            gameState.selected = null;
-            gameState.laserPath = null;
-            
-            const td = document.getElementById('turn-display');
-            td.innerText = `TURN: ${gameState.turn}`;
-            td.className = gameState.turn === 'RED' 
-                ? 'px-4 py-1 text-sm font-bold tracking-widest border border-red-500 text-red-500 bg-red-950/30'
-                : 'px-4 py-1 text-sm font-bold tracking-widest border border-cyan-400 text-cyan-400 bg-cyan-950/30';
-            
-            renderBoard();
-        }
-
-        function getPieceAt(x, y) {
-            return gameState.pieces.find(p => p.x === x && p.y === y);
-        }
-
-        function traceLaser(color) {
-            const laser = gameState.pieces.find(p => p.type === 'LASER' && p.color === color);
-            if (!laser) return null;
-
-            let pathStr = '';
-            let isDestroyed = false;
-            let cx = laser.x;
-            let cy = laser.y;
-            let dir = laser.rot;
-            
-            pathStr += `M ${cx * CELL_SIZE + 50} ${cy * CELL_SIZE + 50}`;
-            
-            let steps = 0;
-            let hitPiece = null;
-
-            while (steps < 20) {
-                steps++;
-                cx += DIRS[dir].dx;
-                cy += DIRS[dir].dy;
-
-                if (cx < 0 || cx >= COLS || cy < 0 || cy >= ROWS) {
-                    pathStr += ` L ${(cx) * CELL_SIZE + 50} ${(cy) * CELL_SIZE + 50}`;
-                    break;
-                }
-
-                pathStr += ` L ${cx * CELL_SIZE + 50} ${cy * CELL_SIZE + 50}`;
-                hitPiece = getPieceAt(cx, cy);
-
-                if (hitPiece) {
-                    if (hitPiece.type === 'KING' || hitPiece.type === 'LASER') {
-                        isDestroyed = true;
-                        break;
-                    }
-
-                    const interaction = INTERACTION_MAP[hitPiece.type]?.[hitPiece.rot]?.[dir];
-                    
-                    if (interaction === undefined || interaction === null) {
-                        isDestroyed = true; // Hit non-reflective side
-                        break;
-                    } else if (interaction === 'block') {
-                        break; // Stopped safely
-                    } else {
-                        dir = interaction; // Reflected
-                    }
-                }
-            }
-
-            return { pathStr, hitPiece, isDestroyed };
-        }
-
-        // --- 3. INPUT HANDLERS ---
-        window.handleCellClick = function(x, y) {
-            const clickedPiece = getPieceAt(x, y);
-
-            if (!gameState.selected) {
-                if (clickedPiece && clickedPiece.color === gameState.turn) {
-                    gameState.selected = {x, y};
-                    log(`Selected ${clickedPiece.type} at (${x}, ${y})`, 'text-white');
-                } else if (clickedPiece) {
-                    log('Cannot select enemy piece.', 'text-red-theme');
-                }
-            } else {
-                const sx = gameState.selected.x;
-                const sy = gameState.selected.y;
-                
-                if (sx === x && sy === y) {
-                    gameState.selected = null;
-                    log('Deselected.');
-                } else {
-                    const dx = Math.abs(x - sx);
-                    const dy = Math.abs(y - sy);
-                    
-                    if (dx <= 1 && dy <= 1) {
-                        if (!clickedPiece) {
-                            const p = getPieceAt(sx, sy);
-                            if (p.type === 'LASER') return log('Lasers cannot move.', 'text-red-theme');
-                            p.x = x; p.y = y;
-                            log(`Moved to (${x}, ${y})`);
-                            executeFireSequence();
-                        } else {
-                            log('Square occupied.', 'text-red-theme');
-                        }
-                    } else {
-                        log('Invalid move range.', 'text-red-theme');
-                    }
-                }
-            }
-            renderBoard();
-        };
-
-        window.rotateSelected = function(dir) {
-            if (!gameState.selected) return log('Select a piece first.');
-            const p = getPieceAt(gameState.selected.x, gameState.selected.y);
-            p.rot = (p.rot + dir + 4) % 4;
-            log(`Rotated ${p.type}.`);
-            executeFireSequence();
-        };
-
-        window.fireLaser = function() {
-            log('Turn skipped. Firing manual.', 'text-white');
-            executeFireSequence();
-        };
-
-        function executeFireSequence() {
-            const trace = traceLaser(gameState.turn);
-            gameState.laserPath = trace;
-            renderBoard();
-            
-            setTimeout(() => {
-                if (trace && trace.isDestroyed && trace.hitPiece) {
-                    log(`DESTROYED: ${trace.hitPiece.color} ${trace.hitPiece.type}!`, 'text-red-theme');
-                    gameState.pieces = gameState.pieces.filter(p => p.id !== trace.hitPiece.id);
-                    if (trace.hitPiece.type === 'KING') {
-                        alert(`${gameState.turn} WINS!`);
-                        resetGame();
-                        return;
-                    }
-                }
-                toggleTurn();
-            }, 1000);
-        }
-
-        window.resetGame = function() { location.reload(); };
-
-        // --- 4. SVG RENDERING ---
         function renderBoard() {
             const svg = document.getElementById('game-board');
             svg.innerHTML = '';
-
-            // Draw Grid
-            for (let y = 0; y < ROWS; y++) {
-                for (let x = 0; x < COLS; x++) {
-                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    rect.setAttribute('x', x * CELL_SIZE);
-                    rect.setAttribute('y', y * CELL_SIZE);
-                    rect.setAttribute('width', CELL_SIZE);
-                    rect.setAttribute('height', CELL_SIZE);
-                    
-                    let cls = 'grid-cell';
-                    if (x === 0 || x === 9) {
-                        cls += x === 0 ? ' reserved-red' : ' reserved-blue';
-                    }
-                    if (gameState.selected && gameState.selected.x === x && gameState.selected.y === y) {
-                        cls += ' selected';
-                    }
-
-                    rect.setAttribute('class', cls);
-                    rect.setAttribute('stroke', 'rgba(255, 255, 255, 0.05)');
-                    rect.setAttribute('onclick', `handleCellClick(${x}, ${y})`);
-                    svg.appendChild(rect);
+            // Render Grid
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    r.setAttribute('x', x * CELL_SIZE); r.setAttribute('y', y * CELL_SIZE);
+                    r.setAttribute('width', CELL_SIZE); r.setAttribute('height', CELL_SIZE);
+                    r.setAttribute('class', 'grid-cell');
+                    r.setAttribute('fill', 'transparent');
+                    r.setAttribute('stroke', 'rgba(255,255,255,0.05)');
+                    r.setAttribute('onclick', `handleCellClick(${x},${y})`);
+                    svg.appendChild(r);
                 }
             }
-
-            // Draw Laser Path
-            if (gameState.laserPath) {
-                const isD = gameState.laserPath.isDestroyed;
-                const pathStr = gameState.laserPath.pathStr;
-                const c = gameState.turn === 'RED' ? 'rgba(244, 67, 54,' : 'rgba(3, 233, 244,';
-
-                const glow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                glow.setAttribute('d', pathStr);
-                glow.setAttribute('stroke', isD ? 'rgba(120, 120, 120, 0.3)' : `${c} 0.35)`);
-                glow.setAttribute('stroke-width', '14'); glow.setAttribute('fill', 'none');
-                
-                const core = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                core.setAttribute('d', pathStr);
-                core.setAttribute('stroke', isD ? 'rgba(160, 160, 160, 0.9)' : 'white');
-                core.setAttribute('stroke-width', '3.5'); core.setAttribute('fill', 'none');
-
-                svg.appendChild(glow); svg.appendChild(core);
-            }
-
-            // Draw Pieces using actual .png assets
+            // Render Pieces
             gameState.pieces.forEach(p => {
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                
-                // Calculate center pivot point for rotation
-                const ox = p.x * CELL_SIZE + 50; 
-                const oy = p.y * CELL_SIZE + 50;
-                
-                g.style.transformOrigin = `${ox}px ${oy}px`;
+                g.style.transformOrigin = `${p.x * CELL_SIZE + 50}px ${p.y * CELL_SIZE + 50}px`;
                 g.style.transform = `rotate(${p.rot * 90}deg)`;
                 
-                // Create Image node
                 const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-                
-                // Offset by 5px so the 90x90 image sits perfectly centered inside the 100x100 cell
-                img.setAttribute('x', p.x * CELL_SIZE + 5); 
+                img.setAttribute('x', p.x * CELL_SIZE + 5);
                 img.setAttribute('y', p.y * CELL_SIZE + 5);
-                img.setAttribute('width', 90); 
-                img.setAttribute('height', 90);
+                img.setAttribute('width', 90); img.setAttribute('height', 90);
                 
-                // Dynamically build the filename (e.g., "redking.png" or "bluedeflector.png")
-                // Adjust the path string if your prototype is saved in a different directory relative to the images
+                // Path integration: ensure this matches your folder structure
                 const fileName = `${p.color.toLowerCase()}${p.type.toLowerCase()}.png`;
-                img.setAttribute('href', `laserchess/docs/pieces/${fileName}`); 
+                img.setAttribute('href', `laserchess/docs/pieces/${fileName}`);
                 
                 g.appendChild(img);
-
-                // Add pass-through click handler to trigger the rect below it
-                g.setAttribute('onclick', `handleCellClick(${p.x}, ${p.y})`);
-                g.setAttribute('class', 'cursor-pointer');
-                
+                g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
                 svg.appendChild(g);
             });
         }
 
-        // Init
+        window.handleCellClick = (x, y) => {
+            const p = gameState.pieces.find(pc => pc.x === x && pc.y === y);
+            if (p) gameState.selected = {x, y};
+            renderBoard();
+        };
+
+        window.rotateSelected = (dir) => {
+            if (!gameState.selected) return;
+            const p = gameState.pieces.find(pc => pc.x === gameState.selected.x && pc.y === gameState.selected.y);
+            if (p) p.rot = (p.rot + dir + 4) % 4;
+            renderBoard();
+        };
+
         renderBoard();
     </script>
 </body>
