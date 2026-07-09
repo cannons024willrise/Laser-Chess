@@ -111,7 +111,7 @@
         .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 3; }
         .grid-cell.reserved-blue { fill: rgba(3, 233, 244, 0.05); }
         .grid-cell.reserved-red { fill: rgba(244, 67, 54, 0.05); }
-        .piece-group { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+        .piece-group { cursor: pointer; }
 
         /* --- CONTROLS --- */
         .status-text {
@@ -552,14 +552,19 @@
                 const ox = p.x * CELL_SIZE + 50;
                 const oy = p.y * CELL_SIZE + 50;
                 
-                g.style.transformOrigin = ox + "px " + oy + "px";
-                g.style.transform = "rotate(" + (p.rot * 90) + "deg)";
+                // BUG FIX: Use native SVG transform space rotations to avoid CSS box matrix misalignment
+                g.setAttribute('transform', "rotate(" + (p.rot * 90) + " " + ox + " " + oy + ")");
                 
                 const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
                 img.setAttribute('x', p.x * CELL_SIZE + 5);
                 img.setAttribute('y', p.y * CELL_SIZE + 5);
                 img.setAttribute('width', 90); img.setAttribute('height', 90);
-                img.setAttribute('href', BASE_ASSET_URL + "/" + p.color.toLowerCase() + p.pieceType.toLowerCase() + ".png");
+                
+                const assetUrl = BASE_ASSET_URL + "/" + p.color.toLowerCase() + p.pieceType.toLowerCase() + ".png";
+                
+                // BUG FIX: Declare standard href attribute alongside fallback legacy xlink declaration
+                img.setAttribute('href', assetUrl);
+                img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', assetUrl);
                 
                 g.appendChild(img);
                 g.setAttribute('onclick', "handleCellClick(" + p.x + "," + p.y + ")");
