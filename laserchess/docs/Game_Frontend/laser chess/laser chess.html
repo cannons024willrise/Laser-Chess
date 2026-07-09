@@ -13,26 +13,13 @@
             --theme-rgb: 3, 233, 244;
             --red-theme: #f44336;
         }
-        body {
-            font-family: "Quantico", sans-serif;
-            background: radial-gradient(circle at center, #1a1a1a, #0a0a0a);
-            color: white;
-            min-height: 100vh;
-        }
-        .rule-card {
-            background: rgba(20, 20, 20, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-        }
-        .play-btn {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(3, 233, 244, 0.3);
-            color: var(--theme-color);
-            transition: all 0.3s;
-        }
+        body { font-family: "Quantico", sans-serif; background: #0a0a0a; color: white; min-height: 100vh; }
+        .rule-card { background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
+        .play-btn { background: rgba(0,0,0,0.5); border: 1px solid rgba(3, 233, 244, 0.3); color: var(--theme-color); transition: all 0.3s; }
         .play-btn:hover { background: rgba(var(--theme-rgb), 0.2); box-shadow: 0 0 10px var(--theme-color); }
         .grid-cell { transition: fill 0.2s; cursor: pointer; }
-        .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); }
+        .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 3; }
+        .piece-group { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
     </style>
 </head>
 <body class="p-8 flex justify-center">
@@ -44,9 +31,11 @@
         </div>
 
         <div class="rule-card p-6 w-[300px] flex flex-col gap-4">
-            <h3 class="text-cyan-400 font-bold uppercase">System Console</h3>
-            <button onclick="rotateSelected(-1)" class="play-btn py-2">Rotate Left</button>
-            <button onclick="rotateSelected(1)" class="play-btn py-2">Rotate Right</button>
+            <h3 class="text-cyan-400 font-bold uppercase tracking-widest">Controls</h3>
+            <div id="selection-status" class="text-[10px] text-gray-500 uppercase font-mono mb-2">NO PIECE SELECTED</div>
+            <button onclick="rotateSelected(-1)" class="play-btn py-2">Rotate Left ⟲</button>
+            <button onclick="rotateSelected(1)" class="play-btn py-2">Rotate Right ⟳</button>
+            <button onclick="clearSelection()" class="play-btn py-2 border-red-500 text-red-500">Deselect</button>
             <div id="sys-log" class="h-40 bg-black/50 p-2 text-[10px] font-mono text-gray-400 overflow-y-auto"></div>
         </div>
     </div>
@@ -55,7 +44,7 @@
         const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
         const CELL_SIZE = 100;
         let gameState = {
-            turn: 'RED', selected: null, laserPath: null,
+            selected: null,
             pieces: [
                 { id: 1, type: "KING", color: "BLUE", rot: 0, x: 4, y: 7 },
                 { id: 2, type: "KING", color: "RED", rot: 0, x: 5, y: 0 },
@@ -67,22 +56,25 @@
         function renderBoard() {
             const svg = document.getElementById('game-board');
             svg.innerHTML = '';
-            // Render Grid
+            
+            // Draw Grid
             for (let y = 0; y < 8; y++) {
                 for (let x = 0; x < 10; x++) {
                     const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     r.setAttribute('x', x * CELL_SIZE); r.setAttribute('y', y * CELL_SIZE);
                     r.setAttribute('width', CELL_SIZE); r.setAttribute('height', CELL_SIZE);
-                    r.setAttribute('class', 'grid-cell');
+                    r.setAttribute('class', `grid-cell ${gameState.selected?.x === x && gameState.selected?.y === y ? 'selected' : ''}`);
                     r.setAttribute('fill', 'transparent');
                     r.setAttribute('stroke', 'rgba(255,255,255,0.05)');
                     r.setAttribute('onclick', `handleCellClick(${x},${y})`);
                     svg.appendChild(r);
                 }
             }
-            // Render Pieces
+            
+            // Draw Pieces
             gameState.pieces.forEach(p => {
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', 'piece-group');
                 g.style.transformOrigin = `${p.x * CELL_SIZE + 50}px ${p.y * CELL_SIZE + 50}px`;
                 g.style.transform = `rotate(${p.rot * 90}deg)`;
                 
@@ -90,10 +82,7 @@
                 img.setAttribute('x', p.x * CELL_SIZE + 5);
                 img.setAttribute('y', p.y * CELL_SIZE + 5);
                 img.setAttribute('width', 90); img.setAttribute('height', 90);
-                
-                // Using exact external URL pattern requested
-                const fileName = `${p.color.toLowerCase()}${p.type.toLowerCase()}.png`;
-                img.setAttribute('href', `${BASE_ASSET_URL}/${fileName}`);
+                img.setAttribute('href', `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.type.toLowerCase()}.png`);
                 
                 g.appendChild(img);
                 g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
@@ -103,14 +92,29 @@
 
         window.handleCellClick = (x, y) => {
             const p = gameState.pieces.find(pc => pc.x === x && pc.y === y);
-            if (p) gameState.selected = {x, y};
+            if (p) {
+                gameState.selected = {x, y};
+                document.getElementById('selection-status').innerText = `SELECTED: ${p.color} ${p.type}`;
+            } else {
+                gameState.selected = null;
+                document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
+            }
             renderBoard();
         };
 
         window.rotateSelected = (dir) => {
             if (!gameState.selected) return;
             const p = gameState.pieces.find(pc => pc.x === gameState.selected.x && pc.y === gameState.selected.y);
-            if (p) p.rot = (p.rot + dir + 4) % 4;
+            if (p) {
+                p.rot = (p.rot + dir + 4) % 4;
+                document.getElementById('sys-log').innerHTML += `> Rotated ${p.type} to ${p.rot * 90}°<br>`;
+            }
+            renderBoard();
+        };
+
+        window.clearSelection = () => {
+            gameState.selected = null;
+            document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
             renderBoard();
         };
 
