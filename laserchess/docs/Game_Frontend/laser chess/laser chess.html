@@ -438,8 +438,8 @@
           Select a piece, click an adjacent square to move, use rotate to change its orientation, or fire your laser. The board uses the hosted tutorial sprites so nothing depends on terminal rendering or local repo paths.
         </div>
         <div class="hero-actions">
-          <button class="btn primary" id="rotateL">Rotate Left <span class="kbd" style="margin-left:.55rem">L</span></button>
-          <button class="btn primary" id="rotateR">Rotate Right <span class="kbd" style="margin-left:.55rem">R</span></button>
+          <button class="btn primary" id="rotateCCW">↺ CCW <span class="kbd" style="margin-left:.55rem">Q</span></button>
+          <button class="btn primary" id="rotateCW">CW ↻ <span class="kbd" style="margin-left:.55rem">E</span></button>
           <button class="btn" id="fireBtn">Fire <span class="kbd" style="margin-left:.55rem">F</span></button>
           <button class="btn danger" id="resetBtn">Reset Game <span class="kbd" style="margin-left:.55rem">N</span></button>
         </div>
@@ -464,7 +464,7 @@
           </div>
         </div>
         <div class="mini">
-          Keyboard: <span class="kbd">←</span> <span class="kbd">↑</span> <span class="kbd">→</span> <span class="kbd">↓</span> move cursor, <span class="kbd">Enter</span> select/use, <span class="kbd">Esc</span> clear selection.
+          Keyboard: <span class="kbd">←</span> <span class="kbd">↑</span> <span class="kbd">→</span> <span class="kbd">↓</span> move cursor, <span class="kbd">Q</span> CCW, <span class="kbd">E</span> CW, <span class="kbd">Enter</span> select/use, <span class="kbd">Esc</span> clear selection.
         </div>
       </div>
     </div>
@@ -489,7 +489,8 @@
         <div class="controls">
           <button class="btn primary" id="moveBtn">Move</button>
           <button class="btn primary" id="selectBtn">Select / Deselect</button>
-          <button class="btn" id="rotateSelectedBtn">Rotate Selected</button>
+          <button class="btn" id="rotateCCWBtn">↺ CCW</button>
+          <button class="btn" id="rotateCWBtn">CW ↻</button>
           <button class="btn" id="endTurnBtn">End Turn</button>
         </div>
       </section>
@@ -637,13 +638,14 @@
     pieceColorValue: document.getElementById("pieceColorValue"),
     piecePosValue: document.getElementById("piecePosValue"),
     pieceRotValue: document.getElementById("pieceRotValue"),
-    rotateL: document.getElementById("rotateL"),
-    rotateR: document.getElementById("rotateR"),
+    rotateCCW: document.getElementById("rotateCCW"),
+    rotateCW: document.getElementById("rotateCW"),
     fireBtn: document.getElementById("fireBtn"),
     resetBtn: document.getElementById("resetBtn"),
     moveBtn: document.getElementById("moveBtn"),
     selectBtn: document.getElementById("selectBtn"),
-    rotateSelectedBtn: document.getElementById("rotateSelectedBtn"),
+    rotateCCWBtn: document.getElementById("rotateCCWBtn"),
+    rotateCWBtn: document.getElementById("rotateCWBtn"),
     endTurnBtn: document.getElementById("endTurnBtn"),
   };
 
@@ -877,6 +879,9 @@
     render();
     return true;
   }
+
+  function rotateCCW() { return rotateSelected(3); }
+  function rotateCW() { return rotateSelected(1); }
 
   function resetGame() {
     state = START_STATE();
@@ -1113,14 +1118,16 @@
     if (key === "ArrowRight") { e.preventDefault(); cursor.x = Math.min(W - 1, cursor.x + 1); render(); return; }
     if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
     if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); p ? onPieceClick(p) : onCellClick(cursor.x, cursor.y); return; }
-    if (key === "l" || key === "L") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateSelected(3); return; }
-    if (key === "r" || key === "R") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateSelected(1); return; }
+    if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
+    if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
+    if (key === "l" || key === "L") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
+    if (key === "r" || key === "R") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
     if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
     if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
   }
 
-  el.rotateL.addEventListener("click", () => rotateSelected(3));
-  el.rotateR.addEventListener("click", () => rotateSelected(1));
+  el.rotateCCW.addEventListener("click", () => rotateCCW());
+  el.rotateCW.addEventListener("click", () => rotateCW());
   el.fireBtn.addEventListener("click", () => fireLaser());
   el.resetBtn.addEventListener("click", () => resetGame());
   el.moveBtn.addEventListener("click", () => {
@@ -1143,7 +1150,8 @@
       if (p) onPieceClick(p);
     }
   });
-  el.rotateSelectedBtn.addEventListener("click", () => rotateSelected(1));
+  el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
+  el.rotateCWBtn.addEventListener("click", () => rotateCW());
   el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
 
   window.addEventListener("keydown", handleKeyboard);
