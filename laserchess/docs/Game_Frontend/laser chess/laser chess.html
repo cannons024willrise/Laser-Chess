@@ -1,273 +1,1637 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laser Chess | Tactical Interface</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --theme-color: #03e9f4;
-            --theme-rgb: 3, 233, 244;
-            --red-theme: #f44336;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laser Chess | Local Pass & Play</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --theme-color: #03e9f4;
+      --theme-rgb: 3, 233, 244;
+      --bg0: #05070b;
+      --bg1: #0b1118;
+      --bg2: rgba(6, 10, 18, 0.82);
+      --panel: rgba(10, 14, 22, 0.92);
+      --line: rgba(255, 255, 255, 0.09);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.58);
+      --good: #6df7b3;
+      --bad: #ff6666;
+      --blue: #03e9f4;
+      --red: #f44336;
+      --board-cell: rgba(0, 0, 0, 0.55);
+      --board-cell-alt: rgba(255, 255, 255, 0.03);
+      --reserved-blue: rgba(3, 233, 244, 0.12);
+      --reserved-red: rgba(244, 67, 54, 0.12);
+      --shadow: 0 0 24px rgba(var(--theme-rgb), 0.28);
+    }
 
-        body { 
-            font-family: "Quantico", sans-serif; 
-            background: #0a0a0a; 
-            color: white; 
-            min-height: 100vh; 
-            padding: 2rem;
-            display: flex;
-            justify-content: center;
-        }
+    :root.theme-red {
+      --theme-color: #f44336;
+      --theme-rgb: 244, 67, 54;
+      --shadow: 0 0 24px rgba(var(--theme-rgb), 0.28);
+    }
 
-        /* --- NATIVE LAYOUT REPLACE FOR TAILWIND --- */
-        .main-wrapper {
-            display: flex;
-            gap: 2rem;
-            max-width: 1200px;
-            width: 100%;
-        }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Quantico", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(var(--theme-rgb), 0.13), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(255,255,255,0.05), transparent 35%),
+        linear-gradient(180deg, #05070b 0%, #070b11 45%, #030406 100%);
+      overflow-x: hidden;
+    }
 
-        @media (max-width: 900px) {
-            .main-wrapper {
-                flex-direction: column;
-            }
-            .controls-sidebar {
-                width: 100% !important;
-            }
-        }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255,255,255,0.015), rgba(255,255,255,0.015)),
+        repeating-linear-gradient(90deg, transparent 0 21px, rgba(255,255,255,0.01) 21px 22px);
+      mix-blend-mode: screen;
+      opacity: 0.35;
+    }
 
-        .rule-card { 
-            background: rgba(20, 20, 20, 0.8); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            backdrop-filter: blur(10px); 
-            border-radius: 0.5rem;
-        }
-        
-        .board-container {
-            padding: 2rem;
-            flex-grow: 1;
-        }
+    * { box-sizing: border-box; }
+    button, input, select { font: inherit; }
 
-        .controls-sidebar {
-            padding: 1.5rem;
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+    }
 
-        /* --- INTERFACE TYPOGRAPHY & BUTTONS --- */
-        .board-title {
-            font-size: 1.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            margin-bottom: 1.5rem;
-            letter-spacing: 0.1em;
-        }
+    .shell {
+      width: min(1440px, calc(100vw - 24px));
+      margin: 0 auto;
+      padding: 0 0 32px;
+    }
 
-        .sidebar-title {
-            color: #22d3ee;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(8, 10, 14, 0.92);
+      border-bottom: 1px solid var(--line);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+    }
 
-        .status-text {
-            font-size: 10px;
-            color: #6b7280;
-            text-transform: uppercase;
-            font-family: monospace;
-            margin-bottom: 0.5rem;
-        }
+    .header-inner {
+      width: min(1440px, calc(100vw - 24px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 0;
+    }
 
-        .play-btn { 
-            background: rgba(0,0,0,0.5); 
-            border: 1px solid rgba(3, 233, 244, 0.3); 
-            color: var(--theme-color); 
-            transition: all 0.3s; 
-            padding: 0.5rem 0;
-            width: 100%;
-            cursor: pointer;
-            font-family: inherit;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-        .play-btn:hover { 
-            background: rgba(3, 233, 244, 0.2); 
-            box-shadow: 0 0 10px var(--theme-color); 
-        }
-        
-        .btn-deselect {
-            border-color: #ef4444;
-            color: #ef4444;
-        }
-        .btn-deselect:hover {
-            background: rgba(239, 68, 68, 0.2);
-            box-shadow: 0 0 10px #ef4444;
-        }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
-        .sys-log-box {
-            height: 10rem;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 0.5rem;
-            font-size: 10px;
-            font-family: monospace;
-            color: #9ca3af;
-            overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(20px, 2.2vw, 30px);
+      font-style: italic;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-shadow: 0 0 20px rgba(var(--theme-rgb), 0.22);
+    }
 
-        /* --- SVG GRID & PIECES --- */
-        #game-board {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-        .grid-cell { transition: fill 0.2s; cursor: pointer; }
-        .grid-cell:hover { fill: rgba(255, 255, 255, 0.02); }
-        .grid-cell.selected { fill: rgba(3, 233, 244, 0.2); stroke: var(--theme-color); stroke-width: 3; }
-        .piece-group { cursor: pointer; }
-    </style>
+    .brand small {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.38em;
+      font-size: 11px;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .chip strong { color: var(--text); }
+
+    .theme-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .theme-switch input {
+      appearance: none;
+      width: 58px;
+      height: 24px;
+      border-radius: 999px;
+      background: #111;
+      border: 1px solid rgba(255,255,255,0.12);
+      position: relative;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .theme-switch input::before {
+      content: "";
+      position: absolute;
+      inset: 3px auto 3px 3px;
+      width: 18px;
+      border-radius: 50%;
+      background: var(--theme-color);
+      box-shadow: 0 0 16px rgba(var(--theme-rgb), 0.7);
+      transition: transform 0.25s ease;
+    }
+
+    .theme-switch input:checked::before { transform: translateX(34px); }
+
+    .hero {
+      padding: 22px 0 12px;
+      display: grid;
+      grid-template-columns: 1.45fr 0.95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.45), var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent 28%, transparent 72%, rgba(255,255,255,0.03));
+      opacity: 0.5;
+    }
+
+    .hero-copy {
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hero-copy h2 {
+      margin: 0;
+      font-size: clamp(30px, 4.4vw, 56px);
+      line-height: 0.95;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-style: italic;
+    }
+
+    .hero-copy p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 70ch;
+      font-size: 15px;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    .badge i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--theme-color);
+      box-shadow: 0 0 16px rgba(var(--theme-rgb), 0.9);
+      display: inline-block;
+    }
+
+    .status-card {
+      padding: 18px 20px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .status-card h3 {
+      margin: 0;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.38em;
+      color: var(--muted);
+    }
+
+    .current-turn {
+      font-size: clamp(24px, 3vw, 36px);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-style: italic;
+      margin: 0;
+    }
+
+    .turn-blue { color: var(--blue); text-shadow: 0 0 16px rgba(3,233,244,0.28); }
+    .turn-red { color: var(--red); text-shadow: 0 0 16px rgba(244,67,54,0.28); }
+
+    .status-text {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+      min-height: 48px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(290px, 0.8fr);
+      gap: 18px;
+      margin-top: 10px;
+      align-items: start;
+    }
+
+    .game-card {
+      padding: 18px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-title h3 {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 14px;
+    }
+
+    .section-title .sub {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      text-align: right;
+    }
+
+    .board-wrap {
+      display: grid;
+      gap: 14px;
+    }
+
+    .board-shell {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(var(--theme-rgb), 0.28);
+      background: rgba(0,0,0,0.55);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03), 0 20px 60px rgba(0,0,0,0.52);
+    }
+
+    .game-board {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 10 / 8;
+      touch-action: manipulation;
+      user-select: none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
+
+    .board-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 50%, rgba(var(--theme-rgb), 0.10), transparent 55%);
+      mix-blend-mode: screen;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .play-btn, .ghost-btn {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 11px;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .play-btn {
+      background: linear-gradient(180deg, rgba(var(--theme-rgb), 0.18), rgba(var(--theme-rgb), 0.08));
+      color: white;
+      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), 0.08), 0 0 24px rgba(var(--theme-rgb), 0.14);
+    }
+
+    .play-btn:hover, .ghost-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(var(--theme-rgb), 0.42);
+      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), 0.12), 0 0 22px rgba(var(--theme-rgb), 0.18);
+    }
+
+    .ghost-btn {
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+    }
+
+    .controls-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mini-panel {
+      padding: 18px;
+    }
+
+    .info-box {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .info-box h4 {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+    }
+
+    .info-row:last-child { padding-bottom: 0; border-bottom: 0; }
+    .info-row strong { color: var(--text); }
+
+    .legend {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .legend-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      flex: 0 0 auto;
+    }
+
+    .legend-swatch.blue { background: rgba(3,233,244,0.18); box-shadow: 0 0 12px rgba(3,233,244,0.2); }
+    .legend-swatch.red { background: rgba(244,67,54,0.18); box-shadow: 0 0 12px rgba(244,67,54,0.18); }
+    .legend-swatch.beam { background: linear-gradient(90deg, rgba(3,233,244,0.9), rgba(255,255,255,0.95)); }
+
+    .message {
+      margin-top: 10px;
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .message.good { color: var(--good); }
+    .message.bad { color: var(--bad); }
+
+    .rules {
+      margin: 18px 0 0;
+      padding: 18px;
+    }
+
+    .rules-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding-bottom: 14px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .rules-head h3 {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 14px;
+    }
+
+    .rules-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-align: right;
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat( auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .rule-card {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+      padding: 16px;
+      min-height: 140px;
+    }
+
+    .rule-card h4 {
+      margin: 0 0 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 13px;
+      color: var(--theme-color);
+    }
+
+    .rule-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .rule-mini {
+      margin-top: 12px;
+      height: 180px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(var(--theme-rgb), 0.18);
+      background: rgba(0,0,0,0.55);
+    }
+
+    .rule-mini svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .hidden { display: none !important; }
+
+    .piece-text {
+      font-family: "Quantico", sans-serif;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      font-weight: 700;
+      paint-order: stroke;
+      stroke: rgba(0,0,0,0.7);
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .floating-note {
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(var(--theme-rgb), 0.18);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 10px;
+      pointer-events: none;
+    }
+
+    .footer-spacer { height: 18px; }
+
+    @media (max-width: 1100px) {
+      .hero, .workspace { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .header-inner, .shell { width: min(100vw - 16px, 100%); }
+      .hero-copy h2 { font-size: 34px; }
+      .controls-grid, .controls-bar { grid-template-columns: 1fr; }
+      .rules, .game-card, .mini-panel { padding: 14px; }
+    }
+  </style>
 </head>
 <body>
-
-    <div class="main-wrapper">
-        <div class="rule-card board-container">
-            <h2 class="board-title">Tactical Grid</h2>
-            <svg id="game-board" viewBox="0 0 1000 800"></svg>
+  <div class="page">
+    <header>
+      <div class="header-inner">
+        <div class="brand">
+          <h1>Laser Chess</h1>
+          <small>local pass & play</small>
         </div>
-
-        <div class="rule-card controls-sidebar">
-            <h3 class="sidebar-title">Controls</h3>
-            <div id="selection-status" class="status-text">NO PIECE SELECTED</div>
-            
-            <button onclick="rotateSelected(-1)" class="play-btn">Rotate Left ⟲</button>
-            <button onclick="rotateSelected(1)" class="play-btn">Rotate Right ⟳</button>
-            <button onclick="clearSelection()" class="play-btn btn-deselect">Deselect</button>
-            
-            <div id="sys-log" class="sys-log-box"></div>
+        <div class="header-actions">
+          <div class="chip"><strong id="turnChip">BLUE</strong> to move</div>
+          <label class="theme-switch" title="Switch theme">
+            red theme
+            <input id="themeToggle" type="checkbox" aria-label="Toggle red theme">
+          </label>
         </div>
+      </div>
+    </header>
+
+    <div class="shell">
+      <section class="hero">
+        <article class="panel hero-copy">
+          <h2>One move. One beam. One turn.</h2>
+          <p>
+            Select one of your pieces, move it to an adjacent square, or rotate it with the controls.
+            Then the laser fires automatically and the turn swaps to the other side.
+          </p>
+          <div class="hero-badges">
+            <span class="badge"><i></i> SVG board renderer</span>
+            <span class="badge"><i></i> Local pass & play</span>
+            <span class="badge"><i></i> Tutorial-style controls</span>
+            <span class="badge"><i></i> No terminal UI</span>
+          </div>
+        </article>
+
+        <aside class="panel status-card">
+          <h3>Match state</h3>
+          <p id="currentTurn" class="current-turn turn-blue">BLUE</p>
+          <div id="statusText" class="status-text">Blue starts first.</div>
+          <div class="info-box">
+            <h4>Selected piece</h4>
+            <div class="info-row"><span>Type</span><strong id="selType">—</strong></div>
+            <div class="info-row"><span>Color</span><strong id="selColor">—</strong></div>
+            <div class="info-row"><span>Rotation</span><strong id="selRot">—</strong></div>
+            <div class="info-row"><span>Position</span><strong id="selPos">—</strong></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="workspace">
+        <article class="panel game-card">
+          <div class="section-title">
+            <div>
+              <h3>Board</h3>
+              <div class="sub">click a piece, then click a target square</div>
+            </div>
+            <div class="sub" id="turnSub">blue to move · local game</div>
+          </div>
+
+          <div class="board-wrap">
+            <div class="board-shell">
+              <div class="floating-note">Arrow keys • Enter • L/R • F • Q</div>
+              <svg id="gameBoard" class="game-board" viewBox="0 0 720 576" role="img" aria-label="Laser chess board"></svg>
+              <div class="board-glow"></div>
+            </div>
+
+            <div class="controls-grid">
+              <button class="play-btn" id="btnRotateL">Rotate left</button>
+              <button class="play-btn" id="btnRotateR">Rotate right</button>
+              <button class="ghost-btn" id="btnFire">Fire laser</button>
+              <button class="ghost-btn" id="btnReset">New game</button>
+            </div>
+            <div id="message" class="message">Click one of your pieces to begin.</div>
+          </div>
+        </article>
+
+        <aside class="panel mini-panel">
+          <div class="section-title">
+            <div>
+              <h3>Legend</h3>
+              <div class="sub">controls and visual cues</div>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-swatch blue"></span> blue pieces</div>
+            <div class="legend-item"><span class="legend-swatch red"></span> red pieces</div>
+            <div class="legend-item"><span class="legend-swatch beam"></span> laser path</div>
+          </div>
+          <div style="margin-top:16px" class="info-box">
+            <h4>Rules</h4>
+            <div class="info-row"><span>Move</span><strong>1 square any direction</strong></div>
+            <div class="info-row"><span>Rotate</span><strong>Selected piece only</strong></div>
+            <div class="info-row"><span>Fire</span><strong>Auto after action</strong></div>
+            <div class="info-row"><span>Win</span><strong>Destroy the enemy king</strong></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="panel rules">
+        <div class="rules-head">
+          <h3>Piece guide</h3>
+          <p>interactive help cards with sandbox-style previews</p>
+        </div>
+        <div class="rules-grid" id="rulesGrid">
+          <div class="rule-card" data-piece="KING">
+            <h4>KING</h4>
+            <p>The king is the target. If a laser destroys it, the game ends immediately.</p>
+            <div class="rule-mini"><svg id="mini-KING" viewBox="0 0 240 180"></svg></div>
+          </div>
+          <div class="rule-card" data-piece="SWITCH">
+            <h4>SWITCH</h4>
+            <p>Switches reflect from every side and can swap with defenders or deflectors.</p>
+            <div class="rule-mini"><svg id="mini-SWITCH" viewBox="0 0 240 180"></svg></div>
+          </div>
+          <div class="rule-card" data-piece="DEFENDER">
+            <h4>DEFENDER</h4>
+            <p>Blocks the beam from one side and is removed by hits from the others.</p>
+            <div class="rule-mini"><svg id="mini-DEFENDER" viewBox="0 0 240 180"></svg></div>
+          </div>
+          <div class="rule-card" data-piece="DEFLECTOR">
+            <h4>DEFLECTOR</h4>
+            <p>Reflects the beam at right angles from one mirrored edge.</p>
+            <div class="rule-mini"><svg id="mini-DEFLECTOR" viewBox="0 0 240 180"></svg></div>
+          </div>
+          <div class="rule-card" data-piece="LASER">
+            <h4>LASER</h4>
+            <p>The emitter cannot move. Rotate it, then it fires across the board.</p>
+            <div class="rule-mini"><svg id="mini-LASER" viewBox="0 0 240 180"></svg></div>
+          </div>
+        </div>
+      </section>
+      <div class="footer-spacer"></div>
     </div>
+  </div>
 
-    <script>
-        const BASE_ASSET_URL = "https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/pieces";
-        const CELL_SIZE = 100;
-        let gameState = {
-            selected: null,
-            pieces: [
-                { id: 1, type: "KING", color: "BLUE", rot: 0, x: 4, y: 7 },
-                { id: 2, type: "KING", color: "RED", rot: 0, x: 5, y: 0 },
-                { id: 3, type: "LASER", color: "RED", rot: 0, x: 0, y: 0 },
-                { id: 4, type: "DEFLECTOR", color: "BLUE", rot: 2, x: 2, y: 4 }
-            ]
-        };
+  <script>
+  (() => {
+    'use strict';
 
-        function renderBoard() {
-            const svg = document.getElementById('game-board');
-            svg.innerHTML = '';
-            
-            // Draw Grid
-            for (let y = 0; y < 8; y++) {
-                for (let x = 0; x < 10; x++) {
-                    const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    r.setAttribute('x', x * CELL_SIZE); r.setAttribute('y', y * CELL_SIZE);
-                    r.setAttribute('width', CELL_SIZE); r.setAttribute('height', CELL_SIZE);
-                    r.setAttribute('class', `grid-cell ${gameState.selected?.x === x && gameState.selected?.y === y ? 'selected' : ''}`);
-                    r.setAttribute('fill', 'transparent');
-                    r.setAttribute('stroke', 'rgba(255,255,255,0.05)');
-                    r.setAttribute('onclick', `handleCellClick(${x},${y})`);
-                    svg.appendChild(r);
-                }
-            }
-            
-            // Draw Pieces
-            gameState.pieces.forEach(p => {
-                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                g.setAttribute('class', 'piece-group');
-                
-                // Calculate precise coordinates for rotation pivot anchor
-                const centerX = p.x * CELL_SIZE + 50;
-                const centerY = p.y * CELL_SIZE + 50;
-                
-                // FIXED: Use native SVG transform matrix rotation to handle cross-browser layout engines smoothly
-                g.setAttribute('transform', `rotate(${p.rot * 90} ${centerX} ${centerY})`);
-                
-                const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-                img.setAttribute('x', p.x * CELL_SIZE + 5);
-                img.setAttribute('y', p.y * CELL_SIZE + 5);
-                img.setAttribute('width', 90); img.setAttribute('height', 90);
-                
-                const imgUrl = `${BASE_ASSET_URL}/${p.color.toLowerCase()}${p.type.toLowerCase()}.png`;
-                img.setAttribute('href', imgUrl);
-                img.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imgUrl);
-                
-                g.appendChild(img);
-                g.setAttribute('onclick', `handleCellClick(${p.x},${p.y})`);
-                svg.appendChild(g);
-            });
+    const STORAGE_KEY = 'laserchess_local_pass_play_v2';
+    const W = 720;
+    const H = 576;
+    const CELL = 72;
+
+    const DIRS = [
+      { dx: 0, dy: 1 },
+      { dx: 1, dy: 0 },
+      { dx: 0, dy: -1 },
+      { dx: -1, dy: 0 }
+    ];
+
+    const ROTATION_TABLE = {
+      KING: { 0: '◈', 1: '◈', 2: '◈', 3: '◈' },
+      LASER: { 0: '⫝', 1: '⟜', 2: 'Ͳ', 3: 'Ð' },
+      SWITCH: { 0: '⟋', 1: '⟍', 2: '⟋', 3: '⟍' },
+      DEFENDER: { 0: '⬓', 1: '◧', 2: '⬒', 3: '◨' },
+      DEFLECTOR: { 0: '◤', 1: '◥', 2: '◢', 3: '◣' }
+    };
+
+    const BLUE_RESERVED = [{x: 9, y: 0}, {x: 9, y: 1}, {x: 9, y: 2}, {x: 9, y: 3}, {x: 9, y: 4}, {x: 9, y: 5}, {x: 9, y: 6}, {x: 9, y: 7}, {x: 1, y: 0}, {x: 1, y: 7}];
+    const RED_RESERVED = [{x: 0, y: 0}, {x: 0, y: 1}, {x: 0, y: 2}, {x: 0, y: 3}, {x: 0, y: 4}, {x: 0, y: 5}, {x: 0, y: 6}, {x: 0, y: 7}, {x: 8, y: 0}, {x: 8, y: 7}];
+
+    const INTERACTION_MAP = {
+      DEFLECTOR: {
+        0: { 0: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 2 }, 1: { action: 'destroy' }, 2: { action: 'destroy' } },
+        1: { 0: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 2 }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+        2: { 2: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 3: { action: 'destroy' } },
+        3: { 2: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 1: { action: 'destroy' } }
+      },
+      SWITCH: {
+        0: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
+        1: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } },
+        2: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
+        3: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } }
+      },
+      DEFENDER: {
+        0: { 0: { action: 'block' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+        1: { 1: { action: 'block' }, 0: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+        2: { 2: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 3: { action: 'destroy' } },
+        3: { 3: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' } }
+      },
+      KING: {
+        0: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+        1: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+        2: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+        3: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } }
+      },
+      LASER: {
+        0: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+        1: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+        2: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+        3: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } }
+      }
+    };
+
+    const INITIAL_PIECES = [
+      {id: 'pmpfnkxpm1', pieceType: 'KING', color: 'BLUE', rotation: 0, x: 4, y: 0},
+      {id: 'pmpfnl4j03', pieceType: 'KING', color: 'RED', rotation: 0, x: 5, y: 7},
+      {id: 'pmpfqugdq4', pieceType: 'DEFENDER', color: 'RED', rotation: 0, x: 4, y: 7},
+      {id: 'pmpfquhvx5', pieceType: 'DEFENDER', color: 'RED', rotation: 2, x: 6, y: 7},
+      {id: 'pmpfqunnp6', pieceType: 'DEFENDER', color: 'BLUE', rotation: 2, x: 5, y: 0},
+      {id: 'pmpfquoqi7', pieceType: 'DEFENDER', color: 'BLUE', rotation: 2, x: 3, y: 0},
+      {id: 'pmpfqvc388', pieceType: 'SWITCH', color: 'BLUE', rotation: 0, x: 5, y: 3},
+      {id: 'pmpfqvfrb9', pieceType: 'SWITCH', color: 'BLUE', rotation: 1, x: 4, y: 3},
+      {id: 'pmpfqvl06a', pieceType: 'SWITCH', color: 'RED', rotation: 0, x: 4, y: 4},
+      {id: 'pmpfqvre4b', pieceType: 'SWITCH', color: 'RED', rotation: 1, x: 5, y: 4},
+      {id: 'pmpfqwdqec', pieceType: 'LASER', color: 'RED', rotation: 2, x: 0, y: 7},
+      {id: 'pmpfqy5dve', pieceType: 'DEFLECTOR', color: 'BLUE', rotation: 2, x: 2, y: 0},
+      {id: 'pmpfqya0pf', pieceType: 'DEFLECTOR', color: 'BLUE', rotation: 2, x: 2, y: 3},
+      {id: 'pmpfqyd1rg', pieceType: 'DEFLECTOR', color: 'BLUE', rotation: 1, x: 2, y: 4},
+      {id: 'pmpfqz0jlj', pieceType: 'DEFLECTOR', color: 'RED', rotation: 0, x: 0, y: 3},
+      {id: 'pmpfqz7fpk', pieceType: 'DEFLECTOR', color: 'RED', rotation: 3, x: 0, y: 4},
+      {id: 'pmpfqzj2ul', pieceType: 'DEFLECTOR', color: 'BLUE', rotation: 3, x: 7, y: 1},
+      {id: 'pmpfr0e5km', pieceType: 'DEFLECTOR', color: 'RED', rotation: 0, x: 6, y: 2},
+      {id: 'pmpfr0t7zn', pieceType: 'DEFLECTOR', color: 'RED', rotation: 0, x: 7, y: 4},
+      {id: 'pmpfr0ww1o', pieceType: 'DEFLECTOR', color: 'RED', rotation: 3, x: 7, y: 3},
+      {id: 'pmpfr18esp', pieceType: 'DEFLECTOR', color: 'BLUE', rotation: 1, x: 9, y: 3},
+      {id: 'pmpfr1bjtq', pieceType: 'DEFLECTOR', color: 'BLUE', rotation: 2, x: 9, y: 4},
+      {id: 'pmpfr2ek5s', pieceType: 'DEFLECTOR', color: 'BLUE', rotation: 2, x: 3, y: 5},
+      {id: 'pmpfr2sl8u', pieceType: 'DEFLECTOR', color: 'RED', rotation: 1, x: 2, y: 6},
+      {id: 'pmpfr337lv', pieceType: 'DEFLECTOR', color: 'RED', rotation: 0, x: 7, y: 7},
+      {id: 'pmpfr69imw', pieceType: 'LASER', color: 'BLUE', rotation: 0, x: 9, y: 0}
+    ];
+
+    const state = {
+      turn: 'BLUE',
+      status: '',
+      moveNumber: 1,
+      pieces: structuredClone(INITIAL_PIECES),
+      selectedId: null,
+      cursorX: 0,
+      cursorY: 0,
+      lastLaserPath: [],
+      lastMoveText: 'Blue starts first.',
+      gameOver: false,
+      themeRed: false,
+      selectedLegalTargets: []
+    };
+
+    const els = {
+      board: document.getElementById('gameBoard'),
+      currentTurn: document.getElementById('currentTurn'),
+      turnChip: document.getElementById('turnChip'),
+      turnSub: document.getElementById('turnSub'),
+      statusText: document.getElementById('statusText'),
+      message: document.getElementById('message'),
+      selType: document.getElementById('selType'),
+      selColor: document.getElementById('selColor'),
+      selRot: document.getElementById('selRot'),
+      selPos: document.getElementById('selPos'),
+      btnRotateL: document.getElementById('btnRotateL'),
+      btnRotateR: document.getElementById('btnRotateR'),
+      btnFire: document.getElementById('btnFire'),
+      btnReset: document.getElementById('btnReset'),
+      themeToggle: document.getElementById('themeToggle')
+    };
+
+    function clonePieces(pieces = state.pieces) {
+      return pieces.map(p => ({ ...p }));
+    }
+
+    function normalizeRotation(rot) {
+      return ((Number(rot) || 0) % 4 + 4) % 4;
+    }
+
+    function inBounds(x, y) {
+      return x >= 0 && x <= 9 && y >= 0 && y <= 7;
+    }
+
+    function isReservedSquare(x, y, color) {
+      const list = color === 'BLUE' ? RED_RESERVED : BLUE_RESERVED;
+      return list.some(s => s.x === x && s.y === y);
+    }
+
+    function getPieceAt(pieces, x, y) {
+      return pieces.find(p => p.x === x && p.y === y) || null;
+    }
+
+    function getSelectedPiece() {
+      return state.pieces.find(p => p.id === state.selectedId) || null;
+    }
+
+    function currentPlayer() {
+      return state.turn;
+    }
+
+    function pieceChar(piece) {
+      const rot = normalizeRotation(piece.rotation);
+      return (ROTATION_TABLE[piece.pieceType] && ROTATION_TABLE[piece.pieceType][rot]) || '?';
+    }
+
+    function pieceAssetHref(pieceType) {
+      return `../pieces/blue${String(pieceType || '').toLowerCase()}.png`;
+    }
+
+    function pieceSpriteFilter(piece) {
+      if (piece.color === 'RED') {
+        return 'hue-rotate(150deg) saturate(4.3) brightness(0.95) drop-shadow(0 0 8px rgba(244,67,54,0.22))';
+      }
+      return 'drop-shadow(0 0 8px rgba(3,233,244,0.20))';
+    }
+
+    function createSpriteImage(piece, x, y, size) {
+      const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+      image.setAttribute('href', pieceAssetHref(piece.pieceType));
+      image.setAttribute('x', x);
+      image.setAttribute('y', y);
+      image.setAttribute('width', size);
+      image.setAttribute('height', size);
+      image.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      image.style.pointerEvents = 'none';
+      image.style.filter = pieceSpriteFilter(piece);
+      return image;
+    }
+
+    function shapeFill(piece) {
+      if (piece.color === 'BLUE') return 'rgba(3, 233, 244, 0.16)';
+      if (piece.color === 'RED') return 'rgba(244, 67, 54, 0.16)';
+      return 'rgba(255,255,255,0.10)';
+    }
+
+    function shapeStroke(piece) {
+      if (piece.color === 'BLUE') return 'rgba(3, 233, 244, 0.75)';
+      if (piece.color === 'RED') return 'rgba(244, 67, 54, 0.75)';
+      return 'rgba(255,255,255,0.45)';
+    }
+
+    function boardToPx(x, y) {
+      return { cx: x * CELL + CELL / 2, cy: y * CELL + CELL / 2 };
+    }
+
+    function pxToBoardCell(rowY) {
+      return 7 - rowY;
+    }
+
+    function interactWithLaser(piece, incomingDir) {
+      const typeMap = INTERACTION_MAP[piece.pieceType];
+      if (!typeMap) return { kind: 'stop', destroyed: false };
+      const outcome = typeMap[normalizeRotation(piece.rotation)]?.[incomingDir];
+      if (!outcome) return { kind: 'stop', destroyed: false };
+      if (outcome.action === 'reflect') return { kind: 'reflect', destroyed: false, reflected: outcome.nextDir };
+      if (outcome.action === 'block') return { kind: 'stop', blocked: true, destroyed: false };
+      if (outcome.action === 'destroy') return { kind: 'stop', destroyed: true };
+      return { kind: 'stop', destroyed: false };
+    }
+
+    function resolveLaserVector(x, y, dir, pieces = state.pieces, path = [], seen = new Set()) {
+      if (!inBounds(x, y)) return { path, hit: null, looped: false };
+      const stateKey = `${x},${y},${dir}`;
+      if (seen.has(stateKey)) return { path, hit: null, looped: true };
+      seen.add(stateKey);
+      path.push({ x, y, dir });
+
+      const piece = getPieceAt(pieces, x, y);
+      if (!piece) return resolveLaserVector(x + DIRS[dir].dx, y + DIRS[dir].dy, dir, pieces, path, seen);
+
+      const outcome = interactWithLaser(piece, dir);
+      if (outcome.kind === 'reflect') {
+        const nextDir = outcome.reflected;
+        return resolveLaserVector(x + DIRS[nextDir].dx, y + DIRS[nextDir].dy, nextDir, pieces, path, seen);
+      }
+      return { path, hit: { piece, blocked: !!outcome.blocked, destroyed: !!outcome.destroyed }, looped: false };
+    }
+
+    function getLaserShooterColor() {
+      return state.turn;
+    }
+
+
+    function previewCurrentBeam() {
+      const shooter = state.pieces.find(p => p.pieceType === 'LASER' && p.color === state.turn);
+      if (!shooter) {
+        state.lastLaserPath = [];
+        return;
+      }
+      const startDir = normalizeRotation(shooter.rotation);
+      state.lastLaserPath = resolveLaserVector(shooter.x + DIRS[startDir].dx, shooter.y + DIRS[startDir].dy, startDir, state.pieces).path;
+    }
+
+    function fireCurrentLaser(pieces = state.pieces) {
+      const shooterColor = getLaserShooterColor();
+      const shooter = pieces.find(p => p.pieceType === 'LASER' && p.color === shooterColor);
+      if (!shooter) return { pieces, path: [], hit: null, destroyedKing: null };
+
+      const startDir = normalizeRotation(shooter.rotation);
+      const trace = resolveLaserVector(shooter.x + DIRS[startDir].dx, shooter.y + DIRS[startDir].dy, startDir, pieces);
+      let nextPieces = clonePieces(pieces);
+      let destroyedKing = null;
+
+      if (trace.hit && trace.hit.destroyed) {
+        const victim = trace.hit.piece;
+        nextPieces = nextPieces.filter(p => !(p.id === victim.id));
+        if (victim.pieceType === 'KING') {
+          destroyedKing = victim;
         }
+      }
 
-        window.handleCellClick = (x, y) => {
-            const clickedPiece = gameState.pieces.find(pc => pc.x === x && pc.y === y);
+      return { pieces: nextPieces, path: trace.path, hit: trace.hit, destroyedKing };
+    }
 
-            // Movement Logic
-            if (gameState.selected && !clickedPiece) {
-                const sx = gameState.selected.x;
-                const sy = gameState.selected.y;
-                const dx = Math.abs(x - sx);
-                const dy = Math.abs(y - sy);
-                
-                if (dx <= 1 && dy <= 1) {
-                    const movingPiece = gameState.pieces.find(pc => pc.x === sx && pc.y === sy);
-                    if (movingPiece.type === 'LASER') {
-                        document.getElementById('sys-log').innerHTML += `> [!] Error: Lasers are fixed.<br>`;
-                    } else {
-                        movingPiece.x = x;
-                        movingPiece.y = y;
-                        gameState.selected = null;
-                        document.getElementById('sys-log').innerHTML += `> Moved ${movingPiece.type} to (${x}, ${y})<br>`;
-                    }
-                } else {
-                    document.getElementById('sys-log').innerHTML += `> [!] Invalid move range.<br>`;
-                }
-            } 
-            // Selection Logic
-            else if (clickedPiece) {
-                gameState.selected = {x, y};
-                document.getElementById('selection-status').innerText = `SELECTED: ${clickedPiece.color} ${clickedPiece.type}`;
+    function legalTargetsFor(piece, pieces = state.pieces) {
+      const targets = [];
+      if (piece.pieceType === 'LASER') return targets;
+
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = piece.x + dx;
+          const ny = piece.y + dy;
+          if (!inBounds(nx, ny) || isReservedSquare(nx, ny, piece.color)) continue;
+
+          const occupant = getPieceAt(pieces, nx, ny);
+          if (!occupant) {
+            targets.push({ x: nx, y: ny, swap: false });
+            continue;
+          }
+
+          if (piece.pieceType === 'SWITCH' && (occupant.pieceType === 'DEFLECTOR' || occupant.pieceType === 'DEFENDER')) {
+            if (!isReservedSquare(piece.x, piece.y, occupant.color)) {
+              targets.push({ x: nx, y: ny, swap: true });
             }
-            renderBoard();
-        };
+          }
+        }
+      }
+      return targets;
+    }
 
-        window.rotateSelected = (dir) => {
-            if (!gameState.selected) return;
-            const p = gameState.pieces.find(pc => pc.x === gameState.selected.x && pc.y === gameState.selected.y);
-            if (p) {
-                p.rot = (p.rot + dir + 4) % 4;
-                document.getElementById('sys-log').innerHTML += `> Rotated ${p.type} to ${p.rot * 90}°<br>`;
-            }
-            renderBoard();
-        };
+    function selectedTargets() {
+      const selected = getSelectedPiece();
+      return selected ? legalTargetsFor(selected) : [];
+    }
 
-        window.clearSelection = () => {
-            gameState.selected = null;
-            document.getElementById('selection-status').innerText = "NO PIECE SELECTED";
-            renderBoard();
-        };
+    function pieceIsSelectable(piece) {
+      return !!piece && piece.color === state.turn && !state.gameOver;
+    }
 
-        renderBoard();
-    </script>
+    function showMessage(text, kind = '') {
+      els.message.textContent = text;
+      els.message.className = `message ${kind}`.trim();
+    }
+
+    function setStatusText(text, kind = '') {
+      els.statusText.textContent = text;
+      els.statusText.className = `status-text ${kind}`.trim();
+    }
+
+    function syncHeader() {
+      els.currentTurn.textContent = state.turn;
+      els.turnChip.textContent = state.turn;
+      els.currentTurn.classList.toggle('turn-blue', state.turn === 'BLUE');
+      els.currentTurn.classList.toggle('turn-red', state.turn === 'RED');
+      els.turnChip.classList.toggle('turn-blue', state.turn === 'BLUE');
+      els.turnChip.classList.toggle('turn-red', state.turn === 'RED');
+      els.turnSub.textContent = state.gameOver ? 'game over' : `${state.turn.toLowerCase()} to move · move number ${state.moveNumber}`;
+      if (state.gameOver) {
+        setStatusText(state.status ? `${state.status.replace('_WIN', '')} wins by laser strike.` : 'Game over.');
+      } else {
+        setStatusText(state.lastMoveText);
+      }
+      const selected = getSelectedPiece();
+      if (selected) {
+        els.selType.textContent = selected.pieceType;
+        els.selColor.textContent = selected.color;
+        els.selRot.textContent = String(normalizeRotation(selected.rotation));
+        els.selPos.textContent = `(${selected.x}, ${selected.y})`;
+      } else {
+        els.selType.textContent = '—';
+        els.selColor.textContent = '—';
+        els.selRot.textContent = '—';
+        els.selPos.textContent = '—';
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          turn: state.turn,
+          status: state.status,
+          moveNumber: state.moveNumber,
+          pieces: state.pieces,
+          selectedId: null,
+          cursorX: state.cursorX,
+          cursorY: state.cursorY,
+          lastLaserPath: state.lastLaserPath,
+          lastMoveText: state.lastMoveText,
+          gameOver: state.gameOver,
+          themeRed: state.themeRed
+        }));
+      } catch (err) {
+        console.warn('Unable to save game state', err);
+      }
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return false;
+      try {
+        const parsed = JSON.parse(saved);
+        if (!parsed || !Array.isArray(parsed.pieces)) return false;
+        state.turn = parsed.turn || 'BLUE';
+        state.status = parsed.status || '';
+        state.moveNumber = parsed.moveNumber || 1;
+        state.pieces = parsed.pieces;
+        state.selectedId = null;
+        state.cursorX = Number.isFinite(parsed.cursorX) ? parsed.cursorX : 0;
+        state.cursorY = Number.isFinite(parsed.cursorY) ? parsed.cursorY : 0;
+        state.lastLaserPath = Array.isArray(parsed.lastLaserPath) ? parsed.lastLaserPath : [];
+        state.lastMoveText = parsed.lastMoveText || 'Resumed saved game.';
+        state.gameOver = !!parsed.gameOver;
+        state.themeRed = !!parsed.themeRed;
+        document.documentElement.classList.toggle('theme-red', state.themeRed);
+        els.themeToggle.checked = state.themeRed;
+        return true;
+      } catch (err) {
+        console.warn('Failed to load saved game', err);
+        return false;
+      }
+    }
+
+    function resetGame() {
+      state.turn = 'BLUE';
+      state.status = '';
+      state.moveNumber = 1;
+      state.pieces = structuredClone(INITIAL_PIECES);
+      state.selectedId = null;
+      state.cursorX = 0;
+      state.cursorY = 0;
+      state.lastLaserPath = [];
+      state.lastMoveText = 'Blue starts first.';
+      state.gameOver = false;
+      previewCurrentBeam();
+      saveState();
+      render();
+      showMessage('New game started.', 'good');
+    }
+
+    function commitTurnMessage(text, kind = '') {
+      state.lastMoveText = text;
+      showMessage(text, kind);
+      syncHeader();
+      saveState();
+    }
+
+    function endTurn(actionLabel) {
+      const currentTurn = state.turn;
+      const result = fireCurrentLaser(state.pieces);
+      state.pieces = result.pieces;
+      state.lastLaserPath = result.path;
+
+      if (result.destroyedKing) {
+        const winner = result.destroyedKing.color === 'RED' ? 'BLUE' : 'RED';
+        state.status = `${winner}_WIN`;
+        state.gameOver = true;
+        state.selectedId = null;
+        state.lastMoveText = `${result.destroyedKing.color} king destroyed. ${winner} wins.`;
+        commitTurnMessage(state.lastMoveText, 'bad');
+        render();
+        return;
+      }
+
+      state.turn = currentTurn === 'BLUE' ? 'RED' : 'BLUE';
+      state.moveNumber += 1;
+      state.selectedId = null;
+      state.gameOver = false;
+      state.status = '';
+      state.lastMoveText = `${actionLabel}. ${state.turn} to move.`;
+      commitTurnMessage(state.lastMoveText, 'good');
+      render();
+    }
+
+    function selectPieceAt(piece) {
+      if (!pieceIsSelectable(piece)) {
+        showMessage(`You can only select your own pieces.`, 'bad');
+        return;
+      }
+      state.selectedId = piece.id;
+      state.cursorX = piece.x;
+      state.cursorY = piece.y;
+      state.selectedLegalTargets = legalTargetsFor(piece);
+      syncHeader();
+      render();
+      showMessage(`Selected ${piece.color} ${piece.pieceType}.`, 'good');
+    }
+
+    function deselectPiece() {
+      state.selectedId = null;
+      state.selectedLegalTargets = [];
+      syncHeader();
+      render();
+    }
+
+    function tryMoveSelectedTo(x, y) {
+      if (state.gameOver) return;
+      const selected = getSelectedPiece();
+      if (!selected) return;
+      if (selected.color !== state.turn) return;
+      if (selected.pieceType === 'LASER') {
+        showMessage('The laser cannot move. Rotate it or fire.', 'bad');
+        return;
+      }
+
+      const target = { x, y };
+      const moveTargets = legalTargetsFor(selected);
+      const targetRule = moveTargets.find(t => t.x === target.x && t.y === target.y);
+      if (!targetRule) {
+        showMessage('That square is not a legal move.', 'bad');
+        return;
+      }
+
+      const pieces = clonePieces();
+      const mover = pieces.find(p => p.id === selected.id);
+      const occupant = getPieceAt(pieces, x, y);
+      const oldX = mover.x;
+      const oldY = mover.y;
+
+      if (occupant && targetRule.swap) {
+        occupant.x = oldX;
+        occupant.y = oldY;
+      }
+      mover.x = x;
+      mover.y = y;
+
+      state.pieces = pieces;
+      state.cursorX = x;
+      state.cursorY = y;
+      state.selectedId = mover.id;
+      state.selectedLegalTargets = legalTargetsFor(mover, pieces);
+      showMessage(`Moved ${mover.color} ${mover.pieceType} to (${x}, ${y}).`, 'good');
+      endTurn('Move complete');
+    }
+
+    function rotateSelected(delta) {
+      if (state.gameOver) return;
+      const selected = getSelectedPiece();
+      if (!selected) {
+        showMessage('Select a piece first.', 'bad');
+        return;
+      }
+      if (selected.color !== state.turn) {
+        showMessage('That piece does not belong to the current player.', 'bad');
+        return;
+      }
+      if (selected.pieceType === 'KING') {
+        showMessage('Kings cannot rotate.', 'bad');
+        return;
+      }
+
+      const nextRotation = normalizeRotation(selected.rotation + delta);
+      if (selected.pieceType === 'LASER') {
+        if (selected.color === 'BLUE' && !(nextRotation === 0 || nextRotation === 3)) {
+          showMessage('Blue laser can only rotate to rotations 0 or 3.', 'bad');
+          return;
+        }
+        if (selected.color === 'RED' && !(nextRotation === 1 || nextRotation === 2)) {
+          showMessage('Red laser can only rotate to rotations 1 or 2.', 'bad');
+          return;
+        }
+      }
+
+      selected.rotation = nextRotation;
+      state.cursorX = selected.x;
+      state.cursorY = selected.y;
+      showMessage(`Rotated ${selected.pieceType} to ${nextRotation}.`, 'good');
+      endTurn('Rotation complete');
+    }
+
+    function fireOnly() {
+      if (state.gameOver) return;
+      showMessage('Firing laser…', 'good');
+      endTurn('Laser fired');
+    }
+
+    function handleCellClick(x, y) {
+      if (state.gameOver) return;
+      state.cursorX = x;
+      state.cursorY = y;
+      const piece = getPieceAt(state.pieces, x, y);
+      const selected = getSelectedPiece();
+
+      if (piece) {
+        if (selected && selected.id === piece.id) {
+          deselectPiece();
+          return;
+        }
+        if (piece.color === state.turn) {
+          selectPieceAt(piece);
+          return;
+        }
+        if (selected) {
+          tryMoveSelectedTo(x, y);
+          return;
+        }
+        showMessage('That is an opposing piece. Select one of your own pieces first.', 'bad');
+        render();
+        return;
+      }
+
+      if (selected) {
+        tryMoveSelectedTo(x, y);
+      } else {
+        render();
+      }
+    }
+
+    function toggleTheme(red) {
+      state.themeRed = red;
+      document.documentElement.classList.toggle('theme-red', red);
+      saveState();
+      render();
+    }
+
+    function renderPieceGroup(piece, selected = false) {
+      const { cx, cy } = boardToPx(piece.x, piece.y);
+      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      group.setAttribute('transform', `translate(${cx} ${cy}) rotate(${normalizeRotation(piece.rotation) * 90})`);
+      group.style.cursor = 'pointer';
+
+      const outer = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      outer.setAttribute('x', -25);
+      outer.setAttribute('y', -25);
+      outer.setAttribute('width', 50);
+      outer.setAttribute('height', 50);
+      outer.setAttribute('rx', 12);
+      outer.setAttribute('fill', piece.color === 'BLUE' ? 'rgba(3,233,244,0.08)' : 'rgba(244,67,54,0.08)');
+      outer.setAttribute('stroke', selected ? 'rgba(255,255,255,0.95)' : shapeStroke(piece));
+      outer.setAttribute('stroke-width', selected ? '3.5' : '2');
+      outer.setAttribute('filter', 'url(#glowPiece)');
+      group.appendChild(outer);
+
+      const inner = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      inner.setAttribute('x', -22);
+      inner.setAttribute('y', -22);
+      inner.setAttribute('width', 44);
+      inner.setAttribute('height', 44);
+      inner.setAttribute('rx', 10);
+      inner.setAttribute('fill', 'rgba(0,0,0,0.20)');
+      inner.setAttribute('stroke', 'rgba(255,255,255,0.05)');
+      inner.setAttribute('stroke-width', '1');
+      group.appendChild(inner);
+
+      group.appendChild(createSpriteImage(piece, -20, -20, 40));
+
+      group.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectPieceAt(piece);
+      });
+      return group;
+    }
+
+    function renderMiniPiece(svg, pieceType) {
+      const board = svg;
+      board.innerHTML = '';
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bg.setAttribute('x', 0);
+      bg.setAttribute('y', 0);
+      bg.setAttribute('width', 240);
+      bg.setAttribute('height', 180);
+      bg.setAttribute('fill', 'rgba(0,0,0,0.35)');
+      board.appendChild(bg);
+
+      for (let y = 0; y < 3; y++) {
+        for (let x = 0; x < 4; x++) {
+          const cell = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          cell.setAttribute('x', x * 60);
+          cell.setAttribute('y', y * 60);
+          cell.setAttribute('width', 60);
+          cell.setAttribute('height', 60);
+          cell.setAttribute('fill', (x + y) % 2 === 0 ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)');
+          cell.setAttribute('stroke', 'rgba(255,255,255,0.06)');
+          board.appendChild(cell);
+        }
+      }
+
+      const miniPiece = { x: 1, y: 1, rotation: 1, pieceType, color: 'BLUE' };
+      if (pieceType === 'LASER') {
+        miniPiece.rotation = 1;
+        miniPiece.x = 0;
+        miniPiece.y = 1;
+      }
+      const miniGroup = renderMiniGroup(miniPiece);
+      board.appendChild(miniGroup);
+
+      if (pieceType !== 'LASER') {
+        const extra = { x: 2, y: 1, rotation: 0, pieceType: 'LASER', color: 'RED' };
+        board.appendChild(renderMiniGroup(extra, true));
+      }
+
+      if (pieceType === 'LASER') {
+        const beam = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        beam.setAttribute('x1', 30);
+        beam.setAttribute('y1', 90);
+        beam.setAttribute('x2', 210);
+        beam.setAttribute('y2', 90);
+        beam.setAttribute('stroke', 'rgba(3,233,244,0.85)');
+        beam.setAttribute('stroke-width', '6');
+        beam.setAttribute('stroke-linecap', 'round');
+        board.appendChild(beam);
+      }
+    }
+
+    function renderMiniGroup(piece, isOpponent = false) {
+      const CELL2 = 60;
+      const cx = piece.x * CELL2 + CELL2 / 2;
+      const cy = (2 - piece.y) * CELL2 + CELL2 / 2;
+      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      group.setAttribute('transform', `translate(${cx} ${cy}) rotate(${normalizeRotation(piece.rotation) * 90})`);
+
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', -18);
+      rect.setAttribute('y', -18);
+      rect.setAttribute('width', 36);
+      rect.setAttribute('height', 36);
+      rect.setAttribute('rx', 10);
+      rect.setAttribute('fill', isOpponent ? 'rgba(244,67,54,0.14)' : 'rgba(3,233,244,0.14)');
+      rect.setAttribute('stroke', isOpponent ? 'rgba(244,67,54,0.65)' : 'rgba(3,233,244,0.65)');
+      rect.setAttribute('stroke-width', '2');
+      group.appendChild(rect);
+
+      const plate = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      plate.setAttribute('x', -15);
+      plate.setAttribute('y', -15);
+      plate.setAttribute('width', 30);
+      plate.setAttribute('height', 30);
+      plate.setAttribute('rx', 8);
+      plate.setAttribute('fill', 'rgba(0,0,0,0.22)');
+      plate.setAttribute('stroke', 'rgba(255,255,255,0.05)');
+      plate.setAttribute('stroke-width', '1');
+      group.appendChild(plate);
+
+      group.appendChild(createSpriteImage(piece, -13, -13, 26));
+      return group;
+    }
+
+    function renderBoard() {
+      const svg = els.board;
+      svg.innerHTML = '';
+
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      defs.innerHTML = `
+        <filter id="glowCell" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glowPiece" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="beamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#03e9f4" stop-opacity="0.10" />
+          <stop offset="50%" stop-color="#03e9f4" stop-opacity="0.96" />
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.96" />
+        </linearGradient>
+      `;
+      svg.appendChild(defs);
+
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bg.setAttribute('x', 0);
+      bg.setAttribute('y', 0);
+      bg.setAttribute('width', W);
+      bg.setAttribute('height', H);
+      bg.setAttribute('fill', 'rgba(0,0,0,0.40)');
+      svg.appendChild(bg);
+
+      for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 10; x++) {
+          const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          rect.setAttribute('x', x * CELL);
+          rect.setAttribute('y', y * CELL);
+          rect.setAttribute('width', CELL);
+          rect.setAttribute('height', CELL);
+          rect.setAttribute('fill', (x + y) % 2 === 0 ? 'rgba(0,0,0,0.52)' : 'rgba(255,255,255,0.028)');
+          rect.setAttribute('stroke', 'rgba(255,255,255,0.05)');
+          rect.setAttribute('stroke-width', '1');
+          rect.style.cursor = 'pointer';
+          rect.addEventListener('click', () => handleCellClick(x, y));
+          svg.appendChild(rect);
+
+          const reserved = isReservedSquare(x, y, 'BLUE') ? 'blue' : (isReservedSquare(x, y, 'RED') ? 'red' : null);
+          if (reserved) {
+            const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            overlay.setAttribute('x', x * CELL + 4);
+            overlay.setAttribute('y', y * CELL + 4);
+            overlay.setAttribute('width', CELL - 8);
+            overlay.setAttribute('height', CELL - 8);
+            overlay.setAttribute('rx', 12);
+            overlay.setAttribute('fill', reserved === 'blue' ? 'rgba(3,233,244,0.07)' : 'rgba(244,67,54,0.07)');
+            overlay.setAttribute('stroke', reserved === 'blue' ? 'rgba(3,233,244,0.24)' : 'rgba(244,67,54,0.24)');
+            overlay.setAttribute('stroke-width', '1');
+            overlay.style.pointerEvents = 'none';
+            svg.appendChild(overlay);
+          }
+
+          if (state.cursorX === x && state.cursorY === y) {
+            const cursor = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            cursor.setAttribute('x', x * CELL + 4);
+            cursor.setAttribute('y', y * CELL + 4);
+            cursor.setAttribute('width', CELL - 8);
+            cursor.setAttribute('height', CELL - 8);
+            cursor.setAttribute('rx', 12);
+            cursor.setAttribute('fill', 'none');
+            cursor.setAttribute('stroke', 'rgba(255,255,255,0.76)');
+            cursor.setAttribute('stroke-width', '2');
+            cursor.setAttribute('filter', 'url(#glowCell)');
+            cursor.style.pointerEvents = 'none';
+            svg.appendChild(cursor);
+          }
+        }
+      }
+
+      const selected = getSelectedPiece();
+      const legal = selected ? legalTargetsFor(selected) : [];
+      legal.forEach(target => {
+        const mark = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const p = boardToPx(target.x, target.y);
+        mark.setAttribute('cx', p.cx);
+        mark.setAttribute('cy', p.cy);
+        mark.setAttribute('r', 14);
+        mark.setAttribute('fill', target.swap ? 'rgba(255,255,255,0.12)' : 'rgba(6, 255, 143, 0.11)');
+        mark.setAttribute('stroke', target.swap ? 'rgba(255,255,255,0.7)' : 'rgba(109, 247, 179, 0.9)');
+        mark.setAttribute('stroke-width', '2');
+        mark.setAttribute('filter', 'url(#glowCell)');
+        mark.style.pointerEvents = 'none';
+        svg.appendChild(mark);
+      });
+
+      const beamPath = state.lastLaserPath || [];
+      if (beamPath.length) {
+        const points = beamPath.map(seg => {
+          const p = boardToPx(seg.x, seg.y);
+          return `${p.cx},${p.cy}`;
+        }).join(' ');
+        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        glow.setAttribute('points', points);
+        glow.setAttribute('fill', 'none');
+        glow.setAttribute('stroke', 'rgba(3,233,244,0.30)');
+        glow.setAttribute('stroke-width', '14');
+        glow.setAttribute('stroke-linecap', 'round');
+        glow.setAttribute('stroke-linejoin', 'round');
+        glow.setAttribute('filter', 'url(#glowCell)');
+        svg.appendChild(glow);
+
+        const core = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        core.setAttribute('points', points);
+        core.setAttribute('fill', 'none');
+        core.setAttribute('stroke', 'url(#beamGrad)');
+        core.setAttribute('stroke-width', '4');
+        core.setAttribute('stroke-linecap', 'round');
+        core.setAttribute('stroke-linejoin', 'round');
+        svg.appendChild(core);
+      }
+
+      state.pieces.forEach(piece => {
+        const selectedPiece = selected && selected.id === piece.id;
+        svg.appendChild(renderPieceGroup(piece, selectedPiece));
+      });
+
+      if (state.gameOver) {
+        const overlay = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        overlay.setAttribute('x', 0);
+        overlay.setAttribute('y', 0);
+        overlay.setAttribute('width', W);
+        overlay.setAttribute('height', H);
+        overlay.setAttribute('fill', 'rgba(0,0,0,0.42)');
+        svg.appendChild(overlay);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', W / 2);
+        text.setAttribute('y', H / 2 - 8);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-size', '30');
+        text.setAttribute('font-style', 'italic');
+        text.setAttribute('font-weight', '700');
+        text.setAttribute('fill', 'white');
+        text.textContent = state.status ? `${state.status.replace('_WIN', '')} WINS` : 'GAME OVER';
+        svg.appendChild(text);
+      }
+    }
+
+    function renderMiniBoards() {
+      const miniIds = ['KING', 'SWITCH', 'DEFENDER', 'DEFLECTOR', 'LASER'];
+      miniIds.forEach(pieceType => {
+        const svg = document.getElementById(`mini-${pieceType}`);
+        if (svg) renderMiniPiece(svg, pieceType);
+      });
+    }
+
+    function render() {
+      syncHeader();
+      renderBoard();
+      renderMiniBoards();
+    }
+
+    function handleKeydown(e) {
+      if (state.gameOver && e.key.toLowerCase() !== 'r') return;
+      const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'r', 'l', 'f', 'q'];
+      if (!keys.includes(e.key) && !keys.includes(e.key.toLowerCase())) return;
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'r', 'l', 'f', 'q'].includes(e.key)) e.preventDefault();
+
+      if (e.key === 'ArrowUp' && state.cursorY > 0) state.cursorY -= 1;
+      else if (e.key === 'ArrowDown' && state.cursorY < 7) state.cursorY += 1;
+      else if (e.key === 'ArrowLeft' && state.cursorX > 0) state.cursorX -= 1;
+      else if (e.key === 'ArrowRight' && state.cursorX < 9) state.cursorX += 1;
+      else if (e.key === 'Enter') {
+        const piece = getPieceAt(state.pieces, state.cursorX, state.cursorY);
+        if (piece) handleCellClick(piece.x, piece.y);
+        else if (state.selectedId) tryMoveSelectedTo(state.cursorX, state.cursorY);
+      } else if (e.key.toLowerCase() === 'r') rotateSelected(1);
+      else if (e.key.toLowerCase() === 'l') rotateSelected(-1);
+      else if (e.key.toLowerCase() === 'f') fireOnly();
+      else if (e.key.toLowerCase() === 'q') {
+        state.status = `${state.turn === 'BLUE' ? 'RED' : 'BLUE'}_WIN`;
+        state.gameOver = true;
+        state.lastMoveText = `${state.turn} resigned. ${(state.turn === 'BLUE' ? 'RED' : 'BLUE')} wins.`;
+        showMessage(state.lastMoveText, 'bad');
+        render();
+        saveState();
+        return;
+      }
+
+      render();
+    }
+
+    els.btnRotateL.addEventListener('click', () => rotateSelected(-1));
+    els.btnRotateR.addEventListener('click', () => rotateSelected(1));
+    els.btnFire.addEventListener('click', fireOnly);
+    els.btnReset.addEventListener('click', resetGame);
+    els.themeToggle.addEventListener('change', () => toggleTheme(els.themeToggle.checked));
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('beforeunload', saveState);
+
+    if (!loadState()) {
+      state.pieces = structuredClone(INITIAL_PIECES);
+      state.turn = 'BLUE';
+      state.lastMoveText = 'Blue starts first.';
+      state.themeRed = false;
+    }
+
+    if (state.gameOver && !state.status) state.status = 'BLUE_WIN';
+    if (state.selectedId) state.selectedId = null;
+    if (!state.gameOver) previewCurrentBeam();
+
+    render();
+    showMessage('Click one of your pieces to begin.', '');
+  })();
+  </script>
 </body>
 </html>
