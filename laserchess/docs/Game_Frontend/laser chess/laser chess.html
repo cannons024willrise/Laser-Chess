@@ -523,7 +523,7 @@
   </main>
 
   <div class="footer-note">
-    Tutorial piece art is loaded from the hosted GitHub Pages URLs under /docs/pieces/. The game state is stored locally in your browser.
+    Tutorial piece art is loaded from image files in the same folder as this HTML. The game state is stored locally in your browser.
   </div>
 </div>
 
@@ -531,7 +531,7 @@
 (() => {
   "use strict";
 
-  const PIECE_BASE = "https://cannons024willrise.github.io/Laser-Chess/docs/pieces/";
+  const PIECE_BASE = "./";
   const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
   const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
   const W = 10, H = 8;
