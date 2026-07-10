@@ -413,7 +413,17 @@
       :root { --boardW: 96vw; }
       .hero-left h2 { font-size: 2.45rem; }
     }
-  </style>
+  
+svg{display:block;width:min(100vw,100vh - 20px);max-width:100%;height:auto;}
+#board, .board, .game-board, svg[id*="board"], svg[id*="sandbox"]{
+ width:min(96vw,96vh)!important;
+ height:min(96vw,96vh)!important;
+ max-width:100%;
+ max-height:100%;
+}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;}
+
+</style>
 </head>
 <body>
 <div class="shell">
@@ -1177,6 +1187,17 @@
   updateSelectionUI();
   render();
 })();
+</script>
+
+<script>
+function __fitBoards(){
+document.querySelectorAll('svg').forEach(s=>{
+ const size=Math.min(window.innerWidth,window.innerHeight)-16;
+ if(size>0){s.style.width=size+'px';s.style.height=size+'px';}
+});
+}
+window.addEventListener('resize',__fitBoards);
+window.addEventListener('load',__fitBoards);
 </script>
 </body>
 </html>
