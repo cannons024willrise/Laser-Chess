@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Laser Chess | Lobby</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  
+  <link rel="stylesheet" href="themes.css">
+
+  <style>
+    body {
+      font-family: "Quantico", sans-serif;
+    }
+  </style>
+
+  <script type="module" src="homeauthcheck.js"></script>
+  <script type="module" src="lobby.js"></script>
+  <script type="module" src="./tutorials.js"></script>
+</head>
+
+<body class="min-h-screen w-full flex flex-col m-0 p-0 text-white">
+  
+  <header class="flex justify-between items-center p-4 z-20 relative shadow-[0_10px_30px_rgba(0,0,0,0.8)] w-full box-border">
+    <div class="flex items-center space-x-4">
+      <h1 class="text-2xl font-black tracking-tighter italic drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">LASER CHESS</h1>
+    </div>
+  </header>
+
+  <section class="w-full py-2 bg-theme-10 border-b border-theme-20 text-center z-10 box-border">
+    <a href="https://discord.gg/mbEuNMee" class="text-[11px] font-bold tracking-[0.5em] uppercase text-theme hover:text-white transition-colors">
+      Join our Discord community
+    </a>
+  </section>
+
+  <!-- RULES SECTION FIRST -->
+  <section id="the-rules" class="relative z-10 w-full bg-black/60 backdrop-blur-sm border-t border-theme-20 py-32 px-10 md:px-20 lg:px-40 shadow-[0_-30px_80px_rgba(0,0,0,0.9)] overflow-hidden box-border">
+    <div class="max-w-7xl mx-auto">
+      
+      <div class="mb-12 p-8 bg-theme-10 border border-theme-20 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
+        <div class="flex flex-col gap-2">
+          <h3 class="text-white font-black tracking-widest uppercase text-sm">Interactive help</h3>
+          <p class="text-[12px] text-gray-400 font-mono uppercase tracking-widest">
+            Tap any piece below to see a live example of how it works.
+          </p>
+        </div>
+        
+        <div class="flex flex-wrap gap-8 text-[15px] font-mono uppercase text-gray-400 bg-black/40 p-6 rounded border border-white/5">
+          <div class="flex items-center gap-3"><span class="w-5 h-5 bg-emerald-500/20 border border-emerald-500/50"></span> Valid move</div>
+          <div class="flex items-center gap-3"><span class="w-5 h-5 border border-cyan-400/80"></span> Selected</div>
+          <div class="flex items-center gap-3"><span class="w-8 h-1.5 bg-cyan-400"></span> Laser active</div>
+        </div>
+      </div>
+
+      <div class="mb-24 text-left border-l-4 border-theme pl-8">
+        <h2 class="text-5xl md:text-7xl lg:text-8xl font-black italic tracking-tighter uppercase leading-none drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">How to Play</h2>
+        <p class="text-theme text-xs md:text-sm tracking-[0.8em] uppercase mt-4 font-bold font-mono">Simple rules and game flow</p>
+      </div>
+
+      <div class="mb-32">
+        <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-12 border-b border-theme-20 pb-4 flex items-center">
+          <span class="text-theme mr-4 font-mono text-lg">01</span> The pieces
+        </h3>
+        
+        <!-- INTERACTIVE PIECES GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          <!-- KING -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="KING">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">KING</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">Goal</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">This is the piece you are trying to protect. It has no shield, so if a laser hits any side, it is removed and the game ends right away.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center">
+              <svg id="svg-sandbox-KING" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+              <div class="text-[11px] font-mono tracking-widest text-gray-500 uppercase mt-4">[ Fixed in place ]</div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-[#f44336] font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>Always vulnerable</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ Tap to see example ]</span>
+            </div>
+          </div>
+
+          <!-- SWITCH -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="SWITCH">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">SWITCH</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">Special</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">This piece has mirrors on both sides, so it cannot be removed. It can also swap places with a nearby Defender or Deflector without turning.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center">
+              <svg id="svg-sandbox-SWITCH" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-theme font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>Cannot be removed</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ Tap to see example ]</span>
+            </div>
+          </div>
+
+          <!-- DEFENDER -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="DEFENDER">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">DEFENDER</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">Shield</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">The front side blocks lasers. It stays on the board when hit from the front, but is removed if hit from the side or back.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center">
+              <svg id="svg-sandbox-DEFENDER" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-gray-400 font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>Weak on the sides and back</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ Tap to see example ]</span>
+            </div>
+          </div>
+
+          <!-- DEFLECTOR -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="DEFLECTOR">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">DEFLECTOR</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">Mirror</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">One side reflects the laser at a right angle. If the beam hits any of the other three sides, the piece is removed.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center">
+              <svg id="svg-sandbox-DEFLECTOR" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-gray-400 font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>Weak on three sides</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ Tap to see example ]</span>
+            </div>
+          </div>
+
+          <!-- LASER -->
+          <div class="rule-card relative p-8 cursor-pointer select-none group transition-all duration-300 hover:scale-[1.01]" data-tutorial-id="LASER">
+            <div class="rule-card-accent"></div>
+            <div class="flex justify-between items-start mb-6">
+              <h4 class="text-theme font-black tracking-widest uppercase text-lg group-hover:text-white transition-colors">LASER</h4>
+              <span class="text-[12px] text-gray-400 font-mono border border-gray-700 px-2 py-1 bg-black/50">Laser</span>
+            </div>
+            <p class="text-[14px] leading-relaxed text-gray-400 uppercase tracking-wider h-auto min-h-[80px] text-left">A fixed beam source in the corner. It cannot move or be removed, but it can be rotated to fire down the first column or across the first row.</p>
+            <div class="sandbox-container hidden animate__animated animate__fadeIn mt-4 p-4 bg-black/60 border border-white/5 rounded-lg flex flex-col items-center">
+              <svg id="svg-sandbox-LASER" viewBox="0 0 300 300" class="w-48 h-48 bg-black/80 border border-theme/20 rounded select-none"></svg>
+            </div>
+            <div class="mt-6 pt-4 border-t border-theme-20 text-[12px] text-theme font-bold tracking-[0.3em] flex justify-between items-center">
+              <span>Always active</span>
+              <span class="expand-label text-gray-500 uppercase tracking-widest group-hover:text-theme transition-colors">[ Tap to see example ]</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <!-- STATIC INFO CARDS SECTION -->
+      <!-- ROW 1 (CARDS 02 & 03) -->
+      <div class="mb-12 grid grid-cols-1 lg:grid-cols-2 gap-12">
+        
+        <div class="rule-card relative p-10 lg:p-12">
+          <div class="rule-card-accent"></div>
+          <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 flex items-center">
+            <span class="text-theme mr-4 font-mono text-lg opacity-80">02</span> On your turn
+          </h3>
+          <p class="text-gray-500 text-xs mb-8 uppercase tracking-widest font-mono border-b border-theme-20 pb-4">Choose one of these actions:</p>
+          <div class="space-y-6">
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
+              <div>
+                <p class="text-[12px] font-bold uppercase tracking-widest mb-1">Move</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">Move any piece one square in any direction, including diagonals. The piece keeps facing the same way.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
+              <div>
+                <p class="text-[12px] font-bold uppercase tracking-widest mb-1">Rotate</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">Turn any piece 90° clockwise or counterclockwise while it stays on the same square.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
+              <div>
+                <p class="text-[12px] font-bold uppercase tracking-widest mb-1">Swap</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">The Switch can trade places with a nearby Defender or Deflector of either color.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rule-card relative p-10 lg:p-12 bg-theme-10 border-theme-20">
+          <div class="absolute top-0 left-0 w-full h-1 gradient-line-theme opacity-80"></div>
+          
+          <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 text-theme flex items-center">
+            <span class="text-white mr-4 font-mono text-lg opacity-50">03</span> Board rules
+          </h3>
+          
+          <div class="space-y-8 mt-12">
+            <div class="flex items-start gap-5 p-5 bg-theme-10 border border-theme-20 relative overflow-hidden">
+              <div class="absolute left-0 top-0 w-1 h-full bg-theme"></div>
+              <span class="text-theme text-xl font-black leading-none">!</span>
+              <p class="text-[11px] text-gray-300 uppercase tracking-widest leading-relaxed">
+                Blue pieces cannot move onto squares marked with <span class="text-[#f44336] font-bold">Red Helix symbols</span>. Red pieces cannot move onto squares marked with <span class="text-[#03e9f4] font-bold">Blue Helix symbols</span>.
+              </p>
+            </div>
+            
+            <div class="flex items-start gap-5 p-5 bg-theme-10 border border-theme-20 relative overflow-hidden">
+              <div class="absolute left-0 top-0 w-1 h-full bg-theme"></div>
+              <span class="text-theme text-xl font-black leading-none">!</span>
+              <p class="text-[11px] text-gray-300 uppercase tracking-widest leading-relaxed">
+                No take-backs. Once you let go of a piece, the move is locked in and the laser fires automatically.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2 (CARDS 04 & 05) -->
+      <div class="mb-32 grid grid-cols-1 lg:grid-cols-2 gap-12">
+        
+        <div class="rule-card relative p-10 lg:p-12 bg-theme-10 border-theme-20">
+          <div class="absolute top-0 left-0 w-full h-1 gradient-line-theme opacity-80"></div>
+          <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 text-theme flex items-center">
+            <span class="text-white mr-4 font-mono text-lg opacity-50">04</span> Laser fires automatically
+          </h3>
+          <p class="text-gray-500 text-xs mb-6 uppercase tracking-widest font-mono border-b border-theme-20 pb-4">After each turn:</p>
+          <p class="text-[11px] text-gray-300 uppercase tracking-widest leading-relaxed mb-6">
+            Your laser fires automatically after every turn. The beam bounces off mirrors until it leaves the board or hits a piece. Any piece hit on a non-mirrored side is removed. You can rotate your laser before it fires.
+          </p>
+          <div class="p-3 bg-red-950/30 border border-red-500/20 text-center text-[10px] font-black tracking-wider text-red-400 uppercase rounded">
+            Your own beam can remove your pieces too.
+          </div>
+        </div>
+
+        <div class="rule-card relative p-10 lg:p-12">
+          <div class="rule-card-accent"></div>
+          <h3 class="text-2xl font-black tracking-[0.3em] uppercase mb-8 flex items-center">
+            <span class="text-theme mr-4 font-mono text-lg opacity-80">05</span> No endless loops
+          </h3>
+          <p class="text-gray-500 text-xs mb-8 uppercase tracking-widest font-mono border-b border-theme-20 pb-4">If the same position repeats three times:</p>
+          <div class="space-y-6">
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
+              <div>
+                <p class="text-[12px] font-bold uppercase tracking-widest mb-1">The rule</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">If the exact same board position happens three times in one match, the game ends in a draw.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-5">
+              <div class="w-3 h-3 mt-1 bg-theme shadow-theme"></div>
+              <div>
+                <p class="text-[12px] font-bold uppercase tracking-widest mb-1">What counts as the same position</p>
+                <p class="text-[11px] text-gray-400 uppercase tracking-wider">A position only counts as repeated if every surviving piece is on the same square, facing the same direction, and it is the same player's turn.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MAIN OPTIONS SECOND -->
+  <main class="flex-grow flex flex-col justify-center items-center py-20 relative z-10 w-full overflow-hidden box-border">
+  
+    <div class="text-center mt-4 mb-12 relative select-none">
+      <h1 class="text-6xl md:text-8xl lg:text-7xl font-black tracking-[0.25em] uppercase italic drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+        Ready to play?
+      </h1>
+      <div class="flex items-center justify-center space-x-4 mt-6 opacity-80">
+        <div class="w-12 h-px bg-gray-600"></div>
+        <p class="text-gray-400 text-sm tracking-[0.8em] uppercase font-mono">
+          Choose a mode and start playing
+        </p>
+        <div class="w-12 h-px bg-gray-600"></div>
+      </div>
+    </div>
+
+    <div class="w-full max-w-[580px] flex flex-col space-y-6 px-6 relative z-20 box-border">
+      <a href="https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/Game_Frontend/laser%20chess/laser%20chess.html" class="block">
+        <button id="btnLocalPlay" class="play-now-btn group w-full">
+          <span></span><span></span><span></span><span></span>
+          <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
+            <div>01 // LOCAL MULTIPLAYER</div>
+            <div class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</div>
+          </div>
+        </button>
+      </a>
+      <a href="https://cannons024willrise.github.io/Laser-Chess/laserchess/docs/Game_Frontend/laser%20chess/laser%20chess.html" class="block">
+        <button id="btnAiMode" class="play-now-btn group w-full">
+          <span></span><span></span><span></span><span></span>
+          <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
+            <div>02 // PLAY AGAINST AI</div>
+            <div class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</div>
+          </div>
+        </button>
+      </a>
+      <button id="btnOnlineMatch" class="play-now-btn group">
+        <span></span><span></span><span></span><span></span>
+        <div id="mainBtnLabel" class="w-full flex items-center justify-between px-8">
+          <div>03 // PLAY ONLINE</div>
+          <div class="font-mono text-2xl transition-transform duration-300 group-hover:translate-x-2">➔</div>
+        </div>
+      </button>
+    </div>
+  </main>
+
+  <footer class="fixed bottom-0 left-0 w-full p-4 text-center text-gray-600 text-[11px] tracking-[0.6em] uppercase border-t border-white/5 bg-black/90 backdrop-blur-md z-50 box-border">
+    <div class="flex justify-center items-center space-x-6">
+      <span>Beta build v1.0</span>
+      <span class="text-theme">///</span>
+      <a href="mailto:later5143@gmail.com" class="hover-text-theme transition-colors font-mono">
+        Report a bug // suggest an idea
+      </a>
+    </div>
+  </footer>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</body>
+</html>
