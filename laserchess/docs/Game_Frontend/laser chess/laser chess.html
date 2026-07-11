@@ -333,12 +333,15 @@
   const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
   const W = 10, H = 8;
   const CELL = 100;
+  
+  // Directions: 0 = SOUTH, 1 = EAST, 2 = NORTH, 3 = WEST
   const DIRS = [
     {dx: 0, dy: 1},   // 0 south
     {dx: 1, dy: 0},   // 1 east
     {dx: 0, dy: -1},  // 2 north
     {dx: -1, dy: 0},  // 3 west
   ];
+  
   const PIECE_MAP = {
     KING: "king",
     DEFENDER: "defender",
@@ -346,7 +349,39 @@
     SWITCH: "switch",
     LASER: "laser",
   };
-const INTERACTION_MAP = { KING: { NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } } }, DEFENDER: { NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }, EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } }, SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } } }, DEFLECTOR: { WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } }, NORTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 'WEST', isDestroyed: false } }, EAST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: null, isDestroyed: true } } }, SWITCH: { WEST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'NORTH', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } }, NORTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'EAST', isDestroyed: false } }, EAST:  { 0: { reflect: 'SOUTH', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } }, SOUTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'WEST', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'WEST', isDestroyed: false } } } };
+
+  const INTERACTION_MAP = {
+    KING: {
+      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+    },
+    DEFENDER: {
+      0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+    },
+    DEFLECTOR: {
+      0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } },
+      1: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
+    },
+    SWITCH: {
+      0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+      1: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
+      2: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+      3: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
+    },
+    LASER: {
+      0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
+      1: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
+      2: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
+      3: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } }
+    }
+  };
 
   const START_STATE = () => ({
     turn: "BLUE",
@@ -484,18 +519,20 @@ const INTERACTION_MAP = { KING: { NORTH: { 0: { reflect: null, isDestroyed: true
     return true;
   }
 
-  /* Corrected to resolve the 90-degree anticlockwise vector offset */
+  /* Corrected vector offset: map standard rotations 0,1,2,3 -> North(2), East(1), South(0), West(3) */
   function laserDirFromRotation(rot) { return [2, 1, 0, 3][normalizeRotation(rot)]; }
 
   function interactWithLaser(piece, incomingDir) {
     const typeMap = INTERACTION_MAP[piece.pieceType];
     if (!typeMap) return { kind: "stop", destroyed: false };
     const out = typeMap[normalizeRotation(piece.rotation || 0)]?.[incomingDir];
+    
     if (!out) return { kind: "stop", destroyed: false };
-    if (out.action === "reflect") return { kind: "reflect", reflected: out.nextDir, destroyed: false };
-    if (out.action === "block") return { kind: "stop", destroyed: false, blocked: true };
-    if (out.action === "destroy") return { kind: "stop", destroyed: true };
-    return { kind: "stop", destroyed: false };
+    if (out.isDestroyed) return { kind: "stop", destroyed: true };
+    if (out.reflect !== null) return { kind: "reflect", reflected: out.reflect, destroyed: false };
+    
+    // Blocked (like defender's active side)
+    return { kind: "stop", destroyed: false, blocked: true };
   }
 
   function resolveLaserVector(x, y, dir, pieces = state.pieces, path = [], seen = new Set()) {
