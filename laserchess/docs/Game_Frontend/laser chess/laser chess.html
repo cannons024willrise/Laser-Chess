@@ -24,7 +24,10 @@
       --warn:#ffb84d;
       --bad:#ff5f6f;
       --shadow:0 18px 60px rgba(0,0,0,.42);
-      --boardW: min(78vw, 780px);
+      
+      /* Fluid board width that scales gracefully down on small vertical heights */
+      --boardW: min(76vw, 920px, 62vh);
+      
       --cell: calc(var(--boardW) / 10);
       --cellH: calc(var(--boardW) / 10);
       --blue-tint: rgba(3, 233, 244, 0.08);
@@ -32,9 +35,11 @@
     }
     * { box-sizing: border-box; }
     html, body { 
-      height: 100%;
+      min-height: 100%;
       margin: 0;
       padding: 0;
+      overflow-x: hidden;
+      overflow-y: auto !important; /* Forces normal browser scrolling */
     }
     body {
       font-family: "Quantico", sans-serif;
@@ -42,8 +47,6 @@
       background:
         linear-gradient(rgba(0,0,0,.64), rgba(0,0,0,.8)),
         url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
-      overflow-x: hidden;
-      overflow-y: auto;
     }
     a { color: var(--theme-color); text-decoration: none; }
     .shell {
@@ -211,8 +214,8 @@
     }
     .layout {
       display: grid;
-      grid-template-columns: minmax(540px, 1.25fr) minmax(320px, .75fr);
-      gap: 1rem;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 1.5rem;
       max-width: 1480px;
       width: 100%;
       margin: 1rem auto 1.25rem;
@@ -220,16 +223,19 @@
       align-items: start;
     }
     .board-panel {
-      padding: 1rem;
+      padding: 1.25rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .board-wrap {
       width: 100%;
+      max-width: var(--boardW);
       display: grid;
       place-items: center;
     }
     .board-shell {
       width: 100%;
-      max-width: 980px;
       padding: .65rem;
       border-radius: 24px;
       background: rgba(0,0,0,.34);
@@ -256,8 +262,6 @@
     .sidebar {
       display: grid;
       gap: 1rem;
-      position: sticky;
-      top: 1rem;
     }
     .side-card {
       padding: 1rem;
@@ -349,7 +353,7 @@
     .swatch.laser { background: rgba(255, 246, 102, .22); border-color: rgba(255, 246, 102, .6); }
     .log {
       max-height: 220px;
-      overflow: auto;
+      overflow-y: auto;
       display: grid;
       gap: .4rem;
       padding-right: .25rem;
@@ -401,10 +405,7 @@
       .hero-grid, .layout {
         grid-template-columns: 1fr;
       }
-      .sidebar {
-        position: static;
-      }
-      :root { --boardW: min(96vw, 800px); }
+      :root { --boardW: min(94vw, 700px); }
     }
     @media (max-width: 720px){
       header {
@@ -414,44 +415,8 @@
       .stat-grid, .controls {
         grid-template-columns: 1fr;
       }
-      :root { --boardW: 96vw; }
+      :root { --boardW: 94vw; }
       .hero-left h2 { font-size: 2.45rem; }
-    }
-  </style>
-  <style id="iframe-resize-styles">
-    /* Fluid responsive override for iframe environments */
-    html, body {
-      overflow-y: auto !important;
-    }
-    @media (min-width: 1121px) {
-      .shell {
-        height: 100vh;
-        overflow: hidden;
-      }
-      .layout {
-        flex: 1;
-        min-height: 0;
-        overflow: hidden;
-        grid-template-rows: 1fr;
-        margin-bottom: 0;
-        padding-bottom: 0;
-      }
-      .board-panel {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        min-height: 0;
-      }
-      .board-wrap {
-        height: 100%;
-        min-height: 0;
-      }
-      .sidebar {
-        height: 100%;
-        overflow-y: auto;
-        padding-right: 4px;
-      }
     }
   </style>
 </head>
@@ -1215,27 +1180,6 @@
   }
   updateSelectionUI();
   render();
-
-  // Dynamic board sizing logic to auto-resize tightly into viewport/iframes
-  function handleDynamicScaling() {
-    if (window.innerWidth <= 1120) {
-      document.documentElement.style.setProperty('--boardW', 'min(96vw, 800px)');
-      return;
-    }
-    const headerH = document.querySelector('header')?.offsetHeight || 80;
-    const heroH = document.querySelector('.hero')?.offsetHeight || 180;
-    const padding = 60;
-    const availableH = window.innerHeight - headerH - heroH - padding;
-    if (availableH > 200) {
-      const targetW = (availableH * 10) / 8;
-      const finalW = Math.min(targetW, window.innerWidth * 0.54, 980);
-      document.documentElement.style.setProperty('--boardW', `${finalW}px`);
-    } else {
-      document.documentElement.style.setProperty('--boardW', 'min(50vw, 600px)');
-    }
-  }
-  window.addEventListener('resize', handleDynamicScaling);
-  setTimeout(handleDynamicScaling, 100);
 })();
 </script>
 </body>
