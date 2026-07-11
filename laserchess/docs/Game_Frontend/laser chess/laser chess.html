@@ -1,3 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laser Chess</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --theme-color:#03e9f4;
+      --theme-rgb:3,233,244;
+      --red-theme:#f44336;
+      --bg0:#06080b;
+      --bg1:#0d1116;
+      --bg2:#121821;
+      --panel:rgba(8,10,14,.82);
+      --panel2:rgba(255,255,255,.03);
+      --line:rgba(255,255,255,.08);
+      --text:#e8f6ff;
+      --muted:#97a8b6;
+      --good:#24d18f;
+      --warn:#ffb84d;
+      --bad:#ff5f6f;
+      --shadow:0 18px 60px rgba(0,0,0,.42);
+      --boardW: min(78vw, 780px);
+      --cell: calc(var(--boardW) / 10);
+      --cellH: calc(var(--boardW) / 10);
+      --blue-tint: rgba(3, 233, 244, 0.08);
+      --red-tint: rgba(244, 67, 54, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Quantico", sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(0,0,0,.64), rgba(0,0,0,.8)),
+        url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    a { color: var(--theme-color); text-decoration: none; }
+    .shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(2px);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(5,7,10,.84);
+      box-shadow: 0 10px 30px rgba(0,0,0,.45);
+    }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: .2rem;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.3rem, 2vw, 2rem);
+      letter-spacing: .16em;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .78rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      color: var(--muted);
+      font-size: .82rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .pill {
+      padding: .5rem .8rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+    .hero {
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(3,233,244,.08), rgba(3,233,244,0));
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.35fr .95fr;
+      gap: 1rem;
+      align-items: stretch;
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+    .hero-left {
+      padding: 1rem 1rem 1.1rem;
+      display: grid;
+      gap: .9rem;
+    }
+    .hero-left h2 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.2rem);
+      line-height: .9;
+      letter-spacing: -.06em;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+    .hero-left .sub {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .28em;
+      font-size: .78rem;
+    }
+    .hero-left .desc {
+      color: #d9e9f5;
+      line-height: 1.6;
+      max-width: 62ch;
+      font-size: .98rem;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+    }
+    button, select {
+      font-family: inherit;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      padding: .85rem 1rem;
+      border-radius: 14px;
+      cursor: pointer;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-size: .78rem;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      user-select: none;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(var(--theme-rgb), .35);
+      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 12px 28px rgba(0,0,0,.24);
+    }
+    .btn.primary {
+      background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
+      border-color: rgba(var(--theme-rgb), .35);
+      color: var(--theme-color);
+    }
+    .btn.danger {
+      background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
+      border-color: rgba(244,67,54,.38);
+      color: #ffb0a8;
+    }
+    .hero-right {
+      padding: 1rem;
+      display: grid;
+      gap: .85rem;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+    .stat {
+      padding: .9rem 1rem;
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      min-height: 85px;
+    }
+    .stat .k {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .7rem;
+      margin-bottom: .45rem;
+    }
+    .stat .v {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(540px, 1.25fr) minmax(320px, .75fr);
+      gap: 1rem;
+      max-width: 1480px;
+      width: 100%;
+      margin: 1rem auto 1.25rem;
+      padding: 0 1.25rem 1.25rem;
+      align-items: start;
+    }
+    .board-panel {
+      padding: 1rem;
+    }
+    .board-wrap {
+      width: 100%;
+      display: grid;
+      place-items: center;
+    }
+    .board-shell {
+      width: 100%;
+      max-width: 980px;
+      padding: .65rem;
+      border-radius: 24px;
+      background: rgba(0,0,0,.34);
+      border: 1px solid rgba(255,255,255,.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .board-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(var(--theme-rgb), .06), transparent 65%);
+      pointer-events: none;
+    }
+    svg#board {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 10 / 8;
+      display: block;
+      background: linear-gradient(180deg, rgba(1,3,6,.9), rgba(10,12,15,.88));
+      border-radius: 18px;
+      touch-action: manipulation;
+    }
+    .sidebar {
+      display: grid;
+      gap: 1rem;
+      position: sticky;
+      top: 1rem;
+    }
+    .side-card {
+      padding: 1rem;
+    }
+    .side-card h3 {
+      margin: 0 0 .8rem;
+      text-transform: uppercase;
+      letter-spacing: .22em;
+      font-size: .9rem;
+    }
+    .turn-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .8rem;
+      flex-wrap: wrap;
+      margin-bottom: .8rem;
+    }
+    .turn-badge {
+      padding: .48rem .8rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .72rem;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+    }
+    .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
+    .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
+    .help {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: .92rem;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .6rem;
+    }
+    .controls .btn {
+      width: 100%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .panel-list {
+      display: grid;
+      gap: .6rem;
+    }
+    .panel-line {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding: .85rem .9rem;
+      display: flex;
+      justify-content: space-between;
+      gap: .8rem;
+      align-items: center;
+      font-size: .9rem;
+    }
+    .panel-line .label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-size: .7rem;
+    }
+    .legend {
+      display: grid;
+      gap: .55rem;
+      font-size: .88rem;
+      color: var(--muted);
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+    }
+    .swatch {
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 4px;
+      flex: 0 0 auto;
+    }
+    .swatch.valid { background: rgba(36,209,143,.18); border-color: rgba(36,209,143,.45); }
+    .swatch.selected { background: rgba(var(--theme-rgb), .18); border-color: rgba(var(--theme-rgb), .45); }
+    .swatch.reserved-blue { background: rgba(3, 233, 244, 0.12); border-color: rgba(3, 233, 244, 0.26); }
+    .swatch.reserved-red { background: rgba(244, 67, 54, 0.12); border-color: rgba(244, 67, 54, 0.26); }
+    .swatch.laser { background: rgba(255, 246, 102, .22); border-color: rgba(255, 246, 102, .6); }
+    .log {
+      max-height: 220px;
+      overflow: auto;
+      display: grid;
+      gap: .4rem;
+      padding-right: .25rem;
+    }
+    .log-entry {
+      padding: .72rem .8rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      line-height: 1.5;
+      font-size: .9rem;
+    }
+    .log-entry.good { border-color: rgba(36,209,143,.32); color: #c2ffe4; }
+    .log-entry.warn { border-color: rgba(255,184,77,.32); color: #fff0cf; }
+    .log-entry.bad { border-color: rgba(255,95,111,.32); color: #ffd0d5; }
+    .log-entry.muted { color: var(--muted); }
+    .footer-note {
+      max-width: 1480px;
+      margin: 0 auto 1rem;
+      padding: 0 1.25rem;
+      color: var(--muted);
+      font-size: .8rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: .12rem .42rem;
+      border: 1px solid rgba(255,255,255,.12);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      font-size: .78em;
+      letter-spacing: 0;
+      text-transform: none;
+      min-width: 1.7rem;
+    }
+    .mini {
+      font-size: .78rem;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+    .hidden { display: none !important; }
+
+    @media (max-width: 1120px){
+      .hero-grid, .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+      }
+      :root { --boardW: min(96vw, 800px); }
+    }
+    @media (max-width: 720px){
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .stat-grid, .controls {
+        grid-template-columns: 1fr;
+      }
+      :root { --boardW: 96vw; }
+      .hero-left h2 { font-size: 2.45rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <h1>Laser Chess</h1>
+      <p>Local pass-and-play • tutorial-style visuals • no terminal</p>
+    </div>
+    <div class="header-meta">
+      <div class="pill" id="turnPill">Turn: BLUE</div>
+      <div class="pill" id="movePill">Move 1</div>
+      <div class="pill" id="savePill">Saved locally</div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="panel hero-left">
+        <div class="sub">One screen. One board. One laser.</div>
+        <h2>Play the game with the tutorial look.</h2>
+        <div class="desc">
+          Select a piece, click an adjacent square to move, use rotate to change its orientation, or fire your laser. The board uses the hosted tutorial sprites so nothing depends on terminal rendering or local repo paths.
+        </div>
+        <div class="hero-actions">
+          <button class="btn primary" id="rotateCCW">↺ CCW <span class="kbd" style="margin-left:.55rem">Q</span></button>
+          <button class="btn primary" id="rotateCW">CW ↻ <span class="kbd" style="margin-left:.55rem">E</span></button>
+          <button class="btn" id="fireBtn">Fire <span class="kbd" style="margin-left:.55rem">F</span></button>
+          <button class="btn danger" id="resetBtn">Reset Game <span class="kbd" style="margin-left:.55rem">N</span></button>
+        </div>
+      </div>
+      <div class="panel hero-right">
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="k">Selected</div>
+            <div class="v" id="selectedLabel">None</div>
+          </div>
+          <div class="stat">
+            <div class="k">Action</div>
+            <div class="v" id="actionLabel">Click a piece</div>
+          </div>
+          <div class="stat">
+            <div class="k">Blue King</div>
+            <div class="v" id="blueKingLabel">Alive</div>
+          </div>
+          <div class="stat">
+            <div class="k">Red King</div>
+            <div class="v" id="redKingLabel">Alive</div>
+          </div>
+        </div>
+        <div class="mini">
+          Keyboard: <span class="kbd">←</span> <span class="kbd">↑</span> <span class="kbd">→</span> <span class="kbd">↓</span> move cursor, <span class="kbd">Q</span> CCW, <span class="kbd">E</span> CW, <span class="kbd">Enter</span> select/use, <span class="kbd">Esc</span> clear selection.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="layout">
+    <section class="panel board-panel">
+      <div class="board-wrap">
+        <div class="board-shell">
+          <svg id="board" viewBox="0 0 1000 800" aria-label="Laser Chess board" tabindex="0"></svg>
+        </div>
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <section class="panel side-card">
+        <h3>Turn controls</h3>
+        <div class="turn-row">
+          <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
+          <div class="turn-badge" id="phaseBadge">Select a piece</div>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="moveBtn">Move</button>
+          <button class="btn primary" id="selectBtn">Select / Deselect</button>
+          <button class="btn" id="rotateCCWBtn">↺ CCW</button>
+          <button class="btn" id="rotateCWBtn">CW ↻</button>
+          <button class="btn" id="endTurnBtn">End Turn</button>
+        </div>
+      </section>
+
+      <section class="panel side-card">
+        <h3>Selection</h3>
+        <div class="panel-list">
+          <div class="panel-line"><span class="label">Piece</span><span id="pieceTypeValue">—</span></div>
+          <div class="panel-line"><span class="label">Color</span><span id="pieceColorValue">—</span></div>
+          <div class="panel-line"><span class="label">Position</span><span id="piecePosValue">—</span></div>
+          <div class="panel-line"><span class="label">Rotation</span><span id="pieceRotValue">—</span></div>
+        </div>
+      </section>
+
+      <section class="panel side-card">
+        <h3>What the colors mean</h3>
+        <div class="legend">
+          <div class="legend-row"><span class="swatch selected"></span> Selected piece / active square</div>
+          <div class="legend-row"><span class="swatch valid"></span> Valid adjacent move</div>
+          <div class="legend-row"><span class="swatch reserved-blue"></span> Blue reserved square</div>
+          <div class="legend-row"><span class="swatch reserved-red"></span> Red reserved square</div>
+          <div class="legend-row"><span class="swatch laser"></span> Fired laser path</div>
+        </div>
+      </section>
+
+      <section class="panel side-card">
+        <h3>Event log</h3>
+        <div id="log" class="log"></div>
+      </section>
+    </aside>
+  </main>
+
+  <div class="footer-note">
+    Tutorial piece art is loaded from image files in the same folder as this HTML. The game state is stored locally in your browser.
+  </div>
+</div>
+
 <script>
 (() => {
   "use strict";
@@ -7,15 +538,15 @@
   const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
   const W = 10, H = 8;
   const CELL = 100;
-  
-  // Game Dirs map for moving pieces (0: S, 1: E, 2: N, 3: W)
+  const ORIGIN = 50;
   const DIRS = [
     {dx: 0, dy: 1},   // 0 south
     {dx: 1, dy: 0},   // 1 east
     {dx: 0, dy: -1},  // 2 north
     {dx: -1, dy: 0},  // 3 west
   ];
-  
+  const TURN_DIRS = { BLUE: [3,0], RED: [1,2] }; 
+  const OPP = {0:2,1:3,2:0,3:1};
   const PIECE_MAP = {
     KING: "king",
     DEFENDER: "defender",
@@ -23,32 +554,36 @@
     SWITCH: "switch",
     LASER: "laser",
   };
-
-  // 1. INTEGRATED: NEW PIECE INTERACTION MATRIX
-  const PIECE_INTERACTION_TABLE = {
-    KING: {
-      NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-    },
-    DEFENDER: {
-      NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
-      SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-    },
+  const INTERACTION_MAP = {
     DEFLECTOR: {
-      WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
-      NORTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 'WEST', isDestroyed: false } },
-      EAST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }
+      0: { 0: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 2 }, 1: { action: 'destroy' }, 2: { action: 'destroy' } },
+      1: { 0: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 2 }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+      2: { 2: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 3: { action: 'destroy' } },
+      3: { 2: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 1: { action: 'destroy' } }
     },
     SWITCH: {
-      WEST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'NORTH', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } },
-      NORTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'EAST', isDestroyed: false } },
-      EAST:  { 0: { reflect: 'SOUTH', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
-      SOUTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'WEST', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'WEST', isDestroyed: false } }
+      0: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
+      1: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } },
+      2: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
+      3: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } }
+    },
+    DEFENDER: {
+      0: { 0: { action: 'block' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+      1: { 1: { action: 'block' }, 0: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+      2: { 2: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 3: { action: 'destroy' } },
+      3: { 3: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' } }
+    },
+    KING: {
+      0: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+      1: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+      2: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
+      3: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } }
+    },
+    LASER: {
+      0: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+      1: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+      2: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
+      3: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } }
     }
   };
 
@@ -56,9 +591,7 @@
     turn: "BLUE",
     moveNumber: 1,
     winner: null,
-    lastLaserPathStr: "",
-    lastLaserDestroyed: false,
-    lastLaserColor: null,
+    lastLaserPath: [],
     lastLog: "Blue to move.",
     pieces: [
       {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
@@ -129,38 +662,48 @@
       const parsed = JSON.parse(raw);
       if (!parsed || !Array.isArray(parsed.pieces)) return null;
       return parsed;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
   function saveState() {
     localStorage.setItem("laserchess_local_state", JSON.stringify(state));
     el.savePill.textContent = "Saved locally";
   }
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
-  function pieceImage(piece) { return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`; }
-  function pieceAt(x, y, pieces = state.pieces) { return pieces.find(p => p.x === x && p.y === y) || null; }
+  function pieceImage(piece) {
+    return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`;
+  }
+  function pieceAt(x, y, pieces = state.pieces) {
+    return pieces.find(p => p.x === x && p.y === y) || null;
+  }
   function isReservedSquare(x, y, color) {
     const arr = color === "BLUE" ? RES_BLUE : RES_RED;
     return arr.some(s => s.x === x && s.y === y);
   }
   function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
   function normalizeRotation(rot) { return ((rot % 4) + 4) % 4; }
-  function myLaser() { return state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn) || null; }
+  function currentTurnPieces() {
+    return state.pieces.filter(p => p.color === state.turn);
+  }
+  function myLaser() {
+    return state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn) || null;
+  }
   function enemyColor(c) { return c === "BLUE" ? "RED" : "BLUE"; }
-  function getSelectedPiece() { return selectedId ? state.pieces.find(p => p.id === selectedId) || null : null; }
-  
+  function getSelectedPiece() {
+    return selectedId ? state.pieces.find(p => p.id === selectedId) || null : null;
+  }
   function selectPiece(pieceOrNull) {
     selectedId = pieceOrNull ? pieceOrNull.id : null;
     updateSelectionUI();
     render();
   }
-  
   function log(msg, kind = "muted") {
     const div = document.createElement("div");
     div.className = `log-entry ${kind}`;
     div.textContent = msg;
     el.log.prepend(div);
   }
-
   function updateSelectionUI() {
     const piece = getSelectedPiece();
     el.selectedLabel.textContent = piece ? `${piece.color} ${piece.pieceType}` : "None";
@@ -201,6 +744,12 @@
     return moves;
   }
 
+  function rotatePiece(piece, delta) {
+    if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
+    piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
+    return true;
+  }
+
   function movePiece(piece, nx, ny) {
     if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
     const occ = pieceAt(nx, ny);
@@ -219,108 +768,53 @@
     return true;
   }
 
-  // 2. INTEGRATED: RAYCAST PHYSICS CORE ENGINE
-  function traceLaserEngine(pieces, shooter) {
-    // Map initial game rotation to string directions
-    const NUM_TO_DIR = { 0: 'SOUTH', 1: 'EAST', 2: 'NORTH', 3: 'WEST' };
-    const DIR_TO_NUM = { 'SOUTH': 0, 'EAST': 1, 'NORTH': 2, 'WEST': 3 };
-    const INBOUND_MAP = { NORTH: 'SOUTH', SOUTH: 'NORTH', EAST: 'WEST', WEST: 'EAST' };
-    
-    // The laser always fires from its front face. Original game sets rotations to map to directions.
-    let currentDirNum = [3, 2, 1, 0][normalizeRotation(shooter.rotation || 0)];
-    let currentDir = NUM_TO_DIR[currentDirNum];
-    let currentX = shooter.x;
-    let currentY = shooter.y;
+  function laserDirFromRotation(rot) {
+    return [3, 2, 1, 0][normalizeRotation(rot)];
+  }
 
-    const vectors = {
-      NORTH: { dx: 0, dy: -1 },
-      EAST:  { dx: 1, dy: 0 },
-      SOUTH: { dx: 0, dy: 1 },
-      WEST:  { dx: -1, dy: 0 }
-    };
+  function interactWithLaser(piece, incomingDir) {
+    const typeMap = INTERACTION_MAP[piece.pieceType];
+    if (!typeMap) return { kind: "stop", destroyed: false };
+    const out = typeMap[normalizeRotation(piece.rotation || 0)]?.[incomingDir];
+    if (!out) return { kind: "stop", destroyed: false };
+    if (out.action === "reflect") return { kind: "reflect", reflected: out.nextDir, destroyed: false };
+    if (out.action === "block") return { kind: "stop", destroyed: false, blocked: true };
+    if (out.action === "destroy") return { kind: "stop", destroyed: true };
+    return { kind: "stop", destroyed: false };
+  }
 
-    let startX = currentX * CELL + CELL / 2;
-    let startY = currentY * CELL + CELL / 2;
-    let points = [[startX, startY]];
-    
-    let isDestroyed = false;
-    let destroyedPiece = null;
-    let looped = false;
-    let steps = 0;
-    const maxSteps = 100;
-    let seen = new Set();
+  function resolveLaserVector(x, y, dir, pieces = state.pieces, path = [], seen = new Set()) {
+    if (!inBounds(x, y)) return { path, hit: null, looped: false };
+    const key = `${x},${y},${dir}`;
+    if (seen.has(key)) return { path, hit: null, looped: true };
+    seen.add(key);
+    path.push({ x, y, dir });
 
-    while (steps < maxSteps) {
-      steps++;
-      let vec = vectors[currentDir];
-      if (!vec) break;
-      
-      let nextX = currentX + vec.dx;
-      let nextY = currentY + vec.dy;
-      
-      let targetX = nextX * CELL + CELL / 2;
-      let targetY = nextY * CELL + CELL / 2;
-
-      // Board Bounds verification instead of tutorial 3x3
-      if (nextX < 0 || nextX >= W || nextY < 0 || nextY >= H) {
-        points.push([startX + vec.dx * (CELL * 1.5), startY + vec.dy * (CELL * 1.5)]);
-        break;
-      }
-
-      const stateKey = `${nextX},${nextY},${currentDir}`;
-      if (seen.has(stateKey)) {
-        looped = true;
-        break;
-      }
-      seen.add(stateKey);
-
-      points.push([targetX, targetY]);
-      currentX = nextX;
-      currentY = nextY;
-
-      let piece = pieceAt(currentX, currentY, pieces);
-      
-      if (piece) {
-        let inboundDir = INBOUND_MAP[currentDir];
-        const matrix = PIECE_INTERACTION_TABLE[piece.pieceType];
-        
-        // Exclude the active laser from colliding with itself when starting
-        if (matrix) {
-          const cellConfig = matrix?.[inboundDir]?.[normalizeRotation(piece.rotation || 0)];
-          if (cellConfig) {
-            if (cellConfig.isDestroyed) {
-              isDestroyed = true;
-              destroyedPiece = piece;
-              break;
-            }
-            if (cellConfig.reflect === null) break; // Blocked
-            currentDir = cellConfig.reflect;
-          }
-        }
-      }
-      startX = targetX;
-      startY = targetY;
+    const piece = pieceAt(x, y, pieces);
+    if (!piece) {
+      return resolveLaserVector(x + DIRS[dir].dx, y + DIRS[dir].dy, dir, pieces, path, seen);
     }
 
-    let pathStr = `M ${points[0][0]} ${points[0][1]}`;
-    for (let i = 1; i < points.length; i++) pathStr += ` L ${points[i][0]} ${points[i][1]}`;
-    return { pathStr, isDestroyed, destroyedPiece, looped };
+    const outcome = interactWithLaser(piece, dir);
+    if (outcome.kind === "reflect") {
+      const nextDir = outcome.reflected;
+      return resolveLaserVector(x + DIRS[nextDir].dx, y + DIRS[nextDir].dy, nextDir, pieces, path, seen);
+    }
+    return { path, hit: { piece, destroyed: !!outcome.destroyed, blocked: !!outcome.blocked }, looped: false };
   }
 
   function fireLaser() {
     if (state.winner) return false;
     const shooter = myLaser();
     if (!shooter) return false;
-    
-    const result = traceLaserEngine(clone(state.pieces), shooter);
-    
-    // Update state variables for visual rendering
-    state.lastLaserPathStr = result.pathStr;
-    state.lastLaserDestroyed = result.isDestroyed;
-    state.lastLaserColor = shooter.color;
+    const dir = laserDirFromRotation(shooter.rotation || 0);
+    const startX = shooter.x + DIRS[dir].dx;
+    const startY = shooter.y + DIRS[dir].dy;
+    const result = resolveLaserVector(startX, startY, dir, clone(state.pieces));
+    state.lastLaserPath = result.path;
 
-    if (result.isDestroyed && result.destroyedPiece) {
-      const victim = result.destroyedPiece;
+    if (result.hit && result.hit.destroyed) {
+      const victim = result.hit.piece;
       const idx = state.pieces.findIndex(p => p.id === victim.id);
       if (idx >= 0) {
         state.pieces.splice(idx, 1);
@@ -364,7 +858,7 @@
       selectedId = null;
       state.turn = enemyColor(state.turn);
       state.moveNumber += 1;
-      state.lastLaserPathStr = "";
+      state.lastLaserPath = [];
       saveState();
       updateSelectionUI();
       render();
@@ -380,7 +874,7 @@
     selectedId = null;
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
-    state.lastLaserPathStr = "";
+    state.lastLaserPath = [];
     saveState();
     updateSelectionUI();
     render();
@@ -403,7 +897,7 @@
   function flashLaserPath() {
     if (flashTimer) clearTimeout(flashTimer);
     flashTimer = setTimeout(() => {
-      state.lastLaserPathStr = "";
+      state.lastLaserPath = [];
       render();
     }, 1400);
   }
@@ -425,9 +919,11 @@
     const f2 = svgEl("feMerge");
     f2.appendChild(svgEl("feMergeNode", { in: "blur" }));
     f2.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    defs.querySelector("#softGlow")?.remove?.();
     defs.appendChild(f1);
     defs.appendChild(f2);
 
+    // grid
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
         const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
@@ -443,6 +939,7 @@
       }
     }
 
+    // coordinate labels
     for (let x = 0; x < W; x++) {
       svg.appendChild(svgEl("text", {
         x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14", "font-family": "Quantico, sans-serif", "letter-spacing": "2"
@@ -457,6 +954,7 @@
       svg.appendChild(t);
     }
 
+    // valid move highlight
     const sel = getSelectedPiece();
     if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
       for (const m of legalMoves(sel)) {
@@ -468,36 +966,29 @@
       }
     }
 
-    // 3. INTEGRATED: VECTOR GRAPHICS RENDERING MATRIX (GLOWING BEAMS)
-    if (state.lastLaserPathStr) {
-      const laserGroup = svgEl('g');
-      const isDestructionEvent = state.lastLaserDestroyed;
-      const themeColor = state.lastLaserColor === 'BLUE' ? '3, 233, 244' : '244, 67, 54';
-
-      const glow = svgEl('path', {
-        d: state.lastLaserPathStr,
-        stroke: isDestructionEvent ? 'rgba(120, 120, 120, 0.4)' : `rgba(${themeColor}, 0.45)`,
+    // laser path
+    if (state.lastLaserPath?.length) {
+      const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
+      svg.appendChild(svgEl("polyline", {
+        points: pts,
+        fill: "none",
+        stroke: "rgba(255,246,102,.35)",
         "stroke-width": "16",
         "stroke-linecap": "round",
         "stroke-linejoin": "round",
-        fill: "none",
         filter: "url(#softGlow)"
-      });
-      
-      const core = svgEl('path', {
-        d: state.lastLaserPathStr,
-        stroke: isDestructionEvent ? 'rgba(160, 160, 160, 0.9)' : 'rgba(255, 255, 255, 1)',
-        "stroke-width": "3.5",
+      }));
+      svg.appendChild(svgEl("polyline", {
+        points: pts,
+        fill: "none",
+        stroke: "rgba(255,255,255,.95)",
+        "stroke-width": "4",
         "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-        fill: "none"
-      });
-
-      laserGroup.appendChild(glow);
-      laserGroup.appendChild(core);
-      svg.appendChild(laserGroup);
+        "stroke-linejoin": "round"
+      }));
     }
 
+    // selected ring & cursor
     const target = sel || pieceAt(cursor.x, cursor.y);
     if (target) {
       svg.appendChild(svgEl("rect", {
@@ -511,6 +1002,7 @@
       }));
     }
 
+    // pieces
     for (const piece of state.pieces) {
       const g = svgEl("g");
       const x = piece.x * CELL;
@@ -524,6 +1016,7 @@
       img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${cx} ${cy})`);
       g.appendChild(img);
 
+      // faint color ring
       g.appendChild(svgEl("rect", {
         x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12,
         fill: "none",
@@ -539,6 +1032,7 @@
       svg.appendChild(g);
     }
 
+    // winner overlay
     if (state.winner) {
       svg.appendChild(svgEl("rect", {
         x: 150, y: 255, width: 700, height: 290, rx: 26, ry: 26,
@@ -609,7 +1103,7 @@
     selectedId = null;
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
-    state.lastLaserPathStr = "";
+    state.lastLaserPath = [];
     log(`Turn passed to ${state.turn}.`, "muted");
     saveState();
     updateSelectionUI();
@@ -684,3 +1178,5 @@
   render();
 })();
 </script>
+</body>
+</html>
