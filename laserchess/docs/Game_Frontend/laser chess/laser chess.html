@@ -15,157 +15,230 @@
       --bg0:#06080b;
       --bg1:#0d1116;
       --bg2:#121821;
-      --panel:rgba(8,10,14,.82);
-      --panel2:rgba(255,255,255,.03);
+      --panel:rgba(8,10,14,.94);
       --line:rgba(255,255,255,.08);
       --text:#e8f6ff;
       --muted:#97a8b6;
-      --good:#24d18f;
-      --warn:#ffb84d;
-      --bad:#ff5f6f;
-      --shadow:0 18px 60px rgba(0,0,0,.42);
-      --boardW: min(78vw, 780px);
-      --cell: calc(var(--boardW) / 10);
-      --cellH: calc(var(--boardW) / 10);
-      --blue-tint: rgba(3, 233, 244, 0.08);
-      --red-tint: rgba(244, 67, 54, 0.08);
+      --shadow:0 25px 70px rgba(0,0,0,.85);
     }
     * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
-    body {
+    html, body { 
+      height: 100%;
+      width: 100%;
       margin: 0;
+      padding: 0;
+      overflow: hidden !important;
+    }
+    body {
       font-family: "Quantico", sans-serif;
       color: var(--text);
       background:
-        linear-gradient(rgba(0,0,0,.64), rgba(0,0,0,.8)),
+        linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.9)),
         url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
-      overflow-x: hidden;
-      overflow-y: auto;
     }
-    a { color: var(--theme-color); text-decoration: none; }
+    
     .shell {
-      min-height: 100vh;
+      height: 100vh;
+      width: 100vw;
       display: flex;
       flex-direction: column;
-      backdrop-filter: blur(2px);
+      overflow: hidden;
     }
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      padding: 1rem 1.25rem;
+      padding: 0.4rem 1.25rem;
       border-bottom: 1px solid var(--line);
       background: rgba(5,7,10,.84);
       box-shadow: 0 10px 30px rgba(0,0,0,.45);
-    }
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: .2rem;
+      z-index: 5;
+      flex-shrink: 0;
     }
     .brand h1 {
       margin: 0;
-      font-size: clamp(1.3rem, 2vw, 2rem);
+      font-size: clamp(1rem, 1.8vw, 1.4rem);
       letter-spacing: .16em;
       font-weight: 900;
-      text-transform: uppercase;
-    }
-    .brand p {
-      margin: 0;
-      color: var(--muted);
-      font-size: .78rem;
-      letter-spacing: .18em;
       text-transform: uppercase;
     }
     .header-meta {
       display: flex;
       align-items: center;
       gap: .7rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      color: var(--muted);
-      font-size: .82rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
     }
     .pill {
-      padding: .5rem .8rem;
+      padding: .25rem .65rem;
       border: 1px solid var(--line);
       border-radius: 999px;
       background: rgba(255,255,255,.04);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
-    }
-    .hero {
-      padding: 1rem 1.25rem 0.75rem;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(3,233,244,.08), rgba(3,233,244,0));
-    }
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.35fr .95fr;
-      gap: 1rem;
-      align-items: stretch;
-      max-width: 1480px;
-      margin: 0 auto;
-    }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-    }
-    .hero-left {
-      padding: 1rem 1rem 1.1rem;
-      display: grid;
-      gap: .9rem;
-    }
-    .hero-left h2 {
-      margin: 0;
-      font-size: clamp(2rem, 5vw, 4.2rem);
-      line-height: .9;
-      letter-spacing: -.06em;
+      font-size: .7rem;
+      letter-spacing: .12em;
       text-transform: uppercase;
-      font-weight: 900;
-    }
-    .hero-left .sub {
       color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .28em;
-      font-size: .78rem;
     }
-    .hero-left .desc {
-      color: #d9e9f5;
-      line-height: 1.6;
-      max-width: 62ch;
-      font-size: .98rem;
-    }
-    .hero-actions {
+    
+    .dialogue-overlay {
+      flex: 1;
+      width: 100%;
+      background: rgba(3, 4, 7, 0.4);
+      backdrop-filter: blur(4px);
       display: flex;
-      flex-wrap: wrap;
-      gap: .6rem;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      overflow: hidden;
     }
-    button, select {
-      font-family: inherit;
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
+      gap: 1rem;
+      width: 100%;
+      height: 100%;
+      max-width: 1600px;
+      background: var(--panel);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 0.75rem;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .layout::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 20px;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(var(--theme-rgb), 0.3), transparent 60%, rgba(244,67,54,0.15));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .panel {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .board-panel {
+      padding: .25rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .board-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .board-shell {
+      width: 100%;
+      height: 100%;
+      padding: .25rem;
+      border-radius: 16px;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    svg#board {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      aspect-ratio: 10 / 8;
+      object-fit: contain;
+      display: block;
+      background: linear-gradient(180deg, rgba(1,3,6,.95), rgba(10,12,15,.92));
+      border-radius: 12px;
+      touch-action: manipulation;
+    }
+    
+    .sidebar {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .side-card {
+      padding: .75rem;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+    .side-card h3 {
+      margin: 0 0 .4rem;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .8rem;
+      text-align: center;
+    }
+    .turn-row {
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+      margin-bottom: .4rem;
+    }
+    .turn-badge {
+      padding: .4rem .5rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .65rem;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
+    .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
+    
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .3rem;
     }
     .btn {
       appearance: none;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.04);
       color: var(--text);
-      padding: .85rem 1rem;
-      border-radius: 14px;
+      padding: .55rem .45rem;
+      border-radius: 10px;
       cursor: pointer;
-      letter-spacing: .12em;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      font-size: .78rem;
+      font-size: .68rem;
       transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
       user-select: none;
+      width: 100%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
     }
     .btn:hover {
       transform: translateY(-1px);
       border-color: rgba(var(--theme-rgb), .35);
-      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 12px 28px rgba(0,0,0,.24);
+      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 8px 20px rgba(0,0,0,.24);
     }
     .btn.primary {
       background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
@@ -177,365 +250,77 @@
       border-color: rgba(244,67,54,.38);
       color: #ffb0a8;
     }
-    .hero-right {
-      padding: 1rem;
-      display: grid;
-      gap: .85rem;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .75rem;
-    }
-    .stat {
-      padding: .9rem 1rem;
-      border-radius: 18px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--line);
-      min-height: 85px;
-    }
-    .stat .k {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: .7rem;
-      margin-bottom: .45rem;
-    }
-    .stat .v {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: .04em;
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(540px, 1.25fr) minmax(320px, .75fr);
-      gap: 1rem;
-      max-width: 1480px;
-      width: 100%;
-      margin: 1rem auto 1.25rem;
-      padding: 0 1.25rem 1.25rem;
-      align-items: start;
-    }
-    .board-panel {
-      padding: 1rem;
-    }
-    .board-wrap {
-      width: 100%;
-      display: grid;
-      place-items: center;
-    }
-    .board-shell {
-      width: 100%;
-      max-width: 980px;
-      padding: .65rem;
-      border-radius: 24px;
-      background: rgba(0,0,0,.34);
-      border: 1px solid rgba(255,255,255,.08);
-      position: relative;
-      overflow: hidden;
-    }
-    .board-shell::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 50%, rgba(var(--theme-rgb), .06), transparent 65%);
-      pointer-events: none;
-    }
-    svg#board {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 10 / 8;
-      display: block;
-      background: linear-gradient(180deg, rgba(1,3,6,.9), rgba(10,12,15,.88));
-      border-radius: 18px;
-      touch-action: manipulation;
-    }
-    .sidebar {
-      display: grid;
-      gap: 1rem;
-      position: sticky;
-      top: 1rem;
-    }
-    .side-card {
-      padding: 1rem;
-    }
-    .side-card h3 {
-      margin: 0 0 .8rem;
-      text-transform: uppercase;
-      letter-spacing: .22em;
-      font-size: .9rem;
-    }
-    .turn-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: .8rem;
-      flex-wrap: wrap;
-      margin-bottom: .8rem;
-    }
-    .turn-badge {
-      padding: .48rem .8rem;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: .72rem;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-    }
-    .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
-    .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
-    .help {
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: .92rem;
-    }
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .6rem;
-    }
-    .controls .btn {
-      width: 100%;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .panel-list {
-      display: grid;
-      gap: .6rem;
-    }
-    .panel-line {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: 14px;
-      padding: .85rem .9rem;
-      display: flex;
-      justify-content: space-between;
-      gap: .8rem;
-      align-items: center;
-      font-size: .9rem;
-    }
-    .panel-line .label {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .16em;
-      font-size: .7rem;
-    }
-    .legend {
-      display: grid;
-      gap: .55rem;
-      font-size: .88rem;
-      color: var(--muted);
-    }
-    .legend-row {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
-    }
-    .swatch {
-      width: 1rem;
-      height: 1rem;
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 4px;
-      flex: 0 0 auto;
-    }
-    .swatch.valid { background: rgba(36,209,143,.18); border-color: rgba(36,209,143,.45); }
-    .swatch.selected { background: rgba(var(--theme-rgb), .18); border-color: rgba(var(--theme-rgb), .45); }
-    .swatch.reserved-blue { background: rgba(3, 233, 244, 0.12); border-color: rgba(3, 233, 244, 0.26); }
-    .swatch.reserved-red { background: rgba(244, 67, 54, 0.12); border-color: rgba(244, 67, 54, 0.26); }
-    .swatch.laser { background: rgba(255, 246, 102, .22); border-color: rgba(255, 246, 102, .6); }
-    .log {
-      max-height: 220px;
-      overflow: auto;
-      display: grid;
-      gap: .4rem;
-      padding-right: .25rem;
-    }
-    .log-entry {
-      padding: .72rem .8rem;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      line-height: 1.5;
-      font-size: .9rem;
-    }
-    .log-entry.good { border-color: rgba(36,209,143,.32); color: #c2ffe4; }
-    .log-entry.warn { border-color: rgba(255,184,77,.32); color: #fff0cf; }
-    .log-entry.bad { border-color: rgba(255,95,111,.32); color: #ffd0d5; }
-    .log-entry.muted { color: var(--muted); }
-    .footer-note {
-      max-width: 1480px;
-      margin: 0 auto 1rem;
-      padding: 0 1.25rem;
-      color: var(--muted);
-      font-size: .8rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
     .kbd {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: .12rem .42rem;
-      border: 1px solid rgba(255,255,255,.12);
+      padding: .1rem .25rem;
+      border: 1px solid rgba(255,255,255,0.1);
       border-bottom-width: 2px;
-      border-radius: 6px;
+      border-radius: 4px;
       background: rgba(255,255,255,.04);
       color: var(--text);
-      font-size: .78em;
-      letter-spacing: 0;
-      text-transform: none;
-      min-width: 1.7rem;
+      font-size: .7em;
+      margin-left: auto;
     }
-    .mini {
-      font-size: .78rem;
-      line-height: 1.4;
-      color: var(--muted);
-    }
-    .hidden { display: none !important; }
 
-    @media (max-width: 1120px){
-      .hero-grid, .layout {
-        grid-template-columns: 1fr;
+    @media (max-width: 640px){
+      .dialogue-overlay { padding: .15rem; }
+      .layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 130px);
+        padding: .4rem;
+        gap: .35rem;
+        border-radius: 12px;
       }
-      .sidebar {
-        position: static;
-      }
-      :root { --boardW: min(96vw, 800px); }
+      .layout::before { border-radius: 12px; }
+      .kbd { display: none; }
+      .btn { font-size: 0.58rem; padding: .45rem .2rem; border-radius: 6px; }
+      .side-card h3 { font-size: 0.62rem; margin-bottom: 0.2rem; }
+      .turn-badge { font-size: 0.55rem; padding: .25rem .1rem; }
     }
-    @media (max-width: 720px){
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .stat-grid, .controls {
-        grid-template-columns: 1fr;
-      }
-      :root { --boardW: 96vw; }
-      .hero-left h2 { font-size: 2.45rem; }
-    }
-  
-svg{display:block;width:min(100vw,100vh - 20px);max-width:100%;height:auto;}
-#board, .board, .game-board, svg[id*="board"], svg[id*="sandbox"]{
- width:min(96vw,96vh)!important;
- height:min(96vw,96vh)!important;
- max-width:100%;
- max-height:100%;
-}
-html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;}
-
-</style>
+  </style>
 </head>
 <body>
 <div class="shell">
   <header>
     <div class="brand">
       <h1>Laser Chess</h1>
-      <p>Local pass-and-play • tutorial-style visuals • no terminal</p>
     </div>
     <div class="header-meta">
-      <div class="pill" id="turnPill">Turn: BLUE</div>
       <div class="pill" id="movePill">Move 1</div>
       <div class="pill" id="savePill">Saved locally</div>
     </div>
   </header>
 
-  <section class="hero">
-    <div class="hero-grid">
-      <div class="panel hero-left">
-        <div class="sub">One screen. One board. One laser.</div>
-        <h2>Play the game with the tutorial look.</h2>
-        <div class="desc">
-          Select a piece, click an adjacent square to move, use rotate to change its orientation, or fire your laser. The board uses the hosted tutorial sprites so nothing depends on terminal rendering or local repo paths.
-        </div>
-        <div class="hero-actions">
-          <button class="btn primary" id="rotateCCW">↺ CCW <span class="kbd" style="margin-left:.55rem">Q</span></button>
-          <button class="btn primary" id="rotateCW">CW ↻ <span class="kbd" style="margin-left:.55rem">E</span></button>
-          <button class="btn" id="fireBtn">Fire <span class="kbd" style="margin-left:.55rem">F</span></button>
-          <button class="btn danger" id="resetBtn">Reset Game <span class="kbd" style="margin-left:.55rem">N</span></button>
-        </div>
-      </div>
-      <div class="panel hero-right">
-        <div class="stat-grid">
-          <div class="stat">
-            <div class="k">Selected</div>
-            <div class="v" id="selectedLabel">None</div>
+  <div class="dialogue-overlay">
+    <main class="layout" role="dialog" aria-modal="true" aria-label="Laser Chess Gameplay Interface">
+      <section class="panel board-panel">
+        <div class="board-wrap">
+          <div class="board-shell">
+            <svg id="board" viewBox="0 0 1000 800" aria-label="Laser Chess board" tabindex="0"></svg>
           </div>
-          <div class="stat">
-            <div class="k">Action</div>
-            <div class="v" id="actionLabel">Click a piece</div>
-          </div>
-          <div class="stat">
-            <div class="k">Blue King</div>
-            <div class="v" id="blueKingLabel">Alive</div>
-          </div>
-          <div class="stat">
-            <div class="k">Red King</div>
-            <div class="v" id="redKingLabel">Alive</div>
-          </div>
-        </div>
-        <div class="mini">
-          Keyboard: <span class="kbd">←</span> <span class="kbd">↑</span> <span class="kbd">→</span> <span class="kbd">↓</span> move cursor, <span class="kbd">Q</span> CCW, <span class="kbd">E</span> CW, <span class="kbd">Enter</span> select/use, <span class="kbd">Esc</span> clear selection.
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <main class="layout">
-    <section class="panel board-panel">
-      <div class="board-wrap">
-        <div class="board-shell">
-          <svg id="board" viewBox="0 0 1000 800" aria-label="Laser Chess board" tabindex="0"></svg>
-        </div>
-      </div>
-    </section>
-
-    <aside class="sidebar">
-      <section class="panel side-card">
-        <h3>Turn controls</h3>
-        <div class="turn-row">
-          <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
-          <div class="turn-badge" id="phaseBadge">Select a piece</div>
-        </div>
-        <div class="controls">
-          <button class="btn primary" id="moveBtn">Move</button>
-          <button class="btn primary" id="selectBtn">Select / Deselect</button>
-          <button class="btn" id="rotateCCWBtn">↺ CCW</button>
-          <button class="btn" id="rotateCWBtn">CW ↻</button>
-          <button class="btn" id="endTurnBtn">End Turn</button>
         </div>
       </section>
 
-      <section class="panel side-card">
-        <h3>Selection</h3>
-        <div class="panel-list">
-          <div class="panel-line"><span class="label">Piece</span><span id="pieceTypeValue">—</span></div>
-          <div class="panel-line"><span class="label">Color</span><span id="pieceColorValue">—</span></div>
-          <div class="panel-line"><span class="label">Position</span><span id="piecePosValue">—</span></div>
-          <div class="panel-line"><span class="label">Rotation</span><span id="pieceRotValue">—</span></div>
-        </div>
-      </section>
-
-      <section class="panel side-card">
-        <h3>What the colors mean</h3>
-        <div class="legend">
-          <div class="legend-row"><span class="swatch selected"></span> Selected piece / active square</div>
-          <div class="legend-row"><span class="swatch valid"></span> Valid adjacent move</div>
-          <div class="legend-row"><span class="swatch reserved-blue"></span> Blue reserved square</div>
-          <div class="legend-row"><span class="swatch reserved-red"></span> Red reserved square</div>
-          <div class="legend-row"><span class="swatch laser"></span> Fired laser path</div>
-        </div>
-      </section>
-
-      <section class="panel side-card">
-        <h3>Event log</h3>
-        <div id="log" class="log"></div>
-      </section>
-    </aside>
-  </main>
-
-  <div class="footer-note">
-    Tutorial piece art is loaded from image files in the same folder as this HTML. The game state is stored locally in your browser.
+      <aside class="sidebar">
+        <section class="panel side-card">
+          <div>
+            <h3>Turn controls</h3>
+            <div class="turn-row">
+              <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
+              <div class="turn-badge" id="phaseBadge">Select a piece</div>
+            </div>
+          </div>
+          <div class="controls">
+            <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
+            <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
+            <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
+            <button class="btn" id="endTurnBtn">Pass / End Turn</button>
+            <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
+          </div>
+        </section>
+      </aside>
+    </main>
   </div>
 </div>
 
@@ -548,15 +333,12 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
   const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
   const W = 10, H = 8;
   const CELL = 100;
-  const ORIGIN = 50;
   const DIRS = [
     {dx: 0, dy: 1},   // 0 south
     {dx: 1, dy: 0},   // 1 east
     {dx: 0, dy: -1},  // 2 north
     {dx: -1, dy: 0},  // 3 west
   ];
-  const TURN_DIRS = { BLUE: [3,0], RED: [1,2] }; 
-  const OPP = {0:2,1:3,2:0,3:1};
   const PIECE_MAP = {
     KING: "king",
     DEFENDER: "defender",
@@ -602,7 +384,6 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     moveNumber: 1,
     winner: null,
     lastLaserPath: [],
-    lastLog: "Blue to move.",
     pieces: [
       {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
       {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
@@ -635,26 +416,12 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
 
   const el = {
     board: document.getElementById("board"),
-    log: document.getElementById("log"),
-    turnPill: document.getElementById("turnPill"),
     movePill: document.getElementById("movePill"),
     savePill: document.getElementById("savePill"),
     turnBadge: document.getElementById("turnBadge"),
     phaseBadge: document.getElementById("phaseBadge"),
-    selectedLabel: document.getElementById("selectedLabel"),
-    actionLabel: document.getElementById("actionLabel"),
-    blueKingLabel: document.getElementById("blueKingLabel"),
-    redKingLabel: document.getElementById("redKingLabel"),
-    pieceTypeValue: document.getElementById("pieceTypeValue"),
-    pieceColorValue: document.getElementById("pieceColorValue"),
-    piecePosValue: document.getElementById("piecePosValue"),
-    pieceRotValue: document.getElementById("pieceRotValue"),
-    rotateCCW: document.getElementById("rotateCCW"),
-    rotateCW: document.getElementById("rotateCW"),
     fireBtn: document.getElementById("fireBtn"),
     resetBtn: document.getElementById("resetBtn"),
-    moveBtn: document.getElementById("moveBtn"),
-    selectBtn: document.getElementById("selectBtn"),
     rotateCCWBtn: document.getElementById("rotateCCWBtn"),
     rotateCWBtn: document.getElementById("rotateCWBtn"),
     endTurnBtn: document.getElementById("endTurnBtn"),
@@ -672,17 +439,12 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
       const parsed = JSON.parse(raw);
       if (!parsed || !Array.isArray(parsed.pieces)) return null;
       return parsed;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
   function saveState() {
     localStorage.setItem("laserchess_local_state", JSON.stringify(state));
-    el.savePill.textContent = "Saved locally";
   }
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
-  
-  // Confirms configuration to keep local .png mapping:
   function pieceImage(piece) {
     return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`;
   }
@@ -695,12 +457,6 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
   }
   function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
   function normalizeRotation(rot) { return ((rot % 4) + 4) % 4; }
-  function currentTurnPieces() {
-    return state.pieces.filter(p => p.color === state.turn);
-  }
-  function myLaser() {
-    return state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn) || null;
-  }
   function enemyColor(c) { return c === "BLUE" ? "RED" : "BLUE"; }
   function getSelectedPiece() {
     return selectedId ? state.pieces.find(p => p.id === selectedId) || null : null;
@@ -710,27 +466,12 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     updateSelectionUI();
     render();
   }
-  function log(msg, kind = "muted") {
-    const div = document.createElement("div");
-    div.className = `log-entry ${kind}`;
-    div.textContent = msg;
-    el.log.prepend(div);
-  }
   function updateSelectionUI() {
     const piece = getSelectedPiece();
-    el.selectedLabel.textContent = piece ? `${piece.color} ${piece.pieceType}` : "None";
-    el.pieceTypeValue.textContent = piece ? piece.pieceType : "—";
-    el.pieceColorValue.textContent = piece ? piece.color : "—";
-    el.piecePosValue.textContent = piece ? `(${piece.x}, ${piece.y})` : "—";
-    el.pieceRotValue.textContent = piece ? String(piece.rotation ?? 0) : "—";
-    el.turnPill.textContent = `Turn: ${state.turn}`;
     el.movePill.textContent = `Move ${state.moveNumber}`;
     el.turnBadge.textContent = `${state.turn} to move`;
     el.turnBadge.className = `turn-badge ${state.turn === "BLUE" ? "turn-blue" : "turn-red"}`;
-    el.blueKingLabel.textContent = state.pieces.some(p => p.pieceType === "KING" && p.color === "BLUE") ? "Alive" : "Down";
-    el.redKingLabel.textContent = state.pieces.some(p => p.pieceType === "KING" && p.color === "RED") ? "Alive" : "Down";
     el.phaseBadge.textContent = state.winner ? `${state.winner} wins` : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
-    el.actionLabel.textContent = state.winner ? "Game over" : (piece ? "Choose move / rotate / fire" : "Click a piece");
   }
 
   function legalMoves(piece) {
@@ -756,12 +497,6 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     return moves;
   }
 
-  function rotatePiece(piece, delta) {
-    if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
-    piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    return true;
-  }
-
   function movePiece(piece, nx, ny) {
     if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
     const occ = pieceAt(nx, ny);
@@ -780,9 +515,8 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     return true;
   }
 
-  function laserDirFromRotation(rot) {
-    return [3, 2, 1, 0][normalizeRotation(rot)];
-  }
+  /* Corrected to resolve the 90-degree anticlockwise vector offset */
+  function laserDirFromRotation(rot) { return [2, 1, 0, 3][normalizeRotation(rot)]; }
 
   function interactWithLaser(piece, incomingDir) {
     const typeMap = INTERACTION_MAP[piece.pieceType];
@@ -817,7 +551,7 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
 
   function fireLaser() {
     if (state.winner) return false;
-    const shooter = myLaser();
+    const shooter = state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn);
     if (!shooter) return false;
     const dir = laserDirFromRotation(shooter.rotation || 0);
     const startX = shooter.x + DIRS[dir].dx;
@@ -827,22 +561,10 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
 
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
-      const idx = state.pieces.findIndex(p => p.id === victim.id);
-      if (idx >= 0) {
-        state.pieces.splice(idx, 1);
-        log(`${state.turn} laser destroyed ${victim.color} ${victim.pieceType} at (${victim.x}, ${victim.y}).`, "bad");
-      }
-      if (victim.pieceType === "KING") {
-        state.winner = state.turn;
-        log(`${state.turn} wins by destroying the enemy KING.`, "good");
-      }
-    } else if (result.looped) {
-      log(`${state.turn} laser looped through the board.`, "warn");
-    } else {
-      log(`${state.turn} fired the laser.`, "good");
+      state.pieces.splice(state.pieces.findIndex(p => p.id === victim.id), 1);
+      if (victim.pieceType === "KING") state.winner = state.turn;
     }
 
-    state.lastLog = `${state.turn} fired.`;
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
     selectedId = null;
@@ -857,15 +579,7 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     if (state.winner) return false;
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn) return false;
-    const occ = pieceAt(targetX, targetY);
-    let ok = false;
-    if (!occ) {
-      ok = movePiece(piece, targetX, targetY);
-      if (ok) log(`${state.turn} moved ${piece.pieceType} to (${targetX}, ${targetY}).`, "good");
-    } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-      ok = movePiece(piece, targetX, targetY);
-      if (ok) log(`${state.turn} swapped with ${occ.color} ${occ.pieceType}.`, "good");
-    }
+    let ok = movePiece(piece, targetX, targetY);
     if (ok) {
       selectedId = null;
       state.turn = enemyColor(state.turn);
@@ -882,7 +596,6 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
     piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    log(`${state.turn} rotated ${piece.pieceType}.`, "good");
     selectedId = null;
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
@@ -901,7 +614,6 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     selectedId = null;
     cursor = { x: 0, y: 0 };
     localStorage.removeItem("laserchess_local_state");
-    log("Game reset.", "muted");
     updateSelectionUI();
     render();
   }
@@ -931,11 +643,9 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     const f2 = svgEl("feMerge");
     f2.appendChild(svgEl("feMergeNode", { in: "blur" }));
     f2.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
-    defs.querySelector("#softGlow")?.remove?.();
     defs.appendChild(f1);
     defs.appendChild(f2);
 
-    // grid
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
         const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
@@ -951,132 +661,71 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
       }
     }
 
-    // coordinate labels
     for (let x = 0; x < W; x++) {
-      svg.appendChild(svgEl("text", {
-        x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14", "font-family": "Quantico, sans-serif", "letter-spacing": "2"
-      }));
-      svg.lastChild.textContent = x;
+      const txt = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14" });
+      txt.textContent = x;
+      svg.appendChild(txt);
     }
     for (let y = 0; y < H; y++) {
-      const t = svgEl("text", {
-        x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14", "font-family": "Quantico, sans-serif", "letter-spacing": "2"
-      });
-      t.textContent = y;
-      svg.appendChild(t);
+      const txt = svgEl("text", { x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14" });
+      txt.textContent = y;
+      svg.appendChild(txt);
     }
 
-    // valid move highlight
     const sel = getSelectedPiece();
     if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
       for (const m of legalMoves(sel)) {
-        const r = svgEl("rect", {
+        svg.appendChild(svgEl("rect", {
           x: m.x * CELL + 6, y: m.y * CELL + 6, width: CELL - 12, height: CELL - 12,
-          fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10", ry: "10"
-        });
-        svg.appendChild(r);
+          fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10"
+        }));
       }
     }
 
-    // laser path
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
-      svg.appendChild(svgEl("polyline", {
-        points: pts,
-        fill: "none",
-        stroke: "rgba(255,246,102,.35)",
-        "stroke-width": "16",
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-        filter: "url(#softGlow)"
-      }));
-      svg.appendChild(svgEl("polyline", {
-        points: pts,
-        fill: "none",
-        stroke: "rgba(255,255,255,.95)",
-        "stroke-width": "4",
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round"
-      }));
+      svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,246,102,.35)", "stroke-width": "16", "stroke-linecap": "round", "stroke-linejoin": "round", filter: "url(#softGlow)" }));
+      svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,255,255,.95)", "stroke-width": "4", "stroke-linecap": "round", "stroke-linejoin": "round" }));
     }
 
-    // selected ring & cursor
     const target = sel || pieceAt(cursor.x, cursor.y);
     if (target) {
-      svg.appendChild(svgEl("rect", {
-        x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12,
-        fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10", ry: "10"
-      }));
+      svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10" }));
     } else {
-      svg.appendChild(svgEl("rect", {
-        x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16,
-        fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", ry: "10", "stroke-dasharray": "10 8"
-      }));
+      svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
     }
 
-    // standard SVG image injection referencing local PNG paths
     for (const piece of state.pieces) {
       const g = svgEl("g");
       const x = piece.x * CELL;
       const y = piece.y * CELL;
-      const img = svgEl("image", {
-        href: pieceImage(piece),
-        x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12,
-        preserveAspectRatio: "xMidYMid meet"
-      });
-      const cx = x + 50, cy = y + 50;
-      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${cx} ${cy})`);
+      const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
+      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
       g.appendChild(img);
 
-      // faint color ring
-      g.appendChild(svgEl("rect", {
-        x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12,
-        fill: "none",
-        stroke: piece.color === "BLUE" ? "rgba(3,233,244,.18)" : "rgba(244,67,54,.18)",
-        "stroke-width": "1.5",
-        rx: "10", ry: "10"
-      }));
+      g.appendChild(svgEl("rect", { x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: piece.color === "BLUE" ? "rgba(3,233,244,.18)" : "rgba(244,67,54,.18)", "stroke-width": "1.5", rx: "10" }));
       g.style.cursor = "pointer";
-      g.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        onPieceClick(piece);
-      });
+      g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
       svg.appendChild(g);
     }
 
-    // winner overlay
     if (state.winner) {
-      svg.appendChild(svgEl("rect", {
-        x: 150, y: 255, width: 700, height: 290, rx: 26, ry: 26,
-        fill: "rgba(0,0,0,.72)", stroke: "rgba(255,255,255,.14)", "stroke-width": "1.5"
-      }));
-      const t = svgEl("text", {
-        x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900", "font-family": "Quantico, sans-serif", "letter-spacing": "4"
-      });
-      t.textContent = `${state.winner} WINS`;
-      svg.appendChild(t);
-      const s = svgEl("text", {
-        x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22", "font-family": "Quantico, sans-serif", "letter-spacing": "3"
-      });
-      s.textContent = "Press Reset to start again";
-      svg.appendChild(s);
+      svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.85)", stroke: "rgba(255,255,255,.14)" }));
+      const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
+      t1.textContent = `${state.winner} WINS`;
+      svg.appendChild(t1);
+      const t2 = svgEl("text", { x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22" });
+      t2.textContent = "Press Reset to start again";
+      svg.appendChild(t2);
     }
   }
 
   function onPieceClick(piece) {
     if (state.winner) return;
-    if (piece.color !== state.turn) {
-      log(`It is ${state.turn}'s turn.`, "warn");
-      return;
-    }
-    if (selectedId === piece.id) {
-      selectPiece(null);
-      return;
-    }
+    if (piece.color !== state.turn) return;
+    if (selectedId === piece.id) { selectPiece(null); return; }
     selectPiece(piece);
     cursor = { x: piece.x, y: piece.y };
-    state.lastLog = `Selected ${piece.color} ${piece.pieceType}.`;
-    updateSelectionUI();
     render();
   }
 
@@ -1086,22 +735,15 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     const sel = getSelectedPiece();
     if (sel && sel.color === state.turn) {
       const occ = pieceAt(x, y);
-      if (!occ) {
-        const moved = doMoveOrSwap(x, y);
-        if (moved) return;
-      } else if (occ.id !== sel.id && sel.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-        const moved = doMoveOrSwap(x, y);
-        if (moved) return;
+      if (!occ || (occ.id !== sel.id && sel.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER"))) {
+        if (doMoveOrSwap(x, y)) return;
       } else if (occ.id === sel.id) {
         selectPiece(null);
         return;
       }
     }
-    if (!pieceAt(x, y)) {
-      selectPiece(null);
-    } else {
-      onPieceClick(pieceAt(x, y));
-    }
+    const target = pieceAt(x, y);
+    if (!target) selectPiece(null); else onPieceClick(target);
   }
 
   function render() {
@@ -1116,90 +758,45 @@ html,body{margin:0;width:100%;min-height:100%;overflow-x:hidden;overflow-y:auto;
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
     state.lastLaserPath = [];
-    log(`Turn passed to ${state.turn}.`, "muted");
     saveState();
     updateSelectionUI();
     render();
   }
 
   function handleKeyboard(e) {
-    if (e.defaultPrevented) return;
     const key = e.key;
     if (key === "ArrowUp") { e.preventDefault(); cursor.y = Math.max(0, cursor.y - 1); render(); return; }
     if (key === "ArrowDown") { e.preventDefault(); cursor.y = Math.min(H - 1, cursor.y + 1); render(); return; }
     if (key === "ArrowLeft") { e.preventDefault(); cursor.x = Math.max(0, cursor.x - 1); render(); return; }
     if (key === "ArrowRight") { e.preventDefault(); cursor.x = Math.min(W - 1, cursor.x + 1); render(); return; }
     if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
-    if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); p ? onPieceClick(p) : onCellClick(cursor.x, cursor.y); return; }
+    if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); else onCellClick(cursor.x, cursor.y); return; }
     if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
     if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
-    if (key === "l" || key === "L") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
-    if (key === "r" || key === "R") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
     if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
     if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
   }
 
-  el.rotateCCW.addEventListener("click", () => rotateCCW());
-  el.rotateCW.addEventListener("click", () => rotateCW());
-  el.fireBtn.addEventListener("click", () => fireLaser());
-  el.resetBtn.addEventListener("click", () => resetGame());
-  el.moveBtn.addEventListener("click", () => {
-    const p = getSelectedPiece();
-    if (p) {
-      const moves = legalMoves(p);
-      if (moves.length) {
-        log("Choose a highlighted square to move or swap.", "muted");
-      } else {
-        log("No legal adjacent moves for that piece.", "warn");
-      }
-    } else {
-      log("Click one of your pieces first.", "muted");
-    }
-  });
-  el.selectBtn.addEventListener("click", () => {
-    if (selectedId) selectPiece(null);
-    else {
-      const p = pieceAt(cursor.x, cursor.y);
-      if (p) onPieceClick(p);
-    }
-  });
   el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
   el.rotateCWBtn.addEventListener("click", () => rotateCW());
+  el.fireBtn.addEventListener("click", () => fireLaser());
+  el.resetBtn.addEventListener("click", () => resetGame());
   el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
 
   window.addEventListener("keydown", handleKeyboard);
   el.board.addEventListener("click", (e) => {
     if (state.winner) return;
     const pt = el.board.createSVGPoint();
-    pt.x = e.clientX;
-    pt.y = e.clientY;
+    pt.x = e.clientX; pt.y = e.clientY;
     const screenCTM = el.board.getScreenCTM();
     if (!screenCTM) return;
     const local = pt.matrixTransform(screenCTM.inverse());
-    const x = Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL)));
-    const y = Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL)));
-    onCellClick(x, y);
+    onCellClick(Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL))), Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL))));
   });
 
-  if (!localStorage.getItem("laserchess_local_state")) {
-    log("New game started.", "good");
-  } else {
-    log("Loaded saved local game.", "muted");
-  }
   updateSelectionUI();
   render();
 })();
-</script>
-
-<script>
-function __fitBoards(){
-document.querySelectorAll('svg').forEach(s=>{
- const size=Math.min(window.innerWidth,window.innerHeight)-16;
- if(size>0){s.style.width=size+'px';s.style.height=size+'px';}
-});
-}
-window.addEventListener('resize',__fitBoards);
-window.addEventListener('load',__fitBoards);
 </script>
 </body>
 </html>
