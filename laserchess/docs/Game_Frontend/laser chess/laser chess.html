@@ -16,22 +16,14 @@
       --bg1:#0d1116;
       --bg2:#121821;
       --panel:rgba(8,10,14,.82);
-      --panel2:rgba(255,255,255,.03);
       --line:rgba(255,255,255,.08);
       --text:#e8f6ff;
       --muted:#97a8b6;
-      --good:#24d18f;
-      --warn:#ffb84d;
-      --bad:#ff5f6f;
       --shadow:0 18px 60px rgba(0,0,0,.42);
       
-      /* Fully dynamic fluid width that watches container width AND max container viewport heights */
-      --boardW: min(100%, 920px, 68vh);
-      
+      /* Dynamic layout boundary settings */
+      --boardW: min(100%, 920px, 80vh);
       --cell: calc(var(--boardW) / 10);
-      --cellH: calc(var(--boardW) / 10);
-      --blue-tint: rgba(3, 233, 244, 0.08);
-      --red-tint: rgba(244, 67, 54, 0.08);
     }
     * { box-sizing: border-box; }
     html, body { 
@@ -39,7 +31,7 @@
       margin: 0;
       padding: 0;
       overflow-x: hidden;
-      overflow-y: auto !important; /* Absolute structural fallback scrolling safety */
+      overflow-y: auto !important;
     }
     body {
       font-family: "Quantico", sans-serif;
@@ -48,7 +40,6 @@
         linear-gradient(rgba(0,0,0,.64), rgba(0,0,0,.8)),
         url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
     }
-    a { color: var(--theme-color); text-decoration: none; }
     .shell {
       min-height: 100vh;
       display: flex;
@@ -65,11 +56,6 @@
       background: rgba(5,7,10,.84);
       box-shadow: 0 10px 30px rgba(0,0,0,.45);
     }
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: .2rem;
-    }
     .brand h1 {
       margin: 0;
       font-size: clamp(1.3rem, 2vw, 2rem);
@@ -77,150 +63,36 @@
       font-weight: 900;
       text-transform: uppercase;
     }
-    .brand p {
-      margin: 0;
-      color: var(--muted);
-      font-size: .78rem;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-    }
     .header-meta {
       display: flex;
       align-items: center;
       gap: .7rem;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      color: var(--muted);
-      font-size: .82rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
     }
     .pill {
       padding: .5rem .8rem;
       border: 1px solid var(--line);
       border-radius: 999px;
       background: rgba(255,255,255,.04);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+      font-size: .82rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
-    .hero {
-      padding: 1rem 1.25rem 0.75rem;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(3,233,244,.08), rgba(3,233,244,0));
-    }
-    .hero-grid {
+    .layout {
       display: grid;
-      grid-template-columns: 1.35fr .95fr;
-      gap: 1rem;
-      align-items: stretch;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 1.5rem;
       max-width: 1480px;
-      margin: 0 auto;
+      width: 100%;
+      margin: 1.5rem auto;
+      padding: 0 1.25rem 1.25rem;
+      align-items: start;
     }
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 22px;
       box-shadow: var(--shadow);
-    }
-    .hero-left {
-      padding: 1rem 1rem 1.1rem;
-      display: grid;
-      gap: .9rem;
-    }
-    .hero-left h2 {
-      margin: 0;
-      font-size: clamp(2rem, 5vw, 4.2rem);
-      line-height: .9;
-      letter-spacing: -.06em;
-      text-transform: uppercase;
-      font-weight: 900;
-    }
-    .hero-left .sub {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .28em;
-      font-size: .78rem;
-    }
-    .hero-left .desc {
-      color: #d9e9f5;
-      line-height: 1.6;
-      max-width: 62ch;
-      font-size: .98rem;
-    }
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .6rem;
-    }
-    button, select {
-      font-family: inherit;
-    }
-    .btn {
-      appearance: none;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      padding: .85rem 1rem;
-      border-radius: 14px;
-      cursor: pointer;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      font-size: .78rem;
-      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
-      user-select: none;
-    }
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(var(--theme-rgb), .35);
-      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 12px 28px rgba(0,0,0,.24);
-    }
-    .btn.primary {
-      background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
-      border-color: rgba(var(--theme-rgb), .35);
-      color: var(--theme-color);
-    }
-    .btn.danger {
-      background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
-      border-color: rgba(244,67,54,.38);
-      color: #ffb0a8;
-    }
-    .hero-right {
-      padding: 1rem;
-      display: grid;
-      gap: .85rem;
-    }
-    .stat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .75rem;
-    }
-    .stat {
-      padding: .9rem 1rem;
-      border-radius: 18px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--line);
-      min-height: 85px;
-    }
-    .stat .k {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: .7rem;
-      margin-bottom: .45rem;
-    }
-    .stat .v {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: .04em;
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: 1.25fr 0.75fr;
-      gap: 1.5rem;
-      max-width: 1480px;
-      width: 100%;
-      margin: 1rem auto 1.25rem;
-      padding: 0 1.25rem 1.25rem;
-      align-items: start;
     }
     .board-panel {
       padding: 1.25rem;
@@ -232,9 +104,6 @@
     .board-wrap {
       width: 100%;
       max-width: var(--boardW);
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
     .board-shell {
       width: 100%;
@@ -244,13 +113,6 @@
       border: 1px solid rgba(255,255,255,.08);
       position: relative;
       overflow: hidden;
-    }
-    .board-shell::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 50%, rgba(var(--theme-rgb), .06), transparent 65%);
-      pointer-events: none;
     }
     svg#board {
       width: 100%;
@@ -266,7 +128,7 @@
       gap: 1rem;
     }
     .side-card {
-      padding: 1rem;
+      padding: 1.25rem;
     }
     .side-card h3 {
       margin: 0 0 .8rem;
@@ -280,7 +142,7 @@
       align-items: center;
       gap: .8rem;
       flex-wrap: wrap;
-      margin-bottom: .8rem;
+      margin-bottom: 1rem;
     }
     .turn-badge {
       padding: .48rem .8rem;
@@ -293,93 +155,44 @@
     }
     .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
     .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
-    .help {
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: .92rem;
-    }
     .controls {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: .6rem;
     }
-    .controls .btn {
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      padding: .85rem 1rem;
+      border-radius: 14px;
+      cursor: pointer;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      font-size: .78rem;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      user-select: none;
       width: 100%;
       display: inline-flex;
       justify-content: center;
       align-items: center;
     }
-    .panel-list {
-      display: grid;
-      gap: .6rem;
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(var(--theme-rgb), .35);
+      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 12px 28px rgba(0,0,0,.24);
     }
-    .panel-line {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      border-radius: 14px;
-      padding: .85rem .9rem;
-      display: flex;
-      justify-content: space-between;
-      gap: .8rem;
-      align-items: center;
-      font-size: .9rem;
+    .btn.primary {
+      background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
+      border-color: rgba(var(--theme-rgb), .35);
+      color: var(--theme-color);
     }
-    .panel-line .label {
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .16em;
-      font-size: .7rem;
-    }
-    .legend {
-      display: grid;
-      gap: .55rem;
-      font-size: .88rem;
-      color: var(--muted);
-    }
-    .legend-row {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
-    }
-    .swatch {
-      width: 1rem;
-      height: 1rem;
-      border: 1px solid rgba(255,255,255,.15);
-      border-radius: 4px;
-      flex: 0 0 auto;
-    }
-    .swatch.valid { background: rgba(36,209,143,.18); border-color: rgba(36,209,143,.45); }
-    .swatch.selected { background: rgba(var(--theme-rgb), .18); border-color: rgba(var(--theme-rgb), .45); }
-    .swatch.reserved-blue { background: rgba(3, 233, 244, 0.12); border-color: rgba(3, 233, 244, 0.26); }
-    .swatch.reserved-red { background: rgba(244, 67, 54, 0.12); border-color: rgba(244, 67, 54, 0.26); }
-    .swatch.laser { background: rgba(255, 246, 102, .22); border-color: rgba(255, 246, 102, .6); }
-    .log {
-      max-height: 220px;
-      overflow-y: auto;
-      display: grid;
-      gap: .4rem;
-      padding-right: .25rem;
-    }
-    .log-entry {
-      padding: .72rem .8rem;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      line-height: 1.5;
-      font-size: .9rem;
-    }
-    .log-entry.good { border-color: rgba(36,209,143,.32); color: #c2ffe4; }
-    .log-entry.warn { border-color: rgba(255,184,77,.32); color: #fff0cf; }
-    .log-entry.bad { border-color: rgba(255,95,111,.32); color: #ffd0d5; }
-    .log-entry.muted { color: var(--muted); }
-    .footer-note {
-      max-width: 1480px;
-      margin: 0 auto 1rem;
-      padding: 0 1.25rem;
-      color: var(--muted);
-      font-size: .8rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
+    .btn.danger {
+      background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
+      border-color: rgba(244,67,54,.38);
+      color: #ffb0a8;
+      margin-top: .4rem;
     }
     .kbd {
       display: inline-flex;
@@ -392,32 +205,20 @@
       background: rgba(255,255,255,.04);
       color: var(--text);
       font-size: .78em;
-      letter-spacing: 0;
-      text-transform: none;
-      min-width: 1.7rem;
+      margin-left: auto;
     }
-    .mini {
-      font-size: .78rem;
-      line-height: 1.4;
-      color: var(--muted);
-    }
-    .hidden { display: none !important; }
 
-    /* Fluid wrapping thresholds for responsive space management */
-    @media (max-width: 1150px){
-      .hero-grid, .layout {
+    @media (max-width: 1024px){
+      .layout {
         grid-template-columns: 1fr;
       }
     }
-    @media (max-width: 720px){
+    @media (max-width: 640px){
       header {
         flex-direction: column;
         align-items: flex-start;
+        gap: .5rem;
       }
-      .stat-grid, .controls {
-        grid-template-columns: 1fr;
-      }
-      .hero-left h2 { font-size: 2.45rem; }
     }
   </style>
 </head>
@@ -426,55 +227,12 @@
   <header>
     <div class="brand">
       <h1>Laser Chess</h1>
-      <p>Local pass-and-play • tutorial-style visuals • no terminal</p>
     </div>
     <div class="header-meta">
-      <div class="pill" id="turnPill">Turn: BLUE</div>
       <div class="pill" id="movePill">Move 1</div>
       <div class="pill" id="savePill">Saved locally</div>
     </div>
   </header>
-
-  <section class="hero">
-    <div class="hero-grid">
-      <div class="panel hero-left">
-        <div class="sub">One screen. One board. One laser.</div>
-        <h2>Play the game with the tutorial look.</h2>
-        <div class="desc">
-          Select a piece, click an adjacent square to move, use rotate to change its orientation, or fire your laser. The board uses the hosted tutorial sprites so nothing depends on terminal rendering or local repo paths.
-        </div>
-        <div class="hero-actions">
-          <button class="btn primary" id="rotateCCW">↺ CCW <span class="kbd" style="margin-left:.55rem">Q</span></button>
-          <button class="btn primary" id="rotateCW">CW ↻ <span class="kbd" style="margin-left:.55rem">E</span></button>
-          <button class="btn" id="fireBtn">Fire <span class="kbd" style="margin-left:.55rem">F</span></button>
-          <button class="btn danger" id="resetBtn">Reset Game <span class="kbd" style="margin-left:.55rem">N</span></button>
-        </div>
-      </div>
-      <div class="panel hero-right">
-        <div class="stat-grid">
-          <div class="stat">
-            <div class="k">Selected</div>
-            <div class="v" id="selectedLabel">None</div>
-          </div>
-          <div class="stat">
-            <div class="k">Action</div>
-            <div class="v" id="actionLabel">Click a piece</div>
-          </div>
-          <div class="stat">
-            <div class="k">Blue King</div>
-            <div class="v" id="blueKingLabel">Alive</div>
-          </div>
-          <div class="stat">
-            <div class="k">Red King</div>
-            <div class="v" id="redKingLabel">Alive</div>
-          </div>
-        </div>
-        <div class="mini">
-          Keyboard: <span class="kbd">←</span> <span class="kbd">↑</span> <span class="kbd">→</span> <span class="kbd">↓</span> move cursor, <span class="kbd">Q</span> CCW, <span class="kbd">E</span> CW, <span class="kbd">Enter</span> select/use, <span class="kbd">Esc</span> clear selection.
-        </div>
-      </div>
-    </div>
-  </section>
 
   <main class="layout">
     <section class="panel board-panel">
@@ -493,45 +251,15 @@
           <div class="turn-badge" id="phaseBadge">Select a piece</div>
         </div>
         <div class="controls">
-          <button class="btn primary" id="moveBtn">Move</button>
-          <button class="btn primary" id="selectBtn">Select / Deselect</button>
-          <button class="btn" id="rotateCCWBtn">↺ CCW</button>
-          <button class="btn" id="rotateCWBtn">CW ↻</button>
-          <button class="btn" id="endTurnBtn">End Turn</button>
+          <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
+          <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
+          <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
+          <button class="btn" id="endTurnBtn">Pass / End Turn</button>
+          <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
         </div>
-      </section>
-
-      <section class="panel side-card">
-        <h3>Selection</h3>
-        <div class="panel-list">
-          <div class="panel-line"><span class="label">Piece</span><span id="pieceTypeValue">—</span></div>
-          <div class="panel-line"><span class="label">Color</span><span id="pieceColorValue">—</span></div>
-          <div class="panel-line"><span class="label">Position</span><span id="piecePosValue">—</span></div>
-          <div class="panel-line"><span class="label">Rotation</span><span id="pieceRotValue">—</span></div>
-        </div>
-      </section>
-
-      <section class="panel side-card">
-        <h3>What the colors mean</h3>
-        <div class="legend">
-          <div class="legend-row"><span class="swatch selected"></span> Selected piece / active square</div>
-          <div class="legend-row"><span class="swatch valid"></span> Valid adjacent move</div>
-          <div class="legend-row"><span class="swatch reserved-blue"></span> Blue reserved square</div>
-          <div class="legend-row"><span class="swatch reserved-red"></span> Red reserved square</div>
-          <div class="legend-row"><span class="swatch laser"></span> Fired laser path</div>
-        </div>
-      </section>
-
-      <section class="panel side-card">
-        <h3>Event log</h3>
-        <div id="log" class="log"></div>
       </section>
     </aside>
   </main>
-
-  <div class="footer-note">
-    Tutorial piece art is loaded from image files in the same folder as this HTML. The game state is stored locally in your browser.
-  </div>
 </div>
 
 <script>
@@ -594,7 +322,6 @@
     moveNumber: 1,
     winner: null,
     lastLaserPath: [],
-    lastLog: "Blue to move.",
     pieces: [
       {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
       {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
@@ -627,26 +354,12 @@
 
   const el = {
     board: document.getElementById("board"),
-    log: document.getElementById("log"),
-    turnPill: document.getElementById("turnPill"),
     movePill: document.getElementById("movePill"),
     savePill: document.getElementById("savePill"),
     turnBadge: document.getElementById("turnBadge"),
     phaseBadge: document.getElementById("phaseBadge"),
-    selectedLabel: document.getElementById("selectedLabel"),
-    actionLabel: document.getElementById("actionLabel"),
-    blueKingLabel: document.getElementById("blueKingLabel"),
-    redKingLabel: document.getElementById("redKingLabel"),
-    pieceTypeValue: document.getElementById("pieceTypeValue"),
-    pieceColorValue: document.getElementById("pieceColorValue"),
-    piecePosValue: document.getElementById("piecePosValue"),
-    pieceRotValue: document.getElementById("pieceRotValue"),
-    rotateCCW: document.getElementById("rotateCCW"),
-    rotateCW: document.getElementById("rotateCW"),
     fireBtn: document.getElementById("fireBtn"),
     resetBtn: document.getElementById("resetBtn"),
-    moveBtn: document.getElementById("moveBtn"),
-    selectBtn: document.getElementById("selectBtn"),
     rotateCCWBtn: document.getElementById("rotateCCWBtn"),
     rotateCWBtn: document.getElementById("rotateCWBtn"),
     endTurnBtn: document.getElementById("endTurnBtn"),
@@ -664,13 +377,10 @@
       const parsed = JSON.parse(raw);
       if (!parsed || !Array.isArray(parsed.pieces)) return null;
       return parsed;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
   function saveState() {
     localStorage.setItem("laserchess_local_state", JSON.stringify(state));
-    el.savePill.textContent = "Saved locally";
   }
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
   function pieceImage(piece) {
@@ -694,27 +404,12 @@
     updateSelectionUI();
     render();
   }
-  function log(msg, kind = "muted") {
-    const div = document.createElement("div");
-    div.className = `log-entry ${kind}`;
-    div.textContent = msg;
-    el.log.prepend(div);
-  }
   function updateSelectionUI() {
     const piece = getSelectedPiece();
-    el.selectedLabel.textContent = piece ? `${piece.color} ${piece.pieceType}` : "None";
-    el.pieceTypeValue.textContent = piece ? piece.pieceType : "—";
-    el.pieceColorValue.textContent = piece ? piece.color : "—";
-    el.piecePosValue.textContent = piece ? `(${piece.x}, ${piece.y})` : "—";
-    el.pieceRotValue.textContent = piece ? String(piece.rotation ?? 0) : "—";
-    el.turnPill.textContent = `Turn: ${state.turn}`;
     el.movePill.textContent = `Move ${state.moveNumber}`;
     el.turnBadge.textContent = `${state.turn} to move`;
     el.turnBadge.className = `turn-badge ${state.turn === "BLUE" ? "turn-blue" : "turn-red"}`;
-    el.blueKingLabel.textContent = state.pieces.some(p => p.pieceType === "KING" && p.color === "BLUE") ? "Alive" : "Down";
-    el.redKingLabel.textContent = state.pieces.some(p => p.pieceType === "KING" && p.color === "RED") ? "Alive" : "Down";
     el.phaseBadge.textContent = state.winner ? `${state.winner} wins` : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
-    el.actionLabel.textContent = state.winner ? "Game over" : (piece ? "Choose move / rotate / fire" : "Click a piece");
   }
 
   function legalMoves(piece) {
@@ -758,9 +453,7 @@
     return true;
   }
 
-  function laserDirFromRotation(rot) {
-    return [3, 2, 1, 0][normalizeRotation(rot)];
-  }
+  function laserDirFromRotation(rot) { return [3, 2, 1, 0][normalizeRotation(rot)]; }
 
   function interactWithLaser(piece, incomingDir) {
     const typeMap = INTERACTION_MAP[piece.pieceType];
@@ -806,21 +499,10 @@
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
       const idx = state.pieces.findIndex(p => p.id === victim.id);
-      if (idx >= 0) {
-        state.pieces.splice(idx, 1);
-        log(`${state.turn} laser destroyed ${victim.color} ${victim.pieceType} at (${victim.x}, ${victim.y}).`, "bad");
-      }
-      if (victim.pieceType === "KING") {
-        state.winner = state.turn;
-        log(`${state.turn} wins by destroying the enemy KING.`, "good");
-      }
-    } else if (result.looped) {
-      log(`${state.turn} laser looped through the board.`, "warn");
-    } else {
-      log(`${state.turn} fired the laser.`, "good");
+      if (idx >= 0) state.pieces.splice(idx, 1);
+      if (victim.pieceType === "KING") state.winner = state.turn;
     }
 
-    state.lastLog = `${state.turn} fired.`;
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
     selectedId = null;
@@ -839,10 +521,8 @@
     let ok = false;
     if (!occ) {
       ok = movePiece(piece, targetX, targetY);
-      if (ok) log(`${state.turn} moved ${piece.pieceType} to (${targetX}, ${targetY}).`, "good");
     } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
       ok = movePiece(piece, targetX, targetY);
-      if (ok) log(`${state.turn} swapped with ${occ.color} ${occ.pieceType}.`, "good");
     }
     if (ok) {
       selectedId = null;
@@ -860,7 +540,6 @@
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
     piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    log(`${state.turn} rotated ${piece.pieceType}.`, "good");
     selectedId = null;
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
@@ -879,7 +558,6 @@
     selectedId = null;
     cursor = { x: 0, y: 0 };
     localStorage.removeItem("laserchess_local_state");
-    log("Game reset.", "muted");
     updateSelectionUI();
     render();
   }
@@ -928,7 +606,7 @@
       }
     }
 
-    // Grid coordinate coordinates labels
+    // Grid Labels
     for (let x = 0; x < W; x++) {
       const txt = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14" });
       txt.textContent = x;
@@ -940,7 +618,7 @@
       svg.appendChild(txt);
     }
 
-    // Move visualization overlays
+    // Move Highlight Overlays
     const sel = getSelectedPiece();
     if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
       for (const m of legalMoves(sel)) {
@@ -951,14 +629,14 @@
       }
     }
 
-    // Laser trail visualization
+    // Laser visualization
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
       svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,246,102,.35)", "stroke-width": "16", "stroke-linecap": "round", "stroke-linejoin": "round", filter: "url(#softGlow)" }));
       svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,255,255,.95)", "stroke-width": "4", "stroke-linecap": "round", "stroke-linejoin": "round" }));
     }
 
-    // Focus tracking ring
+    // Selection box
     const target = sel || pieceAt(cursor.x, cursor.y);
     if (target) {
       svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10" }));
@@ -966,7 +644,7 @@
       svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
     }
 
-    // Active board assets
+    // Pieces rendering
     for (const piece of state.pieces) {
       const g = svgEl("g");
       const x = piece.x * CELL;
@@ -981,7 +659,7 @@
       svg.appendChild(g);
     }
 
-    // Endgame status modal overlay
+    // Win check modal
     if (state.winner) {
       svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.72)", stroke: "rgba(255,255,255,.14)" }));
       const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
@@ -995,15 +673,10 @@
 
   function onPieceClick(piece) {
     if (state.winner) return;
-    if (piece.color !== state.turn) {
-      log(`It is ${state.turn}'s turn.`, "warn");
-      return;
-    }
+    if (piece.color !== state.turn) return;
     if (selectedId === piece.id) { selectPiece(null); return; }
     selectPiece(piece);
     cursor = { x: piece.x, y: piece.y };
-    state.lastLog = `Selected ${piece.color} ${piece.pieceType}.`;
-    updateSelectionUI();
     render();
   }
 
@@ -1036,7 +709,6 @@
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
     state.lastLaserPath = [];
-    log(`Turn passed to ${state.turn}.`, "muted");
     saveState();
     updateSelectionUI();
     render();
@@ -1056,21 +728,10 @@
     if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
   }
 
-  el.rotateCCW.addEventListener("click", () => rotateCCW());
-  el.rotateCW.addEventListener("click", () => rotateCW());
-  el.fireBtn.addEventListener("click", () => fireLaser());
-  el.resetBtn.addEventListener("click", () => resetGame());
-  el.moveBtn.addEventListener("click", () => {
-    const p = getSelectedPiece();
-    if (p && legalMoves(p).length) log("Choose a highlighted square to move or swap.", "muted");
-    else if (p) log("No legal adjacent moves for that piece.", "warn");
-    else log("Click one of your pieces first.", "muted");
-  });
-  el.selectBtn.addEventListener("click", () => {
-    if (selectedId) selectPiece(null); else { const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); }
-  });
   el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
   el.rotateCWBtn.addEventListener("click", () => rotateCW());
+  el.fireBtn.addEventListener("click", () => fireLaser());
+  el.resetBtn.addEventListener("click", () => resetGame());
   el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
 
   window.addEventListener("keydown", handleKeyboard);
