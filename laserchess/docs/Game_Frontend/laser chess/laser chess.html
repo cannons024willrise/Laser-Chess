@@ -21,7 +21,7 @@
       --muted:#97a8b6;
       --shadow:0 18px 60px rgba(0,0,0,.42);
       
-      /* Dynamic sizing based on viewport height and width constraints */
+      /* Dynamic layout boundary settings */
       --boardW: min(100%, 920px, 80vh);
       --cell: calc(var(--boardW) / 10);
     }
@@ -79,12 +79,12 @@
       color: var(--muted);
     }
     
-    /* Optimized Grid to pull controls right next to the board */
+    /* Rigid side-by-side display across ALL screens */
     .layout {
       display: grid;
-      grid-template-columns: auto 320px;
+      grid-template-columns: 1fr 280px;
       gap: 1rem;
-      max-width: 1300px;
+      max-width: 1480px;
       width: 100%;
       margin: 1.5rem auto;
       padding: 0 1.25rem 1.25rem;
@@ -98,7 +98,7 @@
       box-shadow: var(--shadow);
     }
     .board-panel {
-      padding: 1.25rem;
+      padding: 1rem;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -110,7 +110,7 @@
     }
     .board-shell {
       width: 100%;
-      padding: .65rem;
+      padding: .5rem;
       border-radius: 24px;
       background: rgba(0,0,0,.34);
       border: 1px solid rgba(255,255,255,.08);
@@ -130,48 +130,51 @@
       width: 100%;
     }
     .side-card {
-      padding: 1.25rem;
+      padding: 1.25rem 1rem;
     }
     .side-card h3 {
       margin: 0 0 .8rem;
       text-transform: uppercase;
       letter-spacing: .22em;
-      font-size: .9rem;
+      font-size: .85rem;
     }
     .turn-row {
       display: flex;
       flex-direction: column;
-      gap: .6rem;
+      gap: .5rem;
       margin-bottom: 1rem;
     }
     .turn-badge {
-      padding: .48rem .8rem;
+      padding: .48rem .6rem;
       border-radius: 999px;
       text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: .72rem;
+      letter-spacing: .14em;
+      font-size: .68rem;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.04);
       text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
     .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
     .controls {
       display: grid;
       grid-template-columns: 1fr;
-      gap: .6rem;
+      gap: .5rem;
     }
     .btn {
       appearance: none;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.04);
       color: var(--text);
-      padding: .85rem 1rem;
-      border-radius: 14px;
+      padding: .75rem .6rem;
+      border-radius: 12px;
       cursor: pointer;
-      letter-spacing: .12em;
+      letter-spacing: .1em;
       text-transform: uppercase;
-      font-size: .78rem;
+      font-size: .74rem;
       transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
       user-select: none;
       width: 100%;
@@ -193,38 +196,37 @@
       background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
       border-color: rgba(244,67,54,.38);
       color: #ffb0a8;
-      margin-top: .4rem;
+      margin-top: .2rem;
     }
     .kbd {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: .12rem .42rem;
-      border: 1px solid rgba(255,255,255,.12);
+      padding: .1rem .3rem;
+      border: 1px solid rgba(255,255,255,0.1);
       border-bottom-width: 2px;
-      border-radius: 6px;
+      border-radius: 4px;
       background: rgba(255,255,255,.04);
       color: var(--text);
-      font-size: .78em;
+      font-size: .75em;
       margin-left: auto;
     }
 
-    /* Wrap cleanly if screen real estate gets tight */
-    @media (max-width: 990px){
-      .layout {
-        grid-template-columns: 1fr;
-        justify-items: center;
-      }
-      .sidebar {
-        max-width: var(--boardW);
-      }
-    }
+    /* Keep keyboard indicators hidden or tightly sized on tiny devices */
     @media (max-width: 640px){
       header {
         flex-direction: column;
         align-items: flex-start;
         gap: .5rem;
       }
+      .layout {
+        grid-template-columns: 1fr 180px;
+        padding: 0 .5rem .5rem;
+        margin: .75rem auto;
+        gap: .5rem;
+      }
+      .kbd { display: none; }
+      .btn { font-size: 0.68rem; padding: 0.65rem 0.4rem; }
     }
   </style>
 </head>
