@@ -15,22 +15,18 @@
       --bg0:#06080b;
       --bg1:#0d1116;
       --bg2:#121821;
-      --panel:rgba(8,10,14,.92);
+      --panel:rgba(8,10,14,.94);
       --line:rgba(255,255,255,.08);
       --text:#e8f6ff;
       --muted:#97a8b6;
       --shadow:0 25px 70px rgba(0,0,0,.85);
-      
-      /* Rigid board and sizing constraints */
-      --boardW: min(100%, 780px, 70vh);
-      --cell: calc(var(--boardW) / 10);
     }
     * { box-sizing: border-box; }
     html, body { 
       height: 100%;
       margin: 0;
       padding: 0;
-      overflow: hidden;
+      overflow: hidden !important;
     }
     body {
       font-family: "Quantico", sans-serif;
@@ -49,15 +45,16 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      padding: 1rem 1.25rem;
+      padding: 0.5rem 1.25rem;
       border-bottom: 1px solid var(--line);
       background: rgba(5,7,10,.84);
       box-shadow: 0 10px 30px rgba(0,0,0,.45);
       z-index: 5;
+      height: 50px;
     }
     .brand h1 {
       margin: 0;
-      font-size: clamp(1.3rem, 2vw, 2rem);
+      font-size: clamp(1.1rem, 1.8vw, 1.5rem);
       letter-spacing: .16em;
       font-weight: 900;
       text-transform: uppercase;
@@ -68,54 +65,55 @@
       gap: .7rem;
     }
     .pill {
-      padding: .5rem .8rem;
+      padding: .3rem .7rem;
       border: 1px solid var(--line);
       border-radius: 999px;
       background: rgba(255,255,255,.04);
-      font-size: .82rem;
+      font-size: .75rem;
       letter-spacing: .12em;
       text-transform: uppercase;
       color: var(--muted);
     }
     
-    /* MODAL OVERLAY WRAPPER */
+    /* INTERACTIVE MODAL DIALOGUE OVERLAY CONTAINER */
     .dialogue-overlay {
       position: fixed;
-      top: 0;
+      top: 50px; /* Offset below header */
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(3, 4, 7, 0.75);
-      backdrop-filter: blur(8px);
+      background: rgba(3, 4, 7, 0.5);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 100;
-      padding: 1rem;
+      padding: 0.5rem;
     }
 
-    /* THE MAIN DIALOGUE INTERFACE SCREEN */
+    /* THE MAIN RESPONSIVE VIEWPORT BOUND DIALOGUE */
     .layout {
       display: grid;
-      grid-template-columns: 1fr 260px;
-      gap: 1.25rem;
-      max-width: 1200px;
+      grid-template-columns: 1fr 240px;
+      gap: 1rem;
       width: 100%;
+      height: 100%;
+      max-width: 1600px;
       background: var(--panel);
       border: 2px solid rgba(255, 255, 255, 0.12);
-      border-radius: 28px;
+      border-radius: 20px;
       box-shadow: var(--shadow);
-      padding: 1.5rem;
+      padding: 0.75rem;
       align-items: center;
       position: relative;
+      overflow: hidden;
     }
 
-    /* Neon glow outline styling for the entire dialogue module */
     .layout::before {
       content: '';
       position: absolute;
       inset: -2px;
-      border-radius: 28px;
+      border-radius: 20px;
       padding: 2px;
       background: linear-gradient(135deg, rgba(var(--theme-rgb), 0.3), transparent 60%, rgba(244,67,54,0.15));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -124,64 +122,87 @@
       pointer-events: none;
     }
 
+    /* THE MAX-ZOOM NON-DISTORTED BOARD PANEL Wrapper */
     .panel {
       background: rgba(0, 0, 0, 0.25);
       border: 1px solid var(--line);
-      border-radius: 18px;
+      border-radius: 14px;
     }
     .board-panel {
-      padding: .75rem;
+      padding: .25rem;
       display: flex;
       justify-content: center;
       align-items: center;
       width: 100%;
+      height: 100%;
+      overflow: hidden;
     }
     .board-wrap {
       width: 100%;
-      max-width: var(--boardW);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .board-shell {
       width: 100%;
-      padding: .4rem;
-      border-radius: 20px;
+      height: 100%;
+      max-height: 100%;
+      padding: .25rem;
+      border-radius: 16px;
       background: rgba(0,0,0,.45);
       border: 1px solid rgba(255,255,255,.06);
-      position: relative;
-      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     svg#board {
-      width: 100%;
+      width: auto;
       height: auto;
+      max-width: 100%;
+      max-height: 100%;
       aspect-ratio: 10 / 8;
+      object-fit: contain; /* Prevents distortion, scales to layout limits */
       display: block;
       background: linear-gradient(180deg, rgba(1,3,6,.95), rgba(10,12,15,.92));
-      border-radius: 14px;
+      border-radius: 12px;
       touch-action: manipulation;
     }
     .sidebar {
       width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .side-card {
-      padding: 1rem .85rem;
+      padding: .75rem;
+      height: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
     }
     .side-card h3 {
-      margin: 0 0 .8rem;
+      margin: 0 0 .5rem;
       text-transform: uppercase;
-      letter-spacing: .22em;
-      font-size: .85rem;
+      letter-spacing: .18em;
+      font-size: .8rem;
+      text-align: center;
     }
     .turn-row {
       display: flex;
       flex-direction: column;
-      gap: .4rem;
-      margin-bottom: 1rem;
+      gap: .3rem;
+      margin-bottom: .5rem;
     }
     .turn-badge {
-      padding: .48rem .6rem;
+      padding: .4rem .5rem;
       border-radius: 999px;
       text-transform: uppercase;
-      letter-spacing: .14em;
-      font-size: .68rem;
+      letter-spacing: .12em;
+      font-size: .65rem;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.04);
       text-align: center;
@@ -191,22 +212,23 @@
     }
     .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
     .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
+    
     .controls {
       display: grid;
       grid-template-columns: 1fr;
-      gap: .45rem;
+      gap: .35rem;
     }
     .btn {
       appearance: none;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.04);
       color: var(--text);
-      padding: .75rem .6rem;
-      border-radius: 12px;
+      padding: .6rem .5rem;
+      border-radius: 10px;
       cursor: pointer;
-      letter-spacing: .1em;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      font-size: .72rem;
+      font-size: .68rem;
       transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
       user-select: none;
       width: 100%;
@@ -217,7 +239,7 @@
     .btn:hover {
       transform: translateY(-1px);
       border-color: rgba(var(--theme-rgb), .35);
-      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 12px 28px rgba(0,0,0,.24);
+      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 8px 20px rgba(0,0,0,.24);
     }
     .btn.primary {
       background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
@@ -228,38 +250,35 @@
       background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
       border-color: rgba(244,67,54,.38);
       color: #ffb0a8;
-      margin-top: .15rem;
     }
     .kbd {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: .1rem .3rem;
+      padding: .1rem .25rem;
       border: 1px solid rgba(255,255,255,0.1);
       border-bottom-width: 2px;
       border-radius: 4px;
       background: rgba(255,255,255,.04);
       color: var(--text);
-      font-size: .75em;
+      font-size: .7em;
       margin-left: auto;
     }
 
-    /* Force side-by-side format execution inside the Dialogue box across mobile/small views */
+    /* Keep absolute rigid side-by-side consistency across ultra small frames */
     @media (max-width: 640px){
-      .dialogue-overlay {
-        padding: .25rem;
-      }
+      .dialogue-overlay { padding: .15rem; }
       .layout {
-        grid-template-columns: 1fr 155px;
-        padding: .75rem;
-        gap: .5rem;
-        border-radius: 18px;
+        grid-template-columns: 1fr 140px;
+        padding: .4rem;
+        gap: .35rem;
+        border-radius: 12px;
       }
-      .layout::before { border-radius: 18px; }
+      .layout::before { border-radius: 12px; }
       .kbd { display: none; }
-      .btn { font-size: 0.64rem; padding: 0.6rem 0.3rem; border-radius: 8px; }
-      .side-card h3 { font-size: 0.72rem; margin-bottom: 0.5rem; }
-      .turn-badge { font-size: 0.6rem; padding: 0.4rem 0.2rem; }
+      .btn { font-size: 0.6rem; padding: .5rem .25rem; border-radius: 6px; }
+      .side-card h3 { font-size: 0.65rem; margin-bottom: 0.3rem; }
+      .turn-badge { font-size: 0.55rem; padding: .3rem .15rem; }
     }
   </style>
 </head>
@@ -287,10 +306,12 @@
 
       <aside class="sidebar">
         <section class="panel side-card">
-          <h3>Turn controls</h3>
-          <div class="turn-row">
-            <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
-            <div class="turn-badge" id="phaseBadge">Select a piece</div>
+          <div>
+            <h3>Turn controls</h3>
+            <div class="turn-row">
+              <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
+              <div class="turn-badge" id="phaseBadge">Select a piece</div>
+            </div>
           </div>
           <div class="controls">
             <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
@@ -434,7 +455,6 @@
   }
   function isReservedSquare(x, y, color) {
     const arr = color === "BLUE" ? RES_BLUE : RES_RED;
-    return arr.some(s => s.x === s.x && s.y === y); // fix check logic context if mapping required
     return arr.some(s => s.x === x && s.y === y);
   }
   function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
@@ -542,8 +562,7 @@
 
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
-      const idx = state.pieces.findIndex(p => p.id === victim.id);
-      if (idx >= 0) state.pieces.splice(idx, 1);
+      const idx = state.pieces.splice(state.pieces.findIndex(p => p.id === victim.id), 1);
       if (victim.pieceType === "KING") state.winner = state.turn;
     }
 
@@ -561,13 +580,7 @@
     if (state.winner) return false;
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn) return false;
-    const occ = pieceAt(targetX, targetY);
-    let ok = false;
-    if (!occ) {
-      ok = movePiece(piece, targetX, targetY);
-    } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-      ok = movePiece(piece, targetX, targetY);
-    }
+    let ok = movePiece(piece, targetX, targetY);
     if (ok) {
       selectedId = null;
       state.turn = enemyColor(state.turn);
@@ -634,7 +647,6 @@
     defs.appendChild(f1);
     defs.appendChild(f2);
 
-    // Grid rendering
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
         const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
@@ -650,7 +662,6 @@
       }
     }
 
-    // Grid Labels
     for (let x = 0; x < W; x++) {
       const txt = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14" });
       txt.textContent = x;
@@ -662,7 +673,6 @@
       svg.appendChild(txt);
     }
 
-    // Move Highlight Overlays
     const sel = getSelectedPiece();
     if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
       for (const m of legalMoves(sel)) {
@@ -673,14 +683,12 @@
       }
     }
 
-    // Laser visualization
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
       svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,246,102,.35)", "stroke-width": "16", "stroke-linecap": "round", "stroke-linejoin": "round", filter: "url(#softGlow)" }));
       svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,255,255,.95)", "stroke-width": "4", "stroke-linecap": "round", "stroke-linejoin": "round" }));
     }
 
-    // Selection box
     const target = sel || pieceAt(cursor.x, cursor.y);
     if (target) {
       svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10" }));
@@ -688,7 +696,6 @@
       svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
     }
 
-    // Pieces rendering
     for (const piece of state.pieces) {
       const g = svgEl("g");
       const x = piece.x * CELL;
@@ -703,9 +710,8 @@
       svg.appendChild(g);
     }
 
-    // Win check modal
     if (state.winner) {
-      svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.72)", stroke: "rgba(255,255,255,.14)" }));
+      svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.85)", stroke: "rgba(255,255,255,.14)" }));
       const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
       t1.textContent = `${state.winner} WINS`;
       svg.appendChild(t1);
