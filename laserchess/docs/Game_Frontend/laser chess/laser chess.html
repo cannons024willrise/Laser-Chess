@@ -25,8 +25,8 @@
       --bad:#ff5f6f;
       --shadow:0 18px 60px rgba(0,0,0,.42);
       
-      /* Fluid board width that scales gracefully down on small vertical heights */
-      --boardW: min(76vw, 920px, 62vh);
+      /* Fully dynamic fluid width that watches container width AND max container viewport heights */
+      --boardW: min(100%, 920px, 68vh);
       
       --cell: calc(var(--boardW) / 10);
       --cellH: calc(var(--boardW) / 10);
@@ -39,7 +39,7 @@
       margin: 0;
       padding: 0;
       overflow-x: hidden;
-      overflow-y: auto !important; /* Forces normal browser scrolling */
+      overflow-y: auto !important; /* Absolute structural fallback scrolling safety */
     }
     body {
       font-family: "Quantico", sans-serif;
@@ -214,7 +214,7 @@
     }
     .layout {
       display: grid;
-      grid-template-columns: 1.3fr 0.7fr;
+      grid-template-columns: 1.25fr 0.75fr;
       gap: 1.5rem;
       max-width: 1480px;
       width: 100%;
@@ -227,12 +227,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      width: 100%;
     }
     .board-wrap {
       width: 100%;
       max-width: var(--boardW);
-      display: grid;
-      place-items: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     .board-shell {
       width: 100%;
@@ -401,11 +403,11 @@
     }
     .hidden { display: none !important; }
 
-    @media (max-width: 1120px){
+    /* Fluid wrapping thresholds for responsive space management */
+    @media (max-width: 1150px){
       .hero-grid, .layout {
         grid-template-columns: 1fr;
       }
-      :root { --boardW: min(94vw, 700px); }
     }
     @media (max-width: 720px){
       header {
@@ -415,7 +417,6 @@
       .stat-grid, .controls {
         grid-template-columns: 1fr;
       }
-      :root { --boardW: 94vw; }
       .hero-left h2 { font-size: 2.45rem; }
     }
   </style>
@@ -542,15 +543,12 @@
   const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
   const W = 10, H = 8;
   const CELL = 100;
-  const ORIGIN = 50;
   const DIRS = [
     {dx: 0, dy: 1},   // 0 south
     {dx: 1, dy: 0},   // 1 east
     {dx: 0, dy: -1},  // 2 north
     {dx: -1, dy: 0},  // 3 west
   ];
-  const TURN_DIRS = { BLUE: [3,0], RED: [1,2] }; 
-  const OPP = {0:2,1:3,2:0,3:1};
   const PIECE_MAP = {
     KING: "king",
     DEFENDER: "defender",
@@ -687,12 +685,6 @@
   }
   function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
   function normalizeRotation(rot) { return ((rot % 4) + 4) % 4; }
-  function currentTurnPieces() {
-    return state.pieces.filter(p => p.color === state.turn);
-  }
-  function myLaser() {
-    return state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn) || null;
-  }
   function enemyColor(c) { return c === "BLUE" ? "RED" : "BLUE"; }
   function getSelectedPiece() {
     return selectedId ? state.pieces.find(p => p.id === selectedId) || null : null;
@@ -746,12 +738,6 @@
       }
     }
     return moves;
-  }
-
-  function rotatePiece(piece, delta) {
-    if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
-    piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    return true;
   }
 
   function movePiece(piece, nx, ny) {
@@ -809,7 +795,7 @@
 
   function fireLaser() {
     if (state.winner) return false;
-    const shooter = myLaser();
+    const shooter = state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn);
     if (!shooter) return false;
     const dir = laserDirFromRotation(shooter.rotation || 0);
     const startX = shooter.x + DIRS[dir].dx;
@@ -923,11 +909,10 @@
     const f2 = svgEl("feMerge");
     f2.appendChild(svgEl("feMergeNode", { in: "blur" }));
     f2.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
-    defs.querySelector("#softGlow")?.remove?.();
     defs.appendChild(f1);
     defs.appendChild(f2);
 
-    // grid
+    // Grid rendering
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
         const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
@@ -943,115 +928,68 @@
       }
     }
 
-    // coordinate labels
+    // Grid coordinate coordinates labels
     for (let x = 0; x < W; x++) {
-      svg.appendChild(svgEl("text", {
-        x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14", "font-family": "Quantico, sans-serif", "letter-spacing": "2"
-      }));
-      svg.lastChild.textContent = x;
+      const txt = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14" });
+      txt.textContent = x;
+      svg.appendChild(txt);
     }
     for (let y = 0; y < H; y++) {
-      const t = svgEl("text", {
-        x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14", "font-family": "Quantico, sans-serif", "letter-spacing": "2"
-      });
-      t.textContent = y;
-      svg.appendChild(t);
+      const txt = svgEl("text", { x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14" });
+      txt.textContent = y;
+      svg.appendChild(txt);
     }
 
-    // valid move highlight
+    // Move visualization overlays
     const sel = getSelectedPiece();
     if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
       for (const m of legalMoves(sel)) {
-        const r = svgEl("rect", {
+        svg.appendChild(svgEl("rect", {
           x: m.x * CELL + 6, y: m.y * CELL + 6, width: CELL - 12, height: CELL - 12,
-          fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10", ry: "10"
-        });
-        svg.appendChild(r);
+          fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10"
+        }));
       }
     }
 
-    // laser path
+    // Laser trail visualization
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
-      svg.appendChild(svgEl("polyline", {
-        points: pts,
-        fill: "none",
-        stroke: "rgba(255,246,102,.35)",
-        "stroke-width": "16",
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-        filter: "url(#softGlow)"
-      }));
-      svg.appendChild(svgEl("polyline", {
-        points: pts,
-        fill: "none",
-        stroke: "rgba(255,255,255,.95)",
-        "stroke-width": "4",
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round"
-      }));
+      svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,246,102,.35)", "stroke-width": "16", "stroke-linecap": "round", "stroke-linejoin": "round", filter: "url(#softGlow)" }));
+      svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,255,255,.95)", "stroke-width": "4", "stroke-linecap": "round", "stroke-linejoin": "round" }));
     }
 
-    // selected ring & cursor
+    // Focus tracking ring
     const target = sel || pieceAt(cursor.x, cursor.y);
     if (target) {
-      svg.appendChild(svgEl("rect", {
-        x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12,
-        fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10", ry: "10"
-      }));
+      svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10" }));
     } else {
-      svg.appendChild(svgEl("rect", {
-        x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16,
-        fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", ry: "10", "stroke-dasharray": "10 8"
-      }));
+      svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
     }
 
-    // pieces
+    // Active board assets
     for (const piece of state.pieces) {
       const g = svgEl("g");
       const x = piece.x * CELL;
       const y = piece.y * CELL;
-      const img = svgEl("image", {
-        href: pieceImage(piece),
-        x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12,
-        preserveAspectRatio: "xMidYMid meet"
-      });
-      const cx = x + 50, cy = y + 50;
-      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${cx} ${cy})`);
+      const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
+      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
       g.appendChild(img);
 
-      // faint color ring
-      g.appendChild(svgEl("rect", {
-        x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12,
-        fill: "none",
-        stroke: piece.color === "BLUE" ? "rgba(3,233,244,.18)" : "rgba(244,67,54,.18)",
-        "stroke-width": "1.5",
-        rx: "10", ry: "10"
-      }));
+      g.appendChild(svgEl("rect", { x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: piece.color === "BLUE" ? "rgba(3,233,244,.18)" : "rgba(244,67,54,.18)", "stroke-width": "1.5", rx: "10" }));
       g.style.cursor = "pointer";
-      g.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        onPieceClick(piece);
-      });
+      g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
       svg.appendChild(g);
     }
 
-    // winner overlay
+    // Endgame status modal overlay
     if (state.winner) {
-      svg.appendChild(svgEl("rect", {
-        x: 150, y: 255, width: 700, height: 290, rx: 26, ry: 26,
-        fill: "rgba(0,0,0,.72)", stroke: "rgba(255,255,255,.14)", "stroke-width": "1.5"
-      }));
-      const t = svgEl("text", {
-        x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900", "font-family": "Quantico, sans-serif", "letter-spacing": "4"
-      });
-      t.textContent = `${state.winner} WINS`;
-      svg.appendChild(t);
-      const s = svgEl("text", {
-        x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22", "font-family": "Quantico, sans-serif", "letter-spacing": "3"
-      });
-      s.textContent = "Press Reset to start again";
-      svg.appendChild(s);
+      svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.72)", stroke: "rgba(255,255,255,.14)" }));
+      const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
+      t1.textContent = `${state.winner} WINS`;
+      svg.appendChild(t1);
+      const t2 = svgEl("text", { x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22" });
+      t2.textContent = "Press Reset to start again";
+      svg.appendChild(t2);
     }
   }
 
@@ -1061,10 +999,7 @@
       log(`It is ${state.turn}'s turn.`, "warn");
       return;
     }
-    if (selectedId === piece.id) {
-      selectPiece(null);
-      return;
-    }
+    if (selectedId === piece.id) { selectPiece(null); return; }
     selectPiece(piece);
     cursor = { x: piece.x, y: piece.y };
     state.lastLog = `Selected ${piece.color} ${piece.pieceType}.`;
@@ -1078,22 +1013,15 @@
     const sel = getSelectedPiece();
     if (sel && sel.color === state.turn) {
       const occ = pieceAt(x, y);
-      if (!occ) {
-        const moved = doMoveOrSwap(x, y);
-        if (moved) return;
-      } else if (occ.id !== sel.id && sel.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-        const moved = doMoveOrSwap(x, y);
-        if (moved) return;
+      if (!occ || (occ.id !== sel.id && sel.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER"))) {
+        if (doMoveOrSwap(x, y)) return;
       } else if (occ.id === sel.id) {
         selectPiece(null);
         return;
       }
     }
-    if (!pieceAt(x, y)) {
-      selectPiece(null);
-    } else {
-      onPieceClick(pieceAt(x, y));
-    }
+    const target = pieceAt(x, y);
+    if (!target) selectPiece(null); else onPieceClick(target);
   }
 
   function render() {
@@ -1115,18 +1043,15 @@
   }
 
   function handleKeyboard(e) {
-    if (e.defaultPrevented) return;
     const key = e.key;
     if (key === "ArrowUp") { e.preventDefault(); cursor.y = Math.max(0, cursor.y - 1); render(); return; }
     if (key === "ArrowDown") { e.preventDefault(); cursor.y = Math.min(H - 1, cursor.y + 1); render(); return; }
     if (key === "ArrowLeft") { e.preventDefault(); cursor.x = Math.max(0, cursor.x - 1); render(); return; }
     if (key === "ArrowRight") { e.preventDefault(); cursor.x = Math.min(W - 1, cursor.x + 1); render(); return; }
     if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
-    if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); p ? onPieceClick(p) : onCellClick(cursor.x, cursor.y); return; }
+    if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); else onCellClick(cursor.x, cursor.y); return; }
     if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
     if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
-    if (key === "l" || key === "L") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
-    if (key === "r" || key === "R") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
     if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
     if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
   }
@@ -1137,23 +1062,12 @@
   el.resetBtn.addEventListener("click", () => resetGame());
   el.moveBtn.addEventListener("click", () => {
     const p = getSelectedPiece();
-    if (p) {
-      const moves = legalMoves(p);
-      if (moves.length) {
-        log("Choose a highlighted square to move or swap.", "muted");
-      } else {
-        log("No legal adjacent moves for that piece.", "warn");
-      }
-    } else {
-      log("Click one of your pieces first.", "muted");
-    }
+    if (p && legalMoves(p).length) log("Choose a highlighted square to move or swap.", "muted");
+    else if (p) log("No legal adjacent moves for that piece.", "warn");
+    else log("Click one of your pieces first.", "muted");
   });
   el.selectBtn.addEventListener("click", () => {
-    if (selectedId) selectPiece(null);
-    else {
-      const p = pieceAt(cursor.x, cursor.y);
-      if (p) onPieceClick(p);
-    }
+    if (selectedId) selectPiece(null); else { const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); }
   });
   el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
   el.rotateCWBtn.addEventListener("click", () => rotateCW());
@@ -1163,21 +1077,13 @@
   el.board.addEventListener("click", (e) => {
     if (state.winner) return;
     const pt = el.board.createSVGPoint();
-    pt.x = e.clientX;
-    pt.y = e.clientY;
+    pt.x = e.clientX; pt.y = e.clientY;
     const screenCTM = el.board.getScreenCTM();
     if (!screenCTM) return;
     const local = pt.matrixTransform(screenCTM.inverse());
-    const x = Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL)));
-    const y = Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL)));
-    onCellClick(x, y);
+    onCellClick(Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL))), Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL))));
   });
 
-  if (!localStorage.getItem("laserchess_local_state")) {
-    log("New game started.", "good");
-  } else {
-    log("Loaded saved local game.", "muted");
-  }
   updateSelectionUI();
   render();
 })();
