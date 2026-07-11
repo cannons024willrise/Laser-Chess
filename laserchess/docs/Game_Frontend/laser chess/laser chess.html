@@ -15,788 +15,709 @@
       --bg0:#06080b;
       --bg1:#0d1116;
       --bg2:#121821;
-      --panel:rgba(8,10,14,.94);
+      --panel:rgba(8,10,14,.82);
+      --panel2:rgba(255,255,255,.03);
       --line:rgba(255,255,255,.08);
       --text:#e8f6ff;
       --muted:#97a8b6;
-      --shadow:0 25px 70px rgba(0,0,0,.85);
+      --good:#24d18f;
+      --warn:#ffb84d;
+      --bad:#ff5f6f;
+      --font:'Quantico', sans-serif;
     }
-    * { box-sizing: border-box; }
-    html, body { 
-      height: 100%;
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden !important;
+    *{ box-sizing:border-box; margin:0; padding:0; user-select:none; }
+    body{
+      background:var(--bg0);
+      color:var(--text);
+      font-family:var(--font);
+      overflow:hidden;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
     }
-    body {
-      font-family: "Quantico", sans-serif;
-      color: var(--text);
-      background:
-        linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.9)),
-        url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
+    header{
+      height:56px;
+      background:var(--bg1);
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:between;
+      padding:0 24px;
+      z-index:10;
+      flex-shrink:0;
     }
-    
-    .shell {
-      height: 100vh;
-      width: 100vw;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    .logo-area{ display:flex; align-items:center; gap:12px; }
+    .logo-text{ font-weight:900; font-size:20px; letter-spacing:2px; text-transform:uppercase; color:var(--text); }
+    .logo-text span{ color:var(--theme-color); text-shadow:0 0 10px rgba(3,233,244,0.3); }
+    .top-nav{ display:flex; gap:24px; font-size:12px; text-transform:uppercase; font-weight:700; letter-spacing:1px; }
+    .nav-item{ color:var(--muted); cursor:pointer; transition:color .2s; position:relative; padding:18px 0; }
+    .nav-item:hover, .nav-item.active{ color:var(--text); }
+    .nav-item.active::after{
+      content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--theme-color);
+      box-shadow:0 0 8px var(--theme-color);
     }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.4rem 1.25rem;
-      border-bottom: 1px solid var(--line);
-      background: rgba(5,7,10,.84);
-      box-shadow: 0 10px 30px rgba(0,0,0,.45);
-      z-index: 5;
-      flex-shrink: 0;
+    .main-container{ display:flex; flex:1; overflow:hidden; position:relative; }
+    .sidebar{ width:320px; background:var(--bg1); border-right:1px solid var(--line); display:flex; flex-direction:column; flex-shrink:0; }
+    .panel-title{
+      padding:16px 24px; border-bottom:1px solid var(--line); font-size:11px; font-weight:900;
+      text-transform:uppercase; letter-spacing:2px; color:var(--muted); display:flex; justify-content:space-between; align-items:center;
     }
-    .brand h1 {
-      margin: 0;
-      font-size: clamp(1rem, 1.8vw, 1.4rem);
-      letter-spacing: .16em;
-      font-weight: 900;
-      text-transform: uppercase;
+    .turn-indicator{ padding:24px; border-bottom:1px solid var(--line); background:var(--bg2); position:relative; overflow:hidden; }
+    .turn-label{ font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .turn-value{ font-size:24px; font-weight:900; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px; }
+    .turn-silver{ color:var(--text); }
+    .turn-red{ color:var(--red-theme); text-shadow:0 0 10px rgba(244,67,54,0.2); }
+    .moves-left{ font-size:11px; margin-top:8px; color:var(--muted); display:flex; gap:6px; align-items:center; }
+    .dot-track{ display:flex; gap:4px; margin-top:2px; }
+    .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.1); transition:all .3s; }
+    .dot.active{ background:var(--theme-color); box-shadow:0 0 6px var(--theme-color); }
+    .dot.active.red-dot{ background:var(--red-theme); box-shadow:0 0 6px var(--red-theme); }
+    .history-log{ flex:1; overflow-y:auto; padding:16px 24px; font-size:12px; display:flex; flex-direction:column; gap:8px; font-family:monospace; }
+    .log-entry{ line-height:1.4; opacity:0.85; animation:fadeIn .2s ease-out; }
+    .log-entry.good{ color:var(--good); }
+    .log-entry.warn{ color:var(--warn); }
+    .log-entry.bad{ color:var(--bad); }
+    .log-entry.muted{ color:var(--muted); }
+    @keyframes fadeIn { from{opacity:0; transform:translateY(2px);} to{opacity:1; transform:translateY(0);} }
+    .action-pad{ padding:24px; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:12px; background:var(--bg2); }
+    .btn{
+      background:rgba(255,255,255,.03); border:1px solid var(--line); color:var(--text); padding:12px;
+      font-family:var(--font); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+      border-radius:4px; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;
     }
-    .header-meta {
-      display: flex;
-      align-items: center;
-      gap: .7rem;
+    .btn:hover:not(:disabled){ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2); }
+    .btn:disabled{ opacity:0.3; cursor:not-allowed; }
+    .btn-primary{ background:var(--theme-color); color:var(--bg0); border:none; font-weight:900; }
+    .btn-primary:hover:not(:disabled){ background:#02d2dc; box-shadow:0 0 12px rgba(3,233,244,0.4); }
+    .btn-danger{ background:rgba(244,67,54,0.1); border-color:rgba(244,67,54,0.3); color:var(--red-theme); }
+    .btn-danger:hover:not(:disabled){ background:rgba(244,67,54,0.2); border-color:var(--red-theme); }
+    .flex-grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .viewport-area{ flex:1; background:#080a0e; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+    .grid-bg{ position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px); background-size:40px 40px; background-position:center; }
+    .board-wrapper{ position:relative; padding:10px; border:1px solid rgba(255,255,255,.04); background:rgba(0,0,0,.4); border-radius:8px; box-shadow:0 24px 70px rgba(0,0,0,.8); }
+    svg#gameboard{ display:block; background:#040608; overflow:visible; }
+    .cell-rect{ fill:none; stroke:rgba(255,255,255,.02); stroke-width:1; }
+    .cell-rect.silver-zone{ fill:rgba(255,255,255,0.01); }
+    .cell-rect.red-zone{ fill:rgba(244,67,54,0.01); }
+    .laser-line{ fill:none; stroke-linecap:round; stroke-linejoin:round; pointer-events:none; }
+    .laser-line.silver-laser{ stroke:#03e9f4; stroke-width:3; filter:drop-shadow(0 0 4px #03e9f4); }
+    .laser-line.red-laser{ stroke:#f44336; stroke-width:3; filter:drop-shadow(0 0 4px #f44336); }
+    .laser-pulse{ stroke-dasharray:12, 24; animation:laserMove 1s linear infinite; }
+    @keyframes laserMove { to { stroke-dashoffset: -36; } }
+    .hit-spark{ fill:none; stroke-linecap:round; }
+    .modal-overlay{
+      position:absolute; inset:0; background:rgba(4,6,8,0.85); backdrop-filter:blur(6px);
+      display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition:opacity .3s;
     }
-    .pill {
-      padding: .25rem .65rem;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255,255,255,.04);
-      font-size: .7rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
+    .modal-overlay.active{ opacity:1; pointer-events:auto; }
+    .modal-card{
+      background:var(--bg1); border:1px solid var(--line); border-radius:6px; width:400px; padding:32px;
+      box-shadow:0 30px 60px rgba(0,0,0,.6); text-align:center; transform:scale(0.95); transition:transform .3s;
     }
-    
-    .dialogue-overlay {
-      flex: 1;
-      width: 100%;
-      background: rgba(3, 4, 7, 0.4);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.5rem;
-      overflow: hidden;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
-      gap: 1rem;
-      width: 100%;
-      height: 100%;
-      max-width: 1600px;
-      background: var(--panel);
-      border: 2px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      padding: 0.75rem;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .layout::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: 20px;
-      padding: 2px;
-      background: linear-gradient(135deg, rgba(var(--theme-rgb), 0.3), transparent 60%, rgba(244,67,54,0.15));
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
-
-    .panel {
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-    }
-    .board-panel {
-      padding: .25rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-    .board-wrap {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .board-shell {
-      width: 100%;
-      height: 100%;
-      padding: .25rem;
-      border-radius: 16px;
-      background: rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.06);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    svg#board {
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
-      aspect-ratio: 10 / 8;
-      object-fit: contain;
-      display: block;
-      background: linear-gradient(180deg, rgba(1,3,6,.95), rgba(10,12,15,.92));
-      border-radius: 12px;
-      touch-action: manipulation;
-    }
-    
-    .sidebar {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .side-card {
-      padding: .75rem;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-    }
-    .side-card h3 {
-      margin: 0 0 .4rem;
-      text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: .8rem;
-      text-align: center;
-    }
-    .turn-row {
-      display: flex;
-      flex-direction: column;
-      gap: .3rem;
-      margin-bottom: .4rem;
-    }
-    .turn-badge {
-      padding: .4rem .5rem;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      font-size: .65rem;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
-    .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
-    
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: .3rem;
-    }
-    .btn {
-      appearance: none;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      padding: .55rem .45rem;
-      border-radius: 10px;
-      cursor: pointer;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      font-size: .68rem;
-      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
-      user-select: none;
-      width: 100%;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(var(--theme-rgb), .35);
-      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 8px 20px rgba(0,0,0,.24);
-    }
-    .btn.primary {
-      background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
-      border-color: rgba(var(--theme-rgb), .35);
-      color: var(--theme-color);
-    }
-    .btn.danger {
-      background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
-      border-color: rgba(244,67,54,.38);
-      color: #ffb0a8;
-    }
-    .kbd {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: .1rem .25rem;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-bottom-width: 2px;
-      border-radius: 4px;
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      font-size: .7em;
-      margin-left: auto;
-    }
-
-    @media (max-width: 640px){
-      .dialogue-overlay { padding: .15rem; }
-      .layout {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 130px);
-        padding: .4rem;
-        gap: .35rem;
-        border-radius: 12px;
-      }
-      .layout::before { border-radius: 12px; }
-      .kbd { display: none; }
-      .btn { font-size: 0.58rem; padding: .45rem .2rem; border-radius: 6px; }
-      .side-card h3 { font-size: 0.62rem; margin-bottom: 0.2rem; }
-      .turn-badge { font-size: 0.55rem; padding: .25rem .1rem; }
-    }
+    .modal-overlay.active .modal-card{ transform:scale(1); }
+    .modal-icon{ font-size:48px; margin-bottom:16px; }
+    .modal-title{ font-size:24px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+    .modal-body{ font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:24px; }
+    .piece{ cursor:pointer; }
+    .piece-bg{ fill:rgba(255,255,255,0.02); stroke:rgba(255,255,255,0.05); stroke-width:1; transition:all .2s; }
+    .piece:hover .piece-bg{ fill:rgba(255,255,255,0.05); stroke:rgba(255,255,255,0.15); }
+    .piece.selected .piece-bg{ fill:rgba(3,233,244,0.06); stroke:var(--theme-color); stroke-width:1.5; }
+    .piece.selected.red-piece .piece-bg{ fill:rgba(244,67,54,0.06); stroke:var(--red-theme); stroke-width:1.5; }
+    .piece.silver .piece-shape{ fill:#b0c4de; stroke:#ffffff; stroke-width:1.5; }
+    .piece.red .piece-shape{ fill:#992222; stroke:#ff5555; stroke-width:1.5; }
+    .piece.silver .piece-accent{ fill:#03e9f4; }
+    .piece.red .piece-accent{ fill:#f44336; }
+    .cell-highlight{ fill:none; stroke-width:1.5; pointer-events:none; }
+    .cell-highlight.move-valid{ fill:rgba(36,209,143,0.04); stroke:var(--good); stroke-dasharray:4,4; }
+    .cell-highlight.swap-valid{ fill:rgba(255,184,77,0.04); stroke:var(--warn); stroke-dasharray:4,4; }
+    .cell-highlight.active-select{ stroke:var(--theme-color); }
+    .cell-highlight.active-select.red-select{ stroke:var(--red-theme); }
   </style>
 </head>
 <body>
-<div class="shell">
+
   <header>
-    <div class="brand">
-      <h1>Laser Chess</h1>
+    <div class="logo-area">
+      <div class="logo-text">Laser<span>Chess</span></div>
     </div>
-    <div class="header-meta">
-      <div class="pill" id="movePill">Move 1</div>
-      <div class="pill" id="savePill">Saved locally</div>
+    <div class="top-nav">
+      <div class="nav-item active" onclick="resetGame()">Local Match</div>
     </div>
+    <div style="flex:1"></div>
   </header>
 
-  <div class="dialogue-overlay">
-    <main class="layout" role="dialog" aria-modal="true" aria-label="Laser Chess Gameplay Interface">
-      <section class="panel board-panel">
-        <div class="board-wrap">
-          <div class="board-shell">
-            <svg id="board" viewBox="0 0 1000 800" aria-label="Laser Chess board" tabindex="0"></svg>
+  <div class="main-container">
+    <div class="sidebar">
+      <div class="turn-indicator">
+        <div class="turn-label">Current Turn Focus</div>
+        <div class="turn-value turn-silver" id="turnDisplay">Silver Team</div>
+        <div class="moves-left">
+          <span>Actions Remaining:</span>
+          <div class="dot-track" id="actionTrack">
+            <div class="dot active"></div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <aside class="sidebar">
-        <section class="panel side-card">
-          <div>
-            <h3>Turn controls</h3>
-            <div class="turn-row">
-              <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
-              <div class="turn-badge" id="phaseBadge">Select a piece</div>
-            </div>
-          </div>
-          <div class="controls">
-            <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
-            <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
-            <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
-            <button class="btn" id="endTurnBtn">Pass / End Turn</button>
-            <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
-          </div>
-        </section>
-      </aside>
-    </main>
+      <div class="panel-title">
+        <span>Combat Realtime Log</span>
+        <span style="font-size:9px; color:rgba(255,255,255,0.2)">SECURE_LN</span>
+      </div>
+      <div class="history-log" id="gameLog"></div>
+
+      <div class="action-pad">
+        <div class="flex-grid-2">
+          <button class="btn" id="rotateCCWBtn" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            Rotate CCW
+          </button>
+          <button class="btn" id="rotateCWBtn" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38L2.5 8"/></svg>
+            Rotate CW
+          </button>
+        </div>
+        <button class="btn btn-primary" id="fireBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Fire Laser Beam
+        </button>
+        <button class="btn btn-danger" id="endTurnBtn">Pass Action / End Turn</button>
+      </div>
+    </div>
+
+    <div class="viewport-area">
+      <div class="grid-bg"></div>
+      <div class="board-wrapper">
+        <svg id="gameboard"></svg>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-(() => {
-  "use strict";
+  <div class="modal-overlay" id="endgameModal">
+    <div class="modal-card">
+      <div class="modal-icon" id="modalIcon">🏆</div>
+      <div class="modal-title" id="modalTitle">Victory Achieved</div>
+      <div class="modal-body" id="modalBody">Silver team has successfully checkmated the Red King.</div>
+      <button class="btn btn-primary" style="width:100%" onclick="closeModal() & resetGame()">Initialize New Operations Grid</button>
+    </div>
+  </div>
 
-  const PIECE_BASE = "./";
-  const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
-  const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
-  const W = 10, H = 8;
-  const CELL = 100;
-  const DIRS = [
-    {dx: 0, dy: 1},   // 0 south
-    {dx: 1, dy: 0},   // 1 east
-    {dx: 0, dy: -1},  // 2 north
-    {dx: -1, dy: 0},  // 3 west
-  ];
-  const PIECE_MAP = {
-    KING: "king",
-    DEFENDER: "defender",
-    DEFLECTOR: "deflector",
-    SWITCH: "switch",
-    LASER: "laser",
-  };
-  const INTERACTION_MAP = {
-    DEFLECTOR: {
-      0: { 0: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 2 }, 1: { action: 'destroy' }, 2: { action: 'destroy' } },
-      1: { 0: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 2 }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-      2: { 2: { action: 'reflect', nextDir: 3 }, 1: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 3: { action: 'destroy' } },
-      3: { 2: { action: 'reflect', nextDir: 1 }, 3: { action: 'reflect', nextDir: 0 }, 0: { action: 'destroy' }, 1: { action: 'destroy' } }
-    },
-    SWITCH: {
-      0: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
-      1: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } },
-      2: { 0: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 2 } },
-      3: { 0: { action: 'reflect', nextDir: 3 }, 3: { action: 'reflect', nextDir: 0 }, 2: { action: 'reflect', nextDir: 1 }, 1: { action: 'reflect', nextDir: 2 } }
-    },
-    DEFENDER: {
-      0: { 0: { action: 'block' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-      1: { 1: { action: 'block' }, 0: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-      2: { 2: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 3: { action: 'destroy' } },
-      3: { 3: { action: 'block' }, 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' } }
-    },
-    KING: {
-      0: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-      1: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-      2: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } },
-      3: { 0: { action: 'destroy' }, 1: { action: 'destroy' }, 2: { action: 'destroy' }, 3: { action: 'destroy' } }
-    },
-    LASER: {
-      0: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
-      1: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
-      2: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } },
-      3: { 0: { action: 'block' }, 1: { action: 'block' }, 2: { action: 'block' }, 3: { action: 'block' } }
+  <script>
+    // 1. CONFIGURABLE PIECE INTERACTION MATRIX (INTEGRATED FROM TUTORIALS.JS)
+    // =========================================================================
+    const PIECE_INTERACTION_TABLE = {
+      KING: {
+        NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+        EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+        SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+        WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+      },
+      DEFENDER: {
+        NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+        EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
+        SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+        WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+      },
+      DEFLECTOR: {
+        NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
+        EAST:  { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } },
+        SOUTH: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+        WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }
+      },
+      SWITCH: {
+        NORTH: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+        EAST:  { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+        SOUTH: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+        WEST:  { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } }
+      },
+      LASER: {
+        NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+        EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+        SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+        WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+      }
+    };
+
+    // Helper translation arrays between numeric rotation IDs and cardinal strings
+    const INT_TO_DIR_STR = ["NORTH", "EAST", "SOUTH", "WEST"];
+
+    // 2. CORE ENGINE PARAMETERS
+    const W = 10;
+    const H = 8;
+    const CELL = 65;
+
+    // Laser Vectors (dx, dy) matching indices: 0:N, 1:E, 2:S, 3:W
+    const L_DX = [0, 1, 0, -1];
+    const L_DY = [-1, 0, 1, 0];
+
+    let state = {
+      board: [],
+      turn: "silver", // "silver" or "red"
+      actionsLeft: 1,
+      selectedId: null,
+      winner: null,
+      laserPath: null,
+      laserHit: null
+    };
+
+    const el = {
+      board: document.getElementById("gameboard"),
+      turnDisplay: document.getElementById("turnDisplay"),
+      actionTrack: document.getElementById("actionTrack"),
+      gameLog: document.getElementById("gameLog"),
+      rotateCCWBtn: document.getElementById("rotateCCWBtn"),
+      rotateCWBtn: document.getElementById("rotateCWBtn"),
+      fireBtn: document.getElementById("fireBtn"),
+      endTurnBtn: document.getElementById("endTurnBtn"),
+      modal: document.getElementById("endgameModal"),
+      modalIcon: document.getElementById("modalIcon"),
+      modalTitle: document.getElementById("modalTitle"),
+      modalBody: document.getElementById("modalBody")
+    };
+
+    function log(msg, type="muted") {
+      const d = document.createElement("div");
+      d.className = `log-entry ${type}`;
+      d.innerText = `[${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}] ${msg}`;
+      el.gameLog.appendChild(d);
+      el.gameLog.scrollTop = el.gameLog.scrollHeight;
     }
-  };
 
-  const START_STATE = () => ({
-    turn: "BLUE",
-    moveNumber: 1,
-    winner: null,
-    lastLaserPath: [],
-    pieces: [
-      {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
-      {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
-      {id: "pmpfqugdq4", pieceType: "DEFENDER", color: "RED", rotation: 0, x: 4, y: 7},
-      {id: "pmpfquhvx5", pieceType: "DEFENDER", color: "RED", rotation: 2, x: 6, y: 7},
-      {id: "pmpfqunnp6", pieceType: "DEFENDER", color: "BLUE", rotation: 2, x: 5, y: 0},
-      {id: "pmpfquoqi7", pieceType: "DEFENDER", color: "BLUE", rotation: 2, x: 3, y: 0},
-      {id: "pmpfqvc388", pieceType: "SWITCH", color: "BLUE", rotation: 0, x: 5, y: 3},
-      {id: "pmpfqvfrb9", pieceType: "SWITCH", color: "BLUE", rotation: 1, x: 4, y: 3},
-      {id: "pmpfqvl06a", pieceType: "SWITCH", color: "RED", rotation: 0, x: 4, y: 4},
-      {id: "pmpfqvre4b", pieceType: "SWITCH", color: "RED", rotation: 1, x: 5, y: 4},
-      {id: "pmpfqwdqec", pieceType: "LASER", color: "RED", rotation: 2, x: 0, y: 7},
-      {id: "pmpfqy5dve", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 0},
-      {id: "pmpfqya0pf", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 3},
-      {id: "pmpfqyd1rg", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 2, y: 4},
-      {id: "pmpfqz0jlj", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 0, y: 3},
-      {id: "pmpfqz7fpk", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 0, y: 4},
-      {id: "pmpfqzj2ul", pieceType: "DEFLECTOR", color: "BLUE", rotation: 3, x: 7, y: 1},
-      {id: "pmpfr0e5km", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 6, y: 2},
-      {id: "pmpfr0t7zn", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 4},
-      {id: "pmpfr0ww1o", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 7, y: 3},
-      {id: "pmpfr18esp", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 9, y: 3},
-      {id: "pmpfr1bjtq", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 9, y: 4},
-      {id: "pmpfr2ek5s", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 3, y: 5},
-      {id: "pmpfr2sl8u", pieceType: "DEFLECTOR", color: "RED", rotation: 1, x: 2, y: 6},
-      {id: "pmpfr337lv", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 7},
-      {id: "pmpfr69imw", pieceType: "LASER", color: "BLUE", rotation: 0, x: 9, y: 0},
-    ],
-  });
+    function initBoard() {
+      state.board = [];
+      // Setup base grid spacing template
+      for(let y=0; y<H; y++){
+        for(let x=0; x<W; x++){
+          // Non-overlapping reserved spawn cells logic markers
+          let restricted = null;
+          if (x === 0) restricted = "silver";
+          if (x === 9) restricted = "red";
+          if (y === 0 && x === 1) restricted = "silver";
+          if (y === 7 && x === 8) restricted = "red";
+        }
+      }
 
-  const el = {
-    board: document.getElementById("board"),
-    movePill: document.getElementById("movePill"),
-    savePill: document.getElementById("savePill"),
-    turnBadge: document.getElementById("turnBadge"),
-    phaseBadge: document.getElementById("phaseBadge"),
-    fireBtn: document.getElementById("fireBtn"),
-    resetBtn: document.getElementById("resetBtn"),
-    rotateCCWBtn: document.getElementById("rotateCCWBtn"),
-    rotateCWBtn: document.getElementById("rotateCWBtn"),
-    endTurnBtn: document.getElementById("endTurnBtn"),
-  };
+      const pieces = [
+        // Silver Grid Allocations
+        { id: "s_laser", type: "LASER", color: "silver", x: 0, y: 0, r: 2 }, // pointing South (2)
+        { id: "s_king", type: "KING", color: "silver", x: 5, y: 0, r: 2 },
+        { id: "s_def", type: "DEFENDER", color: "silver", x: 4, y: 0, r: 2 },
+        { id: "s_sw0", type: "SWITCH", color: "silver", x: 4, y: 3, r: 1 },
+        { id: "s_sw1", type: "SWITCH", color: "silver", x: 5, y: 4, r: 0 },
+        { id: "s_df0", type: "DEFLECTOR", color: "silver", x: 2, y: 3, r: 2 },
+        { id: "s_df1", type: "DEFLECTOR", color: "silver", x: 3, y: 5, r: 1 },
+        { id: "s_df2", type: "DEFLECTOR", color: "silver", x: 0, y: 7, r: 0 },
 
-  let state = loadState() || START_STATE();
-  let selectedId = null;
-  let cursor = { x: 0, y: 0 };
-  let flashTimer = null;
+        // Red Grid Allocations
+        { id: "r_laser", type: "LASER", color: "red", x: 9, y: 7, r: 0 }, // pointing North (0)
+        { id: "r_king", type: "KING", color: "red", x: 4, y: 7, r: 0 },
+        { id: "r_def", type: "DEFENDER", color: "red", x: 5, y: 7, r: 0 },
+        { id: "r_sw0", type: "SWITCH", color: "red", x: 5, y: 3, r: 2 },
+        { id: "r_sw1", type: "SWITCH", color: "red", x: 4, y: 4, r: 3 },
+        { id: "r_df0", type: "DEFLECTOR", color: "red", x: 7, y: 4, r: 0 },
+        { id: "r_df1", type: "DEFLECTOR", color: "red", x: 6, y: 2, r: 3 },
+        { id: "r_df2", type: "DEFLECTOR", color: "red", x: 9, y: 0, r: 2 }
+      ];
 
-  function loadState() {
-    try {
-      const raw = localStorage.getItem("laserchess_local_state");
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed || !Array.isArray(parsed.pieces)) return null;
-      return parsed;
-    } catch { return null; }
-  }
-  function saveState() {
-    localStorage.setItem("laserchess_local_state", JSON.stringify(state));
-  }
-  function clone(v) { return JSON.parse(JSON.stringify(v)); }
-  function pieceImage(piece) {
-    return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`;
-  }
-  function pieceAt(x, y, pieces = state.pieces) {
-    return pieces.find(p => p.x === x && p.y === y) || null;
-  }
-  function isReservedSquare(x, y, color) {
-    const arr = color === "BLUE" ? RES_BLUE : RES_RED;
-    return arr.some(s => s.x === x && s.y === y);
-  }
-  function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
-  function normalizeRotation(rot) { return ((rot % 4) + 4) % 4; }
-  function enemyColor(c) { return c === "BLUE" ? "RED" : "BLUE"; }
-  function getSelectedPiece() {
-    return selectedId ? state.pieces.find(p => p.id === selectedId) || null : null;
-  }
-  function selectPiece(pieceOrNull) {
-    selectedId = pieceOrNull ? pieceOrNull.id : null;
-    updateSelectionUI();
-    render();
-  }
-  function updateSelectionUI() {
-    const piece = getSelectedPiece();
-    el.movePill.textContent = `Move ${state.moveNumber}`;
-    el.turnBadge.textContent = `${state.turn} to move`;
-    el.turnBadge.className = `turn-badge ${state.turn === "BLUE" ? "turn-blue" : "turn-red"}`;
-    el.phaseBadge.textContent = state.winner ? `${state.winner} wins` : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
-  }
+      state.board = pieces;
+    }
 
-  function legalMoves(piece) {
-    const moves = [];
-    if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return moves;
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        if (dx === 0 && dy === 0) continue;
-        const nx = piece.x + dx;
-        const ny = piece.y + dy;
-        if (!inBounds(nx, ny)) continue;
-        if (isReservedSquare(nx, ny, piece.color)) continue;
-        const occ = pieceAt(nx, ny);
-        if (!occ) {
-          moves.push({ type: "move", x: nx, y: ny });
-        } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-          if (!isReservedSquare(piece.x, piece.y, occ.color)) {
-            moves.push({ type: "swap", x: nx, y: ny });
+    function pieceAt(x, y) {
+      return state.board.find(p => p.x === x && p.y === y);
+    }
+
+    function isCellRestricted(x, y, color) {
+      if (color === "silver" && x === 9) return true;
+      if (color === "silver" && y === 7 && x === 8) return true;
+      if (color === "red" && x === 0) return true;
+      if (color === "red" && y === 0 && x === 1) return true;
+      return false;
+    }
+
+    // 3. INTEGRATED ADVANCED PROPAGATION PHYSICS ROUTINE
+    // =========================================================================
+    function calcLaser() {
+      const activeLaser = state.board.find(p => p.type === "LASER" && p.color === state.turn);
+      if (!activeLaser) return null;
+
+      // Start position: center of the laser source cell
+      let cx = activeLaser.x;
+      let cy = activeLaser.y;
+      let dir = activeLaser.r; // 0:N, 1:E, 2:S, 3:W
+
+      let segments = [{ x: cx * CELL + CELL/2, y: cy * CELL + CELL/2 }];
+      let hitEntity = null;
+      let maxSteps = 64;
+
+      while (maxSteps-- > 0) {
+        // Move to the boundary/center of the next cell based on the laser's current vector direction
+        cx += L_DX[dir];
+        cy += L_DY[dir];
+
+        // Boundary Check: If the laser leaves the map perimeter
+        if (cx < 0 || cx >= W || cy < 0 || cy >= H) {
+          segments.push({ x: (cx - L_DX[dir]) * CELL + CELL/2 + L_DX[dir] * (CELL/2), y: (cy - L_DY[dir]) * CELL + CELL/2 + L_DY[dir] * (CELL/2) });
+          break;
+        }
+
+        // Mid-point target segment vector coordinate updates
+        segments.push({ x: cx * CELL + CELL/2, y: cy * CELL + CELL/2 });
+
+        let p = pieceAt(cx, cy);
+        if (p) {
+          // Translate current piece numerical rotation ID to cardinal string lookup format
+          const orientationStr = INT_TO_DIR_STR[p.r];
+          
+          // Matrix interaction lookup based on strict entry rules
+          const interactionConfig = PIECE_INTERACTION_TABLE[p.type]?.[orientationStr]?.[dir];
+
+          if (!interactionConfig) {
+            // Fallback safety termination
+            hitEntity = { piece: p, destroyed: true };
+            break;
+          }
+
+          if (interactionConfig.isDestroyed) {
+            hitEntity = { piece: p, destroyed: true };
+            break;
+          } else if (interactionConfig.reflect !== null) {
+            // Apply redirection orientation changes smoothly
+            dir = interactionConfig.reflect;
+          } else {
+            // Absorbed safely without structural breakdown/damage
+            hitEntity = { piece: p, destroyed: false };
+            break;
           }
         }
       }
-    }
-    return moves;
-  }
 
-  function movePiece(piece, nx, ny) {
-    if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
-    const occ = pieceAt(nx, ny);
-    if (occ) {
-      if (piece.pieceType !== "SWITCH") return false;
-      if (!(occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) return false;
-      if (isReservedSquare(piece.x, piece.y, occ.color)) return false;
-      const ox = piece.x, oy = piece.y;
-      piece.x = nx; piece.y = ny;
-      occ.x = ox; occ.y = oy;
-      return true;
-    }
-    if (isReservedSquare(nx, ny, piece.color)) return false;
-    if (Math.max(Math.abs(nx - piece.x), Math.abs(ny - piece.y)) !== 1) return false;
-    piece.x = nx; piece.y = ny;
-    return true;
-  }
-
-  /* Corrected to resolve the 90-degree anticlockwise vector offset */
-  function laserDirFromRotation(rot) { return [2, 1, 0, 3][normalizeRotation(rot)]; }
-
-  function interactWithLaser(piece, incomingDir) {
-    const typeMap = INTERACTION_MAP[piece.pieceType];
-    if (!typeMap) return { kind: "stop", destroyed: false };
-    const out = typeMap[normalizeRotation(piece.rotation || 0)]?.[incomingDir];
-    if (!out) return { kind: "stop", destroyed: false };
-    if (out.action === "reflect") return { kind: "reflect", reflected: out.nextDir, destroyed: false };
-    if (out.action === "block") return { kind: "stop", destroyed: false, blocked: true };
-    if (out.action === "destroy") return { kind: "stop", destroyed: true };
-    return { kind: "stop", destroyed: false };
-  }
-
-  function resolveLaserVector(x, y, dir, pieces = state.pieces, path = [], seen = new Set()) {
-    if (!inBounds(x, y)) return { path, hit: null, looped: false };
-    const key = `${x},${y},${dir}`;
-    if (seen.has(key)) return { path, hit: null, looped: true };
-    seen.add(key);
-    path.push({ x, y, dir });
-
-    const piece = pieceAt(x, y, pieces);
-    if (!piece) {
-      return resolveLaserVector(x + DIRS[dir].dx, y + DIRS[dir].dy, dir, pieces, path, seen);
+      return { segments, hitEntity };
     }
 
-    const outcome = interactWithLaser(piece, dir);
-    if (outcome.kind === "reflect") {
-      const nextDir = outcome.reflected;
-      return resolveLaserVector(x + DIRS[nextDir].dx, y + DIRS[nextDir].dy, nextDir, pieces, path, seen);
+    function fireLaser() {
+      const result = calcLaser();
+      if (!result) return;
+
+      state.laserPath = result.segments;
+      state.laserHit = result.hitEntity;
+      render();
+
+      setTimeout(() => {
+        if (state.laserHit && state.laserHit.destroyed) {
+          const victim = state.laserHit.piece;
+          log(`${victim.color.toUpperCase()} ${victim.type} was vaporized at (${victim.x}, ${victim.y})!`, "bad");
+          state.board = state.board.filter(p => p.id !== victim.id);
+          
+          if (victim.type === "KING") {
+            state.winner = victim.color === "silver" ? "red" : "silver";
+            triggerEndgame(state.winner);
+          }
+        } else if (state.laserHit) {
+          log(`Laser impact absorbed by ${state.laserHit.piece.color.toUpperCase()} ${state.laserHit.piece.type}.`, "muted");
+        } else {
+          log("Laser beam dissipated safely into the vacuum.", "muted");
+        }
+
+        state.laserPath = null;
+        state.laserHit = null;
+        
+        // Clean interaction loop handover transitions
+        state.actionsLeft = 0;
+        checkTurnTransitions();
+        render();
+      }, 900);
     }
-    return { path, hit: { piece, destroyed: !!outcome.destroyed, blocked: !!outcome.blocked }, looped: false };
-  }
 
-  function fireLaser() {
-    if (state.winner) return false;
-    const shooter = state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn);
-    if (!shooter) return false;
-    const dir = laserDirFromRotation(shooter.rotation || 0);
-    const startX = shooter.x + DIRS[dir].dx;
-    const startY = shooter.y + DIRS[dir].dy;
-    const result = resolveLaserVector(startX, startY, dir, clone(state.pieces));
-    state.lastLaserPath = result.path;
-
-    if (result.hit && result.hit.destroyed) {
-      const victim = result.hit.piece;
-      state.pieces.splice(state.pieces.findIndex(p => p.id === victim.id), 1);
-      if (victim.pieceType === "KING") state.winner = state.turn;
-    }
-
-    state.turn = enemyColor(state.turn);
-    state.moveNumber += 1;
-    selectedId = null;
-    saveState();
-    updateSelectionUI();
-    render();
-    flashLaserPath();
-    return true;
-  }
-
-  function doMoveOrSwap(targetX, targetY) {
-    if (state.winner) return false;
-    const piece = getSelectedPiece();
-    if (!piece || piece.color !== state.turn) return false;
-    let ok = movePiece(piece, targetX, targetY);
-    if (ok) {
-      selectedId = null;
-      state.turn = enemyColor(state.turn);
-      state.moveNumber += 1;
-      state.lastLaserPath = [];
-      saveState();
-      updateSelectionUI();
+    function selectPiece(id) {
+      if (state.winner || state.laserPath) return;
+      if (id) {
+        const p = state.board.find(x => x.id === id);
+        if (p && p.color !== state.turn) return; 
+      }
+      state.selectedId = id;
       render();
     }
-    return ok;
-  }
 
-  function rotateSelected(delta) {
-    const piece = getSelectedPiece();
-    if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
-    piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    selectedId = null;
-    state.turn = enemyColor(state.turn);
-    state.moveNumber += 1;
-    state.lastLaserPath = [];
-    saveState();
-    updateSelectionUI();
-    render();
-    return true;
-  }
-
-  function rotateCCW() { return rotateSelected(3); }
-  function rotateCW() { return rotateSelected(1); }
-
-  function resetGame() {
-    state = START_STATE();
-    selectedId = null;
-    cursor = { x: 0, y: 0 };
-    localStorage.removeItem("laserchess_local_state");
-    updateSelectionUI();
-    render();
-  }
-
-  function flashLaserPath() {
-    if (flashTimer) clearTimeout(flashTimer);
-    flashTimer = setTimeout(() => {
-      state.lastLaserPath = [];
+    function rotateCW() {
+      if (!state.selectedId || state.actionsLeft < 1) return;
+      const p = state.board.find(x => x.id === state.selectedId);
+      if (!p) return;
+      p.r = (p.r + 1) % 4;
+      log(`Rotated ${p.type} Clockwise.`, "good");
+      state.actionsLeft--;
+      checkTurnTransitions();
       render();
-    }, 1400);
-  }
-
-  function svgEl(name, attrs = {}) {
-    const node = document.createElementNS("http://www.w3.org/2000/svg", name);
-    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
-    return node;
-  }
-
-  function drawBoard() {
-    const svg = el.board;
-    svg.innerHTML = "";
-
-    svg.appendChild(svgEl("defs", {}, {}));
-    const defs = svg.querySelector("defs");
-    defs.appendChild(svgEl("filter", { id: "softGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" }));
-    const f1 = svgEl("feGaussianBlur", { stdDeviation: "3.5", result: "blur" });
-    const f2 = svgEl("feMerge");
-    f2.appendChild(svgEl("feMergeNode", { in: "blur" }));
-    f2.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
-    defs.appendChild(f1);
-    defs.appendChild(f2);
-
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
-        const rect = svgEl("rect", {
-          x: x * CELL, y: y * CELL, width: CELL, height: CELL,
-          fill: reserved === "blue" ? "rgba(3,233,244,.08)" : reserved === "red" ? "rgba(244,67,54,.08)" : "rgba(0,0,0,.42)",
-          stroke: "rgba(255,255,255,.07)",
-          "stroke-width": "1"
-        });
-        rect.style.cursor = "pointer";
-        rect.addEventListener("click", () => onCellClick(x, y));
-        svg.appendChild(rect);
-      }
     }
 
-    for (let x = 0; x < W; x++) {
-      const txt = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14" });
-      txt.textContent = x;
-      svg.appendChild(txt);
-    }
-    for (let y = 0; y < H; y++) {
-      const txt = svgEl("text", { x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14" });
-      txt.textContent = y;
-      svg.appendChild(txt);
-    }
-
-    const sel = getSelectedPiece();
-    if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
-      for (const m of legalMoves(sel)) {
-        svg.appendChild(svgEl("rect", {
-          x: m.x * CELL + 6, y: m.y * CELL + 6, width: CELL - 12, height: CELL - 12,
-          fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10"
-        }));
-      }
+    function rotateCCW() {
+      if (!state.selectedId || state.actionsLeft < 1) return;
+      const p = state.board.find(x => x.id === state.selectedId);
+      if (!p) return;
+      p.r = (p.r + 3) % 4;
+      log(`Rotated ${p.type} Counter-Clockwise.`, "good");
+      state.actionsLeft--;
+      checkTurnTransitions();
+      render();
     }
 
-    if (state.lastLaserPath?.length) {
-      const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
-      svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,246,102,.35)", "stroke-width": "16", "stroke-linecap": "round", "stroke-linejoin": "round", filter: "url(#softGlow)" }));
-      svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,255,255,.95)", "stroke-width": "4", "stroke-linecap": "round", "stroke-linejoin": "round" }));
-    }
+    function onCellClick(x, y) {
+      if (!state.selectedId || state.actionsLeft < 1) return;
+      const p = state.board.find(i => i.id === state.selectedId);
+      if (!p) return;
 
-    const target = sel || pieceAt(cursor.x, cursor.y);
-    if (target) {
-      svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10" }));
-    } else {
-      svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
-    }
-
-    for (const piece of state.pieces) {
-      const g = svgEl("g");
-      const x = piece.x * CELL;
-      const y = piece.y * CELL;
-      const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
-      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
-      g.appendChild(img);
-
-      g.appendChild(svgEl("rect", { x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: piece.color === "BLUE" ? "rgba(3,233,244,.18)" : "rgba(244,67,54,.18)", "stroke-width": "1.5", rx: "10" }));
-      g.style.cursor = "pointer";
-      g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
-      svg.appendChild(g);
-    }
-
-    if (state.winner) {
-      svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.85)", stroke: "rgba(255,255,255,.14)" }));
-      const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
-      t1.textContent = `${state.winner} WINS`;
-      svg.appendChild(t1);
-      const t2 = svgEl("text", { x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22" });
-      t2.textContent = "Press Reset to start again";
-      svg.appendChild(t2);
-    }
-  }
-
-  function onPieceClick(piece) {
-    if (state.winner) return;
-    if (piece.color !== state.turn) return;
-    if (selectedId === piece.id) { selectPiece(null); return; }
-    selectPiece(piece);
-    cursor = { x: piece.x, y: piece.y };
-    render();
-  }
-
-  function onCellClick(x, y) {
-    if (state.winner) return;
-    cursor = { x, y };
-    const sel = getSelectedPiece();
-    if (sel && sel.color === state.turn) {
-      const occ = pieceAt(x, y);
-      if (!occ || (occ.id !== sel.id && sel.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER"))) {
-        if (doMoveOrSwap(x, y)) return;
-      } else if (occ.id === sel.id) {
+      // Clicked current position -> deselect
+      if (p.x === x && p.y === y) {
         selectPiece(null);
         return;
       }
+
+      const dx = Math.abs(p.x - x);
+      const dy = Math.abs(p.y - y);
+
+      if (dx <= 1 && dy <= 1) {
+        const target = pieceAt(x, y);
+
+        if (!target) {
+          if (isCellRestricted(x, y, p.color)) {
+            log("Movement blocked: Target square zone is restricted.", "warn");
+            return;
+          }
+          p.x = x;
+          p.y = y;
+          log(`Moved ${p.type} to [${x}, ${y}].`, "good");
+          state.actionsLeft--;
+          selectPiece(null);
+          checkTurnTransitions();
+        } else if (p.type === "SWITCH" && (target.type === "DEFLECTOR" || target.type === "DEFENDER")) {
+          // Switch Interaction Logic
+          if (isCellRestricted(x, y, p.color) || isCellRestricted(p.x, p.y, target.color)) {
+            log("Swap blocked: Restricted area conflict.", "warn");
+            return;
+          }
+          let tx = target.x, ty = target.y;
+          target.x = p.x; target.y = p.y;
+          p.x = tx; p.y = ty;
+          log(`Swapped SWITCH with ${target.type}.`, "good");
+          state.actionsLeft--;
+          selectPiece(null);
+          checkTurnTransitions();
+        }
+      }
+      render();
     }
-    const target = pieceAt(x, y);
-    if (!target) selectPiece(null); else onPieceClick(target);
-  }
 
-  function render() {
-    drawBoard();
-    updateSelectionUI();
-    saveState();
-  }
+    function checkTurnTransitions() {
+      if (state.actionsLeft <= 0) {
+        state.turn = state.turn === "silver" ? "red" : "silver";
+        state.actionsLeft = 1;
+        selectPiece(null);
+        log(`Turn switched. Active deployment: ${state.turn.toUpperCase()} command structure.`, "muted");
+      }
+    }
 
-  function endTurnWithoutAction() {
-    if (state.winner) return;
-    selectedId = null;
-    state.turn = enemyColor(state.turn);
-    state.moveNumber += 1;
-    state.lastLaserPath = [];
-    saveState();
-    updateSelectionUI();
-    render();
-  }
+    function endTurnWithoutAction() {
+      state.actionsLeft = 0;
+      checkTurnTransitions();
+      render();
+    }
 
-  function handleKeyboard(e) {
-    const key = e.key;
-    if (key === "ArrowUp") { e.preventDefault(); cursor.y = Math.max(0, cursor.y - 1); render(); return; }
-    if (key === "ArrowDown") { e.preventDefault(); cursor.y = Math.min(H - 1, cursor.y + 1); render(); return; }
-    if (key === "ArrowLeft") { e.preventDefault(); cursor.x = Math.max(0, cursor.x - 1); render(); return; }
-    if (key === "ArrowRight") { e.preventDefault(); cursor.x = Math.min(W - 1, cursor.x + 1); render(); return; }
-    if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
-    if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); else onCellClick(cursor.x, cursor.y); return; }
-    if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
-    if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
-    if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
-    if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
-  }
+    function triggerEndgame(winner) {
+      el.modalIcon.innerText = winner === "silver" ? "🥈" : "🔴";
+      el.modalTitle.innerText = `${winner.toUpperCase()} VICTORIOUS`;
+      el.modalBody.innerText = `The enemy King was completely eliminated. Sector control grid successfully secured.`;
+      el.modal.classList.add("active");
+    }
 
-  el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
-  el.rotateCWBtn.addEventListener("click", () => rotateCW());
-  el.fireBtn.addEventListener("click", () => fireLaser());
-  el.resetBtn.addEventListener("click", () => resetGame());
-  el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
+    function closeModal() {
+      el.modal.classList.remove("active");
+    }
 
-  window.addEventListener("keydown", handleKeyboard);
-  el.board.addEventListener("click", (e) => {
-    if (state.winner) return;
-    const pt = el.board.createSVGPoint();
-    pt.x = e.clientX; pt.y = e.clientY;
-    const screenCTM = el.board.getScreenCTM();
-    if (!screenCTM) return;
-    const local = pt.matrixTransform(screenCTM.inverse());
-    onCellClick(Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL))), Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL))));
-  });
+    function resetGame() {
+      initBoard();
+      state.turn = "silver";
+      state.actionsLeft = 1;
+      state.selectedId = null;
+      state.winner = null;
+      state.laserPath = null;
+      state.laserHit = null;
+      el.gameLog.innerHTML = "";
+      log("System fully operational. Initialize board grid placement.", "good");
+      render();
+    }
 
-  updateSelectionUI();
-  render();
-})();
-</script>
+    // 4. DESIGN AND RENDERING SYSTEM
+    // =========================================================================
+    function getPiecePath(type) {
+      switch(type) {
+        case "KING":
+          return "M 20,20 L 45,20 L 45,45 L 20,45 Z M 25,25 L 40,25 L 40,40 L 25,40 Z M 32.5,12 L 32.5,20 M 28.5,15 L 36.5,15";
+        case "DEFENDER":
+          return "M 15,48 L 50,48 L 50,42 L 40,22 L 25,22 L 15,42 Z";
+        case "DEFLECTOR":
+          return "M 15,50 L 50,15 L 50,50 Z M 22,44 L 44,22 L 44,44 Z";
+        case "SWITCH":
+          return "M 20,20 L 32,12 L 44,20 L 44,44 L 32,52 L 20,44 Z M 26,24 L 38,40 M 38,24 L 26,40";
+        case "LASER":
+          return "M 20,45 L 45,45 L 45,30 L 37.5,15 L 27.5,15 L 20,30 Z M 32.5,15 L 32.5,8 M 28.5,10 L 36.5,10";
+        default:
+          return "M 20,20 L 45,20 L 45,45 L 20,45 Z";
+      }
+    }
+
+    function drawCellHighlights() {
+      let html = "";
+      if (!state.selectedId) return html;
+      const p = state.board.find(x => x.id === state.selectedId);
+      if (!p) return html;
+
+      // Draw Selected indicator bounds
+      const selCls = p.color === "red" ? "active-select red-select" : "active-select";
+      html += `<rect x="${p.x*CELL}" y="${p.y*CELL}" width="${CELL}" height="${CELL}" class="cell-highlight ${selCls}"/>`;
+
+      // Highlight surrounding tactical capabilities
+      for (let nx = p.x - 1; nx <= p.x + 1; nx++) {
+        for (let ny = p.y - 1; ny <= p.y + 1; ny++) {
+          if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
+          if (nx === p.x && ny === p.y) continue;
+
+          const target = pieceAt(nx, ny);
+          if (!target && !isCellRestricted(nx, ny, p.color)) {
+            html += `<rect x="${nx*CELL}" y="${ny*CELL}" width="${CELL}" height="${CELL}" class="cell-highlight move-valid"/>`;
+          } else if (target && p.type === "SWITCH" && (target.type === "DEFLECTOR" || target.type === "DEFENDER")) {
+            if (!isCellRestricted(nx, ny, p.color) && !isCellRestricted(p.x, p.y, target.color)) {
+              html += `<rect x="${nx*CELL}" y="${ny*CELL}" width="${CELL}" height="${CELL}" class="cell-highlight swap-valid"/>`;
+            }
+          }
+        }
+      }
+      return html;
+    }
+
+    function render() {
+      // Configuration settings adjustment sizing
+      el.board.setAttribute("width", W * CELL);
+      el.board.setAttribute("height", H * CELL);
+
+      // DOM Node construction properties initialization
+      let boardMarkup = "";
+
+      // Background tracking board zones rendering
+      for(let y=0; y<H; y++){
+        for(let x=0; x<W; x++){
+          let zoneClass = "cell-rect";
+          if (x === 0 || (y === 0 && x === 1)) zoneClass += " silver-zone";
+          if (x === 9 || (y === 7 && x === 8)) zoneClass += " red-zone";
+          boardMarkup += `<rect x="${x*CELL}" y="${y*CELL}" width="${CELL}" height="${CELL}" class="${zoneClass}" />`;
+        }
+      }
+
+      boardMarkup += drawCellHighlights();
+
+      // Render pieces with rotation translation support mappings built-in
+      state.board.forEach(p => {
+        const isSelected = p.id === state.selectedId;
+        const groupClass = `piece ${p.color} ${isSelected ? 'selected' : ''} ${p.color === 'red' ? 'red-piece' : ''}`;
+        const pathData = getPiecePath(p.type);
+        const centerX = p.x * CELL + CELL / 2;
+        const centerY = p.y * CELL + CELL / 2;
+        const angle = p.r * 90;
+
+        boardMarkup += `
+          <g class="${groupClass}" transform="translate(${p.x * CELL}, ${p.y * CELL})" onclick="event.stopPropagation(); selectPiece('${p.id}')">
+            <rect x="2" y="2" width="${CELL-4}" height="${CELL-4}" rx="6" class="piece-bg"/>
+            <g transform="rotate(${angle}, ${CELL/2}, ${CELL/2})">
+              <path d="${pathData}" class="piece-shape" />
+              <circle cx="${CELL/2}" cy="12" r="3" class="piece-accent"/>
+            </g>
+          </g>
+        `;
+      });
+
+      // Render Active Laser Calculations Paths Graphic Overlay
+      if (state.laserPath && state.laserPath.length > 1) {
+        let pathStr = `M ${state.laserPath[0].x} ${state.laserPath[0].y}`;
+        for (let i = 1; i < state.laserPath.length; i++) {
+          pathStr += ` L ${state.laserPath[i].x} ${state.laserPath[i].y}`;
+        }
+        const laserColorClass = state.turn === "silver" ? "silver-laser" : "red-laser";
+        boardMarkup += `<path d="${pathStr}" class="laser-line ${laserColorClass}" />`;
+        boardMarkup += `<path d="${pathStr}" class="laser-line ${laserColorClass} laser-pulse" />`;
+
+        // Draw burst spark node point indicators
+        const lastPt = state.laserPath[state.laserPath.length - 1];
+        if (state.laserHit && state.laserHit.destroyed) {
+          boardMarkup += `<circle cx="${lastPt.x}" cy="${lastPt.y}" r="8" fill="#ff3333" filter="drop-shadow(0 0 6px #ff1111)"/>`;
+        } else {
+          boardMarkup += `<circle cx="${lastPt.x}" cy="${lastPt.y}" r="5" fill="#ffffff" filter="drop-shadow(0 0 4px #ffffff)"/>`;
+        }
+      }
+
+      el.board.innerHTML = boardMarkup;
+
+      // Update Dynamic Sidebar Element Configurations
+      if (state.turn === "silver") {
+        el.turnDisplay.innerText = "Silver Team";
+        el.turnDisplay.className = "turn-value turn-silver";
+      } else {
+        el.turnDisplay.innerText = "Red Team";
+        el.turnDisplay.className = "turn-value turn-red";
+      }
+
+      // Track active moves left
+      let trackHtml = "";
+      for (let i=0; i < state.actionsLeft; i++) {
+        trackHtml += `<div class="dot active ${state.turn === 'red' ? 'red-dot' : ''}"></div>`;
+      }
+      if (!trackHtml) trackHtml = `<div class="dot"></div>`;
+      el.actionTrack.innerHTML = trackHtml;
+
+      // Action configuration validation settings triggers
+      const activeSelectedPiece = state.board.find(x => x.id === state.selectedId);
+      if (activeSelectedPiece && state.actionsLeft > 0 && !state.winner) {
+        el.rotateCCWBtn.removeAttribute("disabled");
+        el.rotateCWBtn.removeAttribute("disabled");
+      } else {
+        el.rotateCCWBtn.setAttribute("disabled", "true");
+        el.rotateCWBtn.setAttribute("disabled", "true");
+      }
+
+      if (state.winner || state.laserPath) {
+        el.fireBtn.setAttribute("disabled", "true");
+        el.endTurnBtn.setAttribute("disabled", "true");
+      } else {
+        el.fireBtn.removeAttribute("disabled");
+        el.endTurnBtn.removeAttribute("disabled");
+      }
+    }
+
+    // Keyboard controls handler function mappings
+    function handleKeyboard(e) {
+      if (!state.selectedId || state.actionsLeft < 1) return;
+      if (e.key === 'q' || e.key === 'Q') rotateCCW();
+      if (e.key === 'e' || e.key === 'E') rotateCW();
+    }
+
+    // Event registrations setups
+    el.fireBtn.addEventListener("click", () => fireLaser());
+    el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
+    el.rotateCWBtn.addEventListener("click", () => rotateCW());
+    el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
+    window.addEventListener("keydown", handleKeyboard);
+    
+    el.board.addEventListener("click", (e) => {
+      if (state.winner || state.laserPath) return;
+      const pt = el.board.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      const screenCTM = el.board.getScreenCTM();
+      if (!screenCTM) return;
+      const local = pt.matrixTransform(screenCTM.inverse());
+      const x = Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL)));
+      const y = Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL)));
+      onCellClick(x, y);
+    });
+
+    // Start execution sequence
+    resetGame();
+  </script>
 </body>
 </html>
