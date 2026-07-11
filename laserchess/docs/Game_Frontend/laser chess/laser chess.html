@@ -31,9 +31,12 @@
       --red-tint: rgba(244, 67, 54, 0.08);
     }
     * { box-sizing: border-box; }
-    html, body { min-height: 100%; }
-    body {
+    html, body { 
+      height: 100%;
       margin: 0;
+      padding: 0;
+    }
+    body {
       font-family: "Quantico", sans-serif;
       color: var(--text);
       background:
@@ -413,6 +416,42 @@
       }
       :root { --boardW: 96vw; }
       .hero-left h2 { font-size: 2.45rem; }
+    }
+  </style>
+  <style id="iframe-resize-styles">
+    /* Fluid responsive override for iframe environments */
+    html, body {
+      overflow-y: auto !important;
+    }
+    @media (min-width: 1121px) {
+      .shell {
+        height: 100vh;
+        overflow: hidden;
+      }
+      .layout {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        grid-template-rows: 1fr;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      .board-panel {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 0;
+      }
+      .board-wrap {
+        height: 100%;
+        min-height: 0;
+      }
+      .sidebar {
+        height: 100%;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
     }
   </style>
 </head>
@@ -1176,6 +1215,27 @@
   }
   updateSelectionUI();
   render();
+
+  // Dynamic board sizing logic to auto-resize tightly into viewport/iframes
+  function handleDynamicScaling() {
+    if (window.innerWidth <= 1120) {
+      document.documentElement.style.setProperty('--boardW', 'min(96vw, 800px)');
+      return;
+    }
+    const headerH = document.querySelector('header')?.offsetHeight || 80;
+    const heroH = document.querySelector('.hero')?.offsetHeight || 180;
+    const padding = 60;
+    const availableH = window.innerHeight - headerH - heroH - padding;
+    if (availableH > 200) {
+      const targetW = (availableH * 10) / 8;
+      const finalW = Math.min(targetW, window.innerWidth * 0.54, 980);
+      document.documentElement.style.setProperty('--boardW', `${finalW}px`);
+    } else {
+      document.documentElement.style.setProperty('--boardW', 'min(50vw, 600px)');
+    }
+  }
+  window.addEventListener('resize', handleDynamicScaling);
+  setTimeout(handleDynamicScaling, 100);
 })();
 </script>
 </body>
