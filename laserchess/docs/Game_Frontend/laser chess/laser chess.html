@@ -21,7 +21,7 @@
       --muted:#97a8b6;
       --shadow:0 18px 60px rgba(0,0,0,.42);
       
-      /* Dynamic layout boundary settings */
+      /* Dynamic sizing based on viewport height and width constraints */
       --boardW: min(100%, 920px, 80vh);
       --cell: calc(var(--boardW) / 10);
     }
@@ -78,15 +78,18 @@
       text-transform: uppercase;
       color: var(--muted);
     }
+    
+    /* Optimized Grid to pull controls right next to the board */
     .layout {
       display: grid;
-      grid-template-columns: 1.35fr 0.65fr;
-      gap: 1.5rem;
-      max-width: 1480px;
+      grid-template-columns: auto 320px;
+      gap: 1rem;
+      max-width: 1300px;
       width: 100%;
       margin: 1.5rem auto;
       padding: 0 1.25rem 1.25rem;
-      align-items: start;
+      align-items: center;
+      justify-content: center;
     }
     .panel {
       background: var(--panel);
@@ -124,8 +127,7 @@
       touch-action: manipulation;
     }
     .sidebar {
-      display: grid;
-      gap: 1rem;
+      width: 100%;
     }
     .side-card {
       padding: 1.25rem;
@@ -138,10 +140,8 @@
     }
     .turn-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: .8rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: .6rem;
       margin-bottom: 1rem;
     }
     .turn-badge {
@@ -152,6 +152,7 @@
       font-size: .72rem;
       border: 1px solid var(--line);
       background: rgba(255,255,255,.04);
+      text-align: center;
     }
     .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
     .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
@@ -208,9 +209,14 @@
       margin-left: auto;
     }
 
-    @media (max-width: 1024px){
+    /* Wrap cleanly if screen real estate gets tight */
+    @media (max-width: 990px){
       .layout {
         grid-template-columns: 1fr;
+        justify-items: center;
+      }
+      .sidebar {
+        max-width: var(--boardW);
       }
     }
     @media (max-width: 640px){
