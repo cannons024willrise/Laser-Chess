@@ -1,556 +1,366 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Laser Chess Engine</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700;900&display=swap" rel="stylesheet">
+<script>
+(() => {
+  "use strict";
+
+  const PIECE_BASE = "./";
+  const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
+  const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
+  const W = 10, H = 8;
+  const CELL = 100;
   
-  <style>
-    :root {
-      --theme-color: #03e9f4;
-      --theme-rgb: 3, 233, 244;
-      --red-theme: #f44336;
-      --bg0: #06080b;
-      --bg1: #0d1116;
-      --bg2: #121821;
-      --panel: rgba(8, 10, 14, .82);
-      --panel2: rgba(255, 255, 255, .03);
-      --line: rgba(255, 255, 255, .08);
-      --text: #e8f6ff;
-      --muted: #97a8b6;
-      --good: #24d18f;
-      --warn: #ffb84d;
-      --bad: #ff5f6f;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg0);
-      color: var(--text);
-      font-family: 'Quantico', sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      overflow: hidden;
-      user-select: none;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 30px;
-      background-color: var(--bg1);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .title { font-size: 24px; font-weight: 900; letter-spacing: 2px; color: var(--theme-color); }
-    .pills { display: flex; gap: 10px; font-size: 14px; }
-    .pill { padding: 5px 12px; background: var(--panel2); border-radius: 20px; border: 1px solid var(--line); }
-
-    main {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    .board-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: radial-gradient(circle at center, var(--bg2) 0%, var(--bg0) 100%);
-      padding: 20px;
-    }
-
-    svg#board {
-      width: 100%;
-      height: 100%;
-      max-width: 1000px;
-      max-height: 800px;
-    }
-
-    .sidebar {
-      width: 380px;
-      background-color: var(--bg1);
-      border-left: 1px solid var(--line);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .panel {
-      padding: 20px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .panel-title { font-size: 12px; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; margin-bottom: 10px; }
-    
-    .status-badges { display: flex; gap: 10px; margin-bottom: 15px; }
-    .badge { padding: 6px 12px; font-size: 13px; font-weight: 700; border-radius: 4px; border: 1px solid transparent; }
-    .turn-blue { color: var(--theme-color); border-color: rgba(3, 233, 244, 0.3); background: rgba(3, 233, 244, 0.05); }
-    .turn-red { color: var(--red-theme); border-color: rgba(244, 67, 54, 0.3); background: rgba(244, 67, 54, 0.05); }
-    
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px; }
-    .info-item { background: var(--panel2); padding: 8px 12px; border-radius: 4px; }
-    .info-label { color: var(--muted); font-size: 11px; text-transform: uppercase; display: block; }
-    .info-val { font-weight: 700; display: block; margin-top: 4px; }
-
-    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-    button {
-      background: var(--panel2); color: var(--text); font-family: inherit; font-size: 14px; font-weight: 700;
-      padding: 10px; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; transition: all 0.2s;
-    }
-    button:hover { background: rgba(255, 255, 255, 0.1); }
-    button.primary { background: rgba(3, 233, 244, 0.1); color: var(--theme-color); border-color: var(--theme-color); }
-    button.primary:hover { background: rgba(3, 233, 244, 0.2); }
-    button.danger { background: rgba(244, 67, 54, 0.1); color: var(--red-theme); border-color: var(--red-theme); }
-    button.danger:hover { background: rgba(244, 67, 54, 0.2); }
-    
-    .rotate-controls { display: flex; gap: 5px; }
-    .rotate-controls button { flex: 1; padding: 5px; }
-
-    .log-container {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      background: var(--bg0);
-      font-size: 13px;
-      font-family: monospace;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    
-    .log-entry { padding: 6px 10px; border-left: 2px solid transparent; background: var(--panel2); }
-    .log-entry.good { border-color: var(--good); color: var(--good); }
-    .log-entry.warn { border-color: var(--warn); color: var(--warn); }
-    .log-entry.bad { border-color: var(--bad); color: var(--bad); }
-    .log-entry.muted { border-color: var(--muted); color: var(--muted); }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="title">LASER CHESS</div>
-    <div class="pills">
-      <div id="turnPill" class="pill">Turn: BLUE</div>
-      <div id="movePill" class="pill">Move 1</div>
-      <div id="savePill" class="pill">Auto-Saved</div>
-    </div>
-  </header>
-
-  <main>
-    <div class="board-container">
-      <svg id="board" viewBox="0 0 1000 800"></svg>
-    </div>
-    
-    <div class="sidebar">
-      <div class="panel">
-        <div class="panel-title">Game Status</div>
-        <div class="status-badges">
-          <div id="turnBadge" class="badge turn-blue">BLUE to move</div>
-          <div id="phaseBadge" class="badge">Select a piece</div>
-        </div>
-        <div class="info-grid" style="margin-bottom: 10px;">
-          <div class="info-item">
-            <span class="info-label">Blue King</span>
-            <span id="blueKingLabel" class="info-val">Alive</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Red King</span>
-            <span id="redKingLabel" class="info-val">Alive</span>
-          </div>
-        </div>
-        <div class="info-label" id="actionLabel" style="margin-top: 10px; color: var(--warn);">Click a piece</div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-title">Selection: <span id="selectedLabel" style="color:var(--text)">None</span></div>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Type</span>
-            <span id="pieceTypeValue" class="info-val">—</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Color</span>
-            <span id="pieceColorValue" class="info-val">—</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Position</span>
-            <span id="piecePosValue" class="info-val">—</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Rotation</span>
-            <div class="rotate-controls" style="margin-top: 4px;">
-              <span id="pieceRotValue" class="info-val" style="margin-right: auto;">—</span>
-              <button id="rotateCCW">↶</button>
-              <button id="rotateCW">↷</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="btn-grid">
-          <button id="selectBtn">Select / Deselect</button>
-          <button id="moveBtn">Move Mode</button>
-          <button id="rotateCCWBtn">Rotate CCW (Q)</button>
-          <button id="rotateCWBtn">Rotate CW (E)</button>
-          <button id="endTurnBtn">Pass Turn</button>
-          <button id="fireBtn" class="danger">FIRE LASER (F)</button>
-        </div>
-      </div>
-
-      <div class="panel" style="border-bottom: none; display: flex; justify-content: space-between; align-items: center;">
-        <div class="panel-title" style="margin: 0;">Combat Log</div>
-        <button id="resetBtn" style="padding: 4px 8px; font-size: 11px;">Reset Game</button>
-      </div>
-      <div id="log" class="log-container"></div>
-    </div>
-  </main>
-
-  <script>
-  (() => {
-    "use strict";
+  // Game Dirs map for moving pieces (0: S, 1: E, 2: N, 3: W)
+  const DIRS = [
+    {dx: 0, dy: 1},   // 0 south
+    {dx: 1, dy: 0},   // 1 east
+    {dx: 0, dy: -1},  // 2 north
+    {dx: -1, dy: 0},  // 3 west
+  ];
   
-    const PIECE_BASE = "./";
-    const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
-    const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
-    const W = 10, H = 8;
-    const CELL = 100;
-    
-    const PIECE_MAP = {
-      KING: "king",
-      DEFENDER: "defender",
-      DEFLECTOR: "deflector",
-      SWITCH: "switch",
-      LASER: "laser",
-    };
-  
-    // NEW PIECE INTERACTION MATRIX
-    const PIECE_INTERACTION_TABLE = {
-      KING: {
-        NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-        EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-        SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-        WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-      },
-      DEFENDER: {
-        NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-        EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
-        SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-        WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-      },
-      DEFLECTOR: {
-        WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
-        NORTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 'WEST', isDestroyed: false } },
-        EAST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-        SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }
-      },
-      SWITCH: {
-        WEST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'NORTH', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } },
-        NORTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'EAST', isDestroyed: false } },
-        EAST:  { 0: { reflect: 'SOUTH', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
-        SOUTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'WEST', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'WEST', isDestroyed: false } }
-      }
-    };
-  
-    const START_STATE = () => ({
-      turn: "BLUE", moveNumber: 1, winner: null,
-      lastLaserPathStr: "", lastLaserDestroyed: false, lastLaserColor: null, lastLog: "Blue to move.",
-      pieces: [
-        {id: "k_b", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
-        {id: "k_r", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
-        {id: "df1_r", pieceType: "DEFENDER", color: "RED", rotation: 0, x: 4, y: 7},
-        {id: "df2_r", pieceType: "DEFENDER", color: "RED", rotation: 2, x: 6, y: 7},
-        {id: "df1_b", pieceType: "DEFENDER", color: "BLUE", rotation: 2, x: 5, y: 0},
-        {id: "df2_b", pieceType: "DEFENDER", color: "BLUE", rotation: 2, x: 3, y: 0},
-        {id: "sw1_b", pieceType: "SWITCH", color: "BLUE", rotation: 0, x: 5, y: 3},
-        {id: "sw2_b", pieceType: "SWITCH", color: "BLUE", rotation: 1, x: 4, y: 3},
-        {id: "sw1_r", pieceType: "SWITCH", color: "RED", rotation: 0, x: 4, y: 4},
-        {id: "sw2_r", pieceType: "SWITCH", color: "RED", rotation: 1, x: 5, y: 4},
-        {id: "ls_r", pieceType: "LASER", color: "RED", rotation: 2, x: 0, y: 7},
-        {id: "dl1_b", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 0},
-        {id: "dl2_b", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 3},
-        {id: "dl3_b", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 2, y: 4},
-        {id: "dl1_r", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 0, y: 3},
-        {id: "dl2_r", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 0, y: 4},
-        {id: "dl4_b", pieceType: "DEFLECTOR", color: "BLUE", rotation: 3, x: 7, y: 1},
-        {id: "dl3_r", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 6, y: 2},
-        {id: "dl4_r", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 4},
-        {id: "dl5_r", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 7, y: 3},
-        {id: "dl5_b", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 9, y: 3},
-        {id: "dl6_b", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 9, y: 4},
-        {id: "dl7_b", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 3, y: 5},
-        {id: "dl6_r", pieceType: "DEFLECTOR", color: "RED", rotation: 1, x: 2, y: 6},
-        {id: "dl7_r", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 7},
-        {id: "ls_b", pieceType: "LASER", color: "BLUE", rotation: 0, x: 9, y: 0},
-      ],
-    });
-  
-    const el = {
-      board: document.getElementById("board"), log: document.getElementById("log"),
-      turnPill: document.getElementById("turnPill"), movePill: document.getElementById("movePill"),
-      savePill: document.getElementById("savePill"), turnBadge: document.getElementById("turnBadge"),
-      phaseBadge: document.getElementById("phaseBadge"), selectedLabel: document.getElementById("selectedLabel"),
-      actionLabel: document.getElementById("actionLabel"), blueKingLabel: document.getElementById("blueKingLabel"),
-      redKingLabel: document.getElementById("redKingLabel"), pieceTypeValue: document.getElementById("pieceTypeValue"),
-      pieceColorValue: document.getElementById("pieceColorValue"), piecePosValue: document.getElementById("piecePosValue"),
-      pieceRotValue: document.getElementById("pieceRotValue"), rotateCCW: document.getElementById("rotateCCW"),
-      rotateCW: document.getElementById("rotateCW"), fireBtn: document.getElementById("fireBtn"),
-      resetBtn: document.getElementById("resetBtn"), moveBtn: document.getElementById("moveBtn"),
-      selectBtn: document.getElementById("selectBtn"), rotateCCWBtn: document.getElementById("rotateCCWBtn"),
-      rotateCWBtn: document.getElementById("rotateCWBtn"), endTurnBtn: document.getElementById("endTurnBtn"),
-    };
-  
-    let state = loadState() || START_STATE();
-    let selectedId = null;
-    let cursor = { x: 0, y: 0 };
-    let flashTimer = null;
-  
-    function loadState() {
-      try {
-        const raw = localStorage.getItem("laserchess_local_state");
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (!parsed || !Array.isArray(parsed.pieces)) return null;
-        return parsed;
-      } catch { return null; }
-    }
-    function saveState() {
-      localStorage.setItem("laserchess_local_state", JSON.stringify(state));
-    }
-    function clone(v) { return JSON.parse(JSON.stringify(v)); }
-    function pieceImage(piece) { return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`; }
-    function pieceAt(x, y, pieces = state.pieces) { return pieces.find(p => p.x === x && p.y === y) || null; }
-    function isReservedSquare(x, y, color) {
-      const arr = color === "BLUE" ? RES_BLUE : RES_RED;
-      return arr.some(s => s.x === x && s.y === y);
-    }
-    function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
-    function normalizeRotation(rot) { return ((rot % 4) + 4) % 4; }
-    function myLaser() { return state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn) || null; }
-    function enemyColor(c) { return c === "BLUE" ? "RED" : "BLUE"; }
-    function getSelectedPiece() { return selectedId ? state.pieces.find(p => p.id === selectedId) || null : null; }
-    
-    function selectPiece(pieceOrNull) {
-      selectedId = pieceOrNull ? pieceOrNull.id : null;
-      updateSelectionUI();
-      render();
-    }
-    
-    function log(msg, kind = "muted") {
-      const div = document.createElement("div");
-      div.className = `log-entry ${kind}`;
-      div.textContent = msg;
-      el.log.prepend(div);
-    }
-  
-    function updateSelectionUI() {
-      const piece = getSelectedPiece();
-      el.selectedLabel.textContent = piece ? `${piece.color} ${piece.pieceType}` : "None";
-      el.pieceTypeValue.textContent = piece ? piece.pieceType : "—";
-      el.pieceColorValue.textContent = piece ? piece.color : "—";
-      el.piecePosValue.textContent = piece ? `(${piece.x}, ${piece.y})` : "—";
-      el.pieceRotValue.textContent = piece ? String(piece.rotation ?? 0) : "—";
-      el.turnPill.textContent = `Turn: ${state.turn}`;
-      el.movePill.textContent = `Move ${state.moveNumber}`;
-      el.turnBadge.textContent = `${state.turn} to move`;
-      el.turnBadge.className = `badge ${state.turn === "BLUE" ? "turn-blue" : "turn-red"}`;
-      el.blueKingLabel.textContent = state.pieces.some(p => p.pieceType === "KING" && p.color === "BLUE") ? "Alive" : "Destroyed";
-      el.redKingLabel.textContent = state.pieces.some(p => p.pieceType === "KING" && p.color === "RED") ? "Alive" : "Destroyed";
-      
-      if (!state.pieces.some(p => p.pieceType === "KING" && p.color === "BLUE")) el.blueKingLabel.style.color = "var(--bad)";
-      else el.blueKingLabel.style.color = "var(--text)";
-      if (!state.pieces.some(p => p.pieceType === "KING" && p.color === "RED")) el.redKingLabel.style.color = "var(--bad)";
-      else el.redKingLabel.style.color = "var(--text)";
+  const PIECE_MAP = {
+    KING: "king",
+    DEFENDER: "defender",
+    DEFLECTOR: "deflector",
+    SWITCH: "switch",
+    LASER: "laser",
+  };
 
-      el.phaseBadge.textContent = state.winner ? `${state.winner} WINS` : (piece ? `Selected` : "Standby");
-      el.actionLabel.textContent = state.winner ? "Game over" : (piece ? "Choose Action" : "Click a piece");
+  // 1. INTEGRATED: NEW PIECE INTERACTION MATRIX
+  const PIECE_INTERACTION_TABLE = {
+    KING: {
+      NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+    },
+    DEFENDER: {
+      NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
+      SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+    },
+    DEFLECTOR: {
+      WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
+      NORTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 'WEST', isDestroyed: false } },
+      EAST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }
+    },
+    SWITCH: {
+      WEST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'NORTH', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } },
+      NORTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'EAST', isDestroyed: false } },
+      EAST:  { 0: { reflect: 'SOUTH', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } },
+      SOUTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'WEST', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'WEST', isDestroyed: false } }
     }
+  };
+
+  const START_STATE = () => ({
+    turn: "BLUE",
+    moveNumber: 1,
+    winner: null,
+    lastLaserPathStr: "",
+    lastLaserDestroyed: false,
+    lastLaserColor: null,
+    lastLog: "Blue to move.",
+    pieces: [
+      {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
+      {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
+      {id: "pmpfqugdq4", pieceType: "DEFENDER", color: "RED", rotation: 0, x: 4, y: 7},
+      {id: "pmpfquhvx5", pieceType: "DEFENDER", color: "RED", rotation: 2, x: 6, y: 7},
+      {id: "pmpfqunnp6", pieceType: "DEFENDER", color: "BLUE", rotation: 2, x: 5, y: 0},
+      {id: "pmpfquoqi7", pieceType: "DEFENDER", color: "BLUE", rotation: 2, x: 3, y: 0},
+      {id: "pmpfqvc388", pieceType: "SWITCH", color: "BLUE", rotation: 0, x: 5, y: 3},
+      {id: "pmpfqvfrb9", pieceType: "SWITCH", color: "BLUE", rotation: 1, x: 4, y: 3},
+      {id: "pmpfqvl06a", pieceType: "SWITCH", color: "RED", rotation: 0, x: 4, y: 4},
+      {id: "pmpfqvre4b", pieceType: "SWITCH", color: "RED", rotation: 1, x: 5, y: 4},
+      {id: "pmpfqwdqec", pieceType: "LASER", color: "RED", rotation: 2, x: 0, y: 7},
+      {id: "pmpfqy5dve", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 0},
+      {id: "pmpfqya0pf", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 3},
+      {id: "pmpfqyd1rg", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 2, y: 4},
+      {id: "pmpfqz0jlj", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 0, y: 3},
+      {id: "pmpfqz7fpk", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 0, y: 4},
+      {id: "pmpfqzj2ul", pieceType: "DEFLECTOR", color: "BLUE", rotation: 3, x: 7, y: 1},
+      {id: "pmpfr0e5km", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 6, y: 2},
+      {id: "pmpfr0t7zn", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 4},
+      {id: "pmpfr0ww1o", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 7, y: 3},
+      {id: "pmpfr18esp", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 9, y: 3},
+      {id: "pmpfr1bjtq", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 9, y: 4},
+      {id: "pmpfr2ek5s", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 3, y: 5},
+      {id: "pmpfr2sl8u", pieceType: "DEFLECTOR", color: "RED", rotation: 1, x: 2, y: 6},
+      {id: "pmpfr337lv", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 7},
+      {id: "pmpfr69imw", pieceType: "LASER", color: "BLUE", rotation: 0, x: 9, y: 0},
+    ],
+  });
+
+  const el = {
+    board: document.getElementById("board"),
+    log: document.getElementById("log"),
+    turnPill: document.getElementById("turnPill"),
+    movePill: document.getElementById("movePill"),
+    savePill: document.getElementById("savePill"),
+    turnBadge: document.getElementById("turnBadge"),
+    phaseBadge: document.getElementById("phaseBadge"),
+    selectedLabel: document.getElementById("selectedLabel"),
+    actionLabel: document.getElementById("actionLabel"),
+    blueKingLabel: document.getElementById("blueKingLabel"),
+    redKingLabel: document.getElementById("redKingLabel"),
+    pieceTypeValue: document.getElementById("pieceTypeValue"),
+    pieceColorValue: document.getElementById("pieceColorValue"),
+    piecePosValue: document.getElementById("piecePosValue"),
+    pieceRotValue: document.getElementById("pieceRotValue"),
+    rotateCCW: document.getElementById("rotateCCW"),
+    rotateCW: document.getElementById("rotateCW"),
+    fireBtn: document.getElementById("fireBtn"),
+    resetBtn: document.getElementById("resetBtn"),
+    moveBtn: document.getElementById("moveBtn"),
+    selectBtn: document.getElementById("selectBtn"),
+    rotateCCWBtn: document.getElementById("rotateCCWBtn"),
+    rotateCWBtn: document.getElementById("rotateCWBtn"),
+    endTurnBtn: document.getElementById("endTurnBtn"),
+  };
+
+  let state = loadState() || START_STATE();
+  let selectedId = null;
+  let cursor = { x: 0, y: 0 };
+  let flashTimer = null;
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem("laserchess_local_state");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.pieces)) return null;
+      return parsed;
+    } catch { return null; }
+  }
+  function saveState() {
+    localStorage.setItem("laserchess_local_state", JSON.stringify(state));
+    el.savePill.textContent = "Saved locally";
+  }
+  function clone(v) { return JSON.parse(JSON.stringify(v)); }
+  function pieceImage(piece) { return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`; }
+  function pieceAt(x, y, pieces = state.pieces) { return pieces.find(p => p.x === x && p.y === y) || null; }
+  function isReservedSquare(x, y, color) {
+    const arr = color === "BLUE" ? RES_BLUE : RES_RED;
+    return arr.some(s => s.x === x && s.y === y);
+  }
+  function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
+  function normalizeRotation(rot) { return ((rot % 4) + 4) % 4; }
+  function myLaser() { return state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn) || null; }
+  function enemyColor(c) { return c === "BLUE" ? "RED" : "BLUE"; }
+  function getSelectedPiece() { return selectedId ? state.pieces.find(p => p.id === selectedId) || null : null; }
   
-    function legalMoves(piece) {
-      const moves = [];
-      if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return moves;
-      for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-          if (dx === 0 && dy === 0) continue;
-          const nx = piece.x + dx;
-          const ny = piece.y + dy;
-          if (!inBounds(nx, ny)) continue;
-          if (isReservedSquare(nx, ny, piece.color)) continue;
-          const occ = pieceAt(nx, ny);
-          if (!occ) {
-            moves.push({ type: "move", x: nx, y: ny });
-          } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-            if (!isReservedSquare(piece.x, piece.y, occ.color)) {
-              moves.push({ type: "swap", x: nx, y: ny });
-            }
+  function selectPiece(pieceOrNull) {
+    selectedId = pieceOrNull ? pieceOrNull.id : null;
+    updateSelectionUI();
+    render();
+  }
+  
+  function log(msg, kind = "muted") {
+    const div = document.createElement("div");
+    div.className = `log-entry ${kind}`;
+    div.textContent = msg;
+    el.log.prepend(div);
+  }
+
+  function updateSelectionUI() {
+    const piece = getSelectedPiece();
+    el.selectedLabel.textContent = piece ? `${piece.color} ${piece.pieceType}` : "None";
+    el.pieceTypeValue.textContent = piece ? piece.pieceType : "—";
+    el.pieceColorValue.textContent = piece ? piece.color : "—";
+    el.piecePosValue.textContent = piece ? `(${piece.x}, ${piece.y})` : "—";
+    el.pieceRotValue.textContent = piece ? String(piece.rotation ?? 0) : "—";
+    el.turnPill.textContent = `Turn: ${state.turn}`;
+    el.movePill.textContent = `Move ${state.moveNumber}`;
+    el.turnBadge.textContent = `${state.turn} to move`;
+    el.turnBadge.className = `turn-badge ${state.turn === "BLUE" ? "turn-blue" : "turn-red"}`;
+    el.blueKingLabel.textContent = state.pieces.some(p => p.pieceType === "KING" && p.color === "BLUE") ? "Alive" : "Down";
+    el.redKingLabel.textContent = state.pieces.some(p => p.pieceType === "KING" && p.color === "RED") ? "Alive" : "Down";
+    el.phaseBadge.textContent = state.winner ? `${state.winner} wins` : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
+    el.actionLabel.textContent = state.winner ? "Game over" : (piece ? "Choose move / rotate / fire" : "Click a piece");
+  }
+
+  function legalMoves(piece) {
+    const moves = [];
+    if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return moves;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = piece.x + dx;
+        const ny = piece.y + dy;
+        if (!inBounds(nx, ny)) continue;
+        if (isReservedSquare(nx, ny, piece.color)) continue;
+        const occ = pieceAt(nx, ny);
+        if (!occ) {
+          moves.push({ type: "move", x: nx, y: ny });
+        } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
+          if (!isReservedSquare(piece.x, piece.y, occ.color)) {
+            moves.push({ type: "swap", x: nx, y: ny });
           }
         }
       }
-      return moves;
     }
-  
-    function movePiece(piece, nx, ny) {
-      if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
-      const occ = pieceAt(nx, ny);
-      if (occ) {
-        if (piece.pieceType !== "SWITCH") return false;
-        if (!(occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) return false;
-        if (isReservedSquare(piece.x, piece.y, occ.color)) return false;
-        const ox = piece.x, oy = piece.y;
-        piece.x = nx; piece.y = ny;
-        occ.x = ox; occ.y = oy;
-        return true;
-      }
-      if (isReservedSquare(nx, ny, piece.color)) return false;
-      if (Math.max(Math.abs(nx - piece.x), Math.abs(ny - piece.y)) !== 1) return false;
+    return moves;
+  }
+
+  function movePiece(piece, nx, ny) {
+    if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
+    const occ = pieceAt(nx, ny);
+    if (occ) {
+      if (piece.pieceType !== "SWITCH") return false;
+      if (!(occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) return false;
+      if (isReservedSquare(piece.x, piece.y, occ.color)) return false;
+      const ox = piece.x, oy = piece.y;
       piece.x = nx; piece.y = ny;
+      occ.x = ox; occ.y = oy;
       return true;
     }
-  
-    // RAYCAST PHYSICS CORE ENGINE
-    function traceLaserEngine(pieces, shooter) {
-      const NUM_TO_DIR = { 0: 'SOUTH', 1: 'EAST', 2: 'NORTH', 3: 'WEST' };
-      const INBOUND_MAP = { NORTH: 'SOUTH', SOUTH: 'NORTH', EAST: 'WEST', WEST: 'EAST' };
+    if (isReservedSquare(nx, ny, piece.color)) return false;
+    if (Math.max(Math.abs(nx - piece.x), Math.abs(ny - piece.y)) !== 1) return false;
+    piece.x = nx; piece.y = ny;
+    return true;
+  }
+
+  // 2. INTEGRATED: RAYCAST PHYSICS CORE ENGINE
+  function traceLaserEngine(pieces, shooter) {
+    // Map initial game rotation to string directions
+    const NUM_TO_DIR = { 0: 'SOUTH', 1: 'EAST', 2: 'NORTH', 3: 'WEST' };
+    const DIR_TO_NUM = { 'SOUTH': 0, 'EAST': 1, 'NORTH': 2, 'WEST': 3 };
+    const INBOUND_MAP = { NORTH: 'SOUTH', SOUTH: 'NORTH', EAST: 'WEST', WEST: 'EAST' };
+    
+    // The laser always fires from its front face. Original game sets rotations to map to directions.
+    let currentDirNum = [3, 2, 1, 0][normalizeRotation(shooter.rotation || 0)];
+    let currentDir = NUM_TO_DIR[currentDirNum];
+    let currentX = shooter.x;
+    let currentY = shooter.y;
+
+    const vectors = {
+      NORTH: { dx: 0, dy: -1 },
+      EAST:  { dx: 1, dy: 0 },
+      SOUTH: { dx: 0, dy: 1 },
+      WEST:  { dx: -1, dy: 0 }
+    };
+
+    let startX = currentX * CELL + CELL / 2;
+    let startY = currentY * CELL + CELL / 2;
+    let points = [[startX, startY]];
+    
+    let isDestroyed = false;
+    let destroyedPiece = null;
+    let looped = false;
+    let steps = 0;
+    const maxSteps = 100;
+    let seen = new Set();
+
+    while (steps < maxSteps) {
+      steps++;
+      let vec = vectors[currentDir];
+      if (!vec) break;
       
-      let currentDirNum = [3, 2, 1, 0][normalizeRotation(shooter.rotation || 0)];
-      let currentDir = NUM_TO_DIR[currentDirNum];
-      let currentX = shooter.x;
-      let currentY = shooter.y;
-  
-      const vectors = { NORTH: { dx: 0, dy: -1 }, EAST: { dx: 1, dy: 0 }, SOUTH: { dx: 0, dy: 1 }, WEST: { dx: -1, dy: 0 } };
-  
-      let startX = currentX * CELL + CELL / 2;
-      let startY = currentY * CELL + CELL / 2;
-      let points = [[startX, startY]];
+      let nextX = currentX + vec.dx;
+      let nextY = currentY + vec.dy;
       
-      let isDestroyed = false, destroyedPiece = null, looped = false;
-      let steps = 0; const maxSteps = 100;
-      let seen = new Set();
-  
-      while (steps < maxSteps) {
-        steps++;
-        let vec = vectors[currentDir];
-        if (!vec) break;
+      let targetX = nextX * CELL + CELL / 2;
+      let targetY = nextY * CELL + CELL / 2;
+
+      // Board Bounds verification instead of tutorial 3x3
+      if (nextX < 0 || nextX >= W || nextY < 0 || nextY >= H) {
+        points.push([startX + vec.dx * (CELL * 1.5), startY + vec.dy * (CELL * 1.5)]);
+        break;
+      }
+
+      const stateKey = `${nextX},${nextY},${currentDir}`;
+      if (seen.has(stateKey)) {
+        looped = true;
+        break;
+      }
+      seen.add(stateKey);
+
+      points.push([targetX, targetY]);
+      currentX = nextX;
+      currentY = nextY;
+
+      let piece = pieceAt(currentX, currentY, pieces);
+      
+      if (piece) {
+        let inboundDir = INBOUND_MAP[currentDir];
+        const matrix = PIECE_INTERACTION_TABLE[piece.pieceType];
         
-        let nextX = currentX + vec.dx;
-        let nextY = currentY + vec.dy;
-        
-        let targetX = nextX * CELL + CELL / 2;
-        let targetY = nextY * CELL + CELL / 2;
-  
-        if (nextX < 0 || nextX >= W || nextY < 0 || nextY >= H) {
-          points.push([startX + vec.dx * (CELL * 1.5), startY + vec.dy * (CELL * 1.5)]);
-          break;
-        }
-  
-        const stateKey = `${nextX},${nextY},${currentDir}`;
-        if (seen.has(stateKey)) { looped = true; break; }
-        seen.add(stateKey);
-  
-        points.push([targetX, targetY]);
-        currentX = nextX; currentY = nextY;
-  
-        let piece = pieceAt(currentX, currentY, pieces);
-        
-        if (piece) {
-          let inboundDir = INBOUND_MAP[currentDir];
-          const matrix = PIECE_INTERACTION_TABLE[piece.pieceType];
-          
-          if (matrix) {
-            const cellConfig = matrix?.[inboundDir]?.[normalizeRotation(piece.rotation || 0)];
-            if (cellConfig) {
-              if (cellConfig.isDestroyed) {
-                isDestroyed = true;
-                destroyedPiece = piece;
-                break;
-              }
-              if (cellConfig.reflect === null) break; 
-              currentDir = cellConfig.reflect;
+        // Exclude the active laser from colliding with itself when starting
+        if (matrix) {
+          const cellConfig = matrix?.[inboundDir]?.[normalizeRotation(piece.rotation || 0)];
+          if (cellConfig) {
+            if (cellConfig.isDestroyed) {
+              isDestroyed = true;
+              destroyedPiece = piece;
+              break;
             }
+            if (cellConfig.reflect === null) break; // Blocked
+            currentDir = cellConfig.reflect;
           }
         }
-        startX = targetX; startY = targetY;
       }
-  
-      let pathStr = `M ${points[0][0]} ${points[0][1]}`;
-      for (let i = 1; i < points.length; i++) pathStr += ` L ${points[i][0]} ${points[i][1]}`;
-      return { pathStr, isDestroyed, destroyedPiece, looped };
+      startX = targetX;
+      startY = targetY;
     }
-  
-    function fireLaser() {
-      if (state.winner) return false;
-      const shooter = myLaser();
-      if (!shooter) return false;
-      
-      const result = traceLaserEngine(clone(state.pieces), shooter);
-      
-      state.lastLaserPathStr = result.pathStr;
-      state.lastLaserDestroyed = result.isDestroyed;
-      state.lastLaserColor = shooter.color;
-  
-      if (result.isDestroyed && result.destroyedPiece) {
-        const victim = result.destroyedPiece;
-        const idx = state.pieces.findIndex(p => p.id === victim.id);
-        if (idx >= 0) {
-          state.pieces.splice(idx, 1);
-          log(`${state.turn} laser destroyed ${victim.color} ${victim.pieceType} at (${victim.x}, ${victim.y}).`, "bad");
-        }
-        if (victim.pieceType === "KING") {
-          state.winner = state.turn;
-          log(`👑 ${state.turn} WINS by destroying the enemy KING.`, "good");
-        }
-      } else if (result.looped) {
-        log(`${state.turn} laser looped infinitely.`, "warn");
-      } else {
-        log(`${state.turn} fired the laser (No hits).`, "muted");
+
+    let pathStr = `M ${points[0][0]} ${points[0][1]}`;
+    for (let i = 1; i < points.length; i++) pathStr += ` L ${points[i][0]} ${points[i][1]}`;
+    return { pathStr, isDestroyed, destroyedPiece, looped };
+  }
+
+  function fireLaser() {
+    if (state.winner) return false;
+    const shooter = myLaser();
+    if (!shooter) return false;
+    
+    const result = traceLaserEngine(clone(state.pieces), shooter);
+    
+    // Update state variables for visual rendering
+    state.lastLaserPathStr = result.pathStr;
+    state.lastLaserDestroyed = result.isDestroyed;
+    state.lastLaserColor = shooter.color;
+
+    if (result.isDestroyed && result.destroyedPiece) {
+      const victim = result.destroyedPiece;
+      const idx = state.pieces.findIndex(p => p.id === victim.id);
+      if (idx >= 0) {
+        state.pieces.splice(idx, 1);
+        log(`${state.turn} laser destroyed ${victim.color} ${victim.pieceType} at (${victim.x}, ${victim.y}).`, "bad");
       }
-  
-      state.lastLog = `${state.turn} fired.`;
-      state.turn = enemyColor(state.turn);
-      state.moveNumber += 1;
-      selectedId = null;
-      saveState();
-      updateSelectionUI();
-      render();
-      flashLaserPath();
-      return true;
+      if (victim.pieceType === "KING") {
+        state.winner = state.turn;
+        log(`${state.turn} wins by destroying the enemy KING.`, "good");
+      }
+    } else if (result.looped) {
+      log(`${state.turn} laser looped through the board.`, "warn");
+    } else {
+      log(`${state.turn} fired the laser.`, "good");
     }
-  
-    function doMoveOrSwap(targetX, targetY) {
-      if (state.winner) return false;
-      const piece = getSelectedPiece();
-      if (!piece || piece.color !== state.turn) return false;
-      const occ = pieceAt(targetX, targetY);
-      let ok = false;
-      if (!occ) {
-        ok = movePiece(piece, targetX, targetY);
-        if (ok) log(`${state.turn} moved ${piece.pieceType} to (${targetX}, ${targetY}).`, "good");
-      } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-        ok = movePiece(piece, targetX, targetY);
-        if (ok) log(`${state.turn} swapped with ${occ.color} ${occ.pieceType}.`, "good");
-      }
-      if (ok) {
-        selectedId = null;
-        state.turn = enemyColor(state.turn);
-        state.moveNumber += 1;
-        state.lastLaserPathStr = "";
-        saveState();
-        updateSelectionUI();
-        render();
-      }
-      return ok;
+
+    state.lastLog = `${state.turn} fired.`;
+    state.turn = enemyColor(state.turn);
+    state.moveNumber += 1;
+    selectedId = null;
+    saveState();
+    updateSelectionUI();
+    render();
+    flashLaserPath();
+    return true;
+  }
+
+  function doMoveOrSwap(targetX, targetY) {
+    if (state.winner) return false;
+    const piece = getSelectedPiece();
+    if (!piece || piece.color !== state.turn) return false;
+    const occ = pieceAt(targetX, targetY);
+    let ok = false;
+    if (!occ) {
+      ok = movePiece(piece, targetX, targetY);
+      if (ok) log(`${state.turn} moved ${piece.pieceType} to (${targetX}, ${targetY}).`, "good");
+    } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
+      ok = movePiece(piece, targetX, targetY);
+      if (ok) log(`${state.turn} swapped with ${occ.color} ${occ.pieceType}.`, "good");
     }
-  
-    function rotateSelected(delta) {
-      const piece = getSelectedPiece();
-      if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
-      piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-      log(`${state.turn} rotated ${piece.pieceType}.`, "good");
+    if (ok) {
       selectedId = null;
       state.turn = enemyColor(state.turn);
       state.moveNumber += 1;
@@ -558,235 +368,319 @@
       saveState();
       updateSelectionUI();
       render();
-      return true;
     }
-  
-    function rotateCCW() { return rotateSelected(3); }
-    function rotateCW() { return rotateSelected(1); }
-  
-    function resetGame() {
-      state = START_STATE();
-      selectedId = null;
-      cursor = { x: 0, y: 0 };
-      localStorage.removeItem("laserchess_local_state");
-      log("Game initialized.", "good");
-      updateSelectionUI();
-      render();
-    }
-  
-    function flashLaserPath() {
-      if (flashTimer) clearTimeout(flashTimer);
-      flashTimer = setTimeout(() => {
-        state.lastLaserPathStr = "";
-        render();
-      }, 1800);
-    }
-  
-    function svgEl(name, attrs = {}) {
-      const node = document.createElementNS("http://www.w3.org/2000/svg", name);
-      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
-      return node;
-    }
-  
-    function drawBoard() {
-      const svg = el.board;
-      svg.innerHTML = "";
-  
-      svg.appendChild(svgEl("defs", {}, {}));
-      const defs = svg.querySelector("defs");
-      defs.appendChild(svgEl("filter", { id: "softGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" }));
-      const f1 = svgEl("feGaussianBlur", { stdDeviation: "3.5", result: "blur" });
-      const f2 = svgEl("feMerge");
-      f2.appendChild(svgEl("feMergeNode", { in: "blur" }));
-      f2.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
-      defs.appendChild(f1);
-      defs.appendChild(f2);
-  
-      // Draw Grid
-      for (let y = 0; y < H; y++) {
-        for (let x = 0; x < W; x++) {
-          const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
-          const rect = svgEl("rect", {
-            x: x * CELL, y: y * CELL, width: CELL, height: CELL,
-            fill: reserved === "blue" ? "rgba(3,233,244,.05)" : reserved === "red" ? "rgba(244,67,54,.05)" : "rgba(0,0,0,.35)",
-            stroke: "rgba(255,255,255,.05)", "stroke-width": "1"
-          });
-          rect.style.cursor = "pointer";
-          rect.addEventListener("click", () => onCellClick(x, y));
-          svg.appendChild(rect);
-        }
-      }
-  
-      // Coordinate labels
-      for (let x = 0; x < W; x++) {
-        const t = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.2)", "font-size": "12", "letter-spacing": "2" });
-        t.textContent = x;
-        svg.appendChild(t);
-      }
-      for (let y = 0; y < H; y++) {
-        const t = svgEl("text", { x: 10, y: y * CELL + 55, fill: "rgba(255,255,255,.2)", "font-size": "12", "letter-spacing": "2" });
-        t.textContent = y;
-        svg.appendChild(t);
-      }
-  
-      const sel = getSelectedPiece();
-      if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
-        for (const m of legalMoves(sel)) {
-          svg.appendChild(svgEl("rect", {
-            x: m.x * CELL + 8, y: m.y * CELL + 8, width: CELL - 16, height: CELL - 16,
-            fill: "rgba(36,209,143,.15)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "8", ry: "8",
-            "pointer-events": "none"
-          }));
-        }
-      }
-  
-      // GLOWING BEAM RENDERING
-      if (state.lastLaserPathStr) {
-        const laserGroup = svgEl('g');
-        const isDestructionEvent = state.lastLaserDestroyed;
-        const themeColor = state.lastLaserColor === 'BLUE' ? '3, 233, 244' : '244, 67, 54';
-  
-        laserGroup.appendChild(svgEl('path', {
-          d: state.lastLaserPathStr, stroke: isDestructionEvent ? 'rgba(120, 120, 120, 0.4)' : `rgba(${themeColor}, 0.55)`,
-          "stroke-width": "14", "stroke-linecap": "round", "stroke-linejoin": "round", fill: "none", filter: "url(#softGlow)"
-        }));
-        
-        laserGroup.appendChild(svgEl('path', {
-          d: state.lastLaserPathStr, stroke: isDestructionEvent ? 'rgba(160, 160, 160, 0.9)' : '#fff',
-          "stroke-width": "4", "stroke-linecap": "round", "stroke-linejoin": "round", fill: "none"
-        }));
-  
-        svg.appendChild(laserGroup);
-      }
-  
-      const target = sel || pieceAt(cursor.x, cursor.y);
-      if (target) {
-        svg.appendChild(svgEl("rect", {
-          x: target.x * CELL + 4, y: target.y * CELL + 4, width: CELL - 8, height: CELL - 8,
-          fill: "none", stroke: target.color === 'BLUE' ? "rgba(3,233,244,.8)" : "rgba(244,67,54,.8)", 
-          "stroke-width": "2", rx: "8", ry: "8", "pointer-events": "none"
-        }));
-      }
-  
-      for (const piece of state.pieces) {
-        const g = svgEl("g");
-        const x = piece.x * CELL;
-        const y = piece.y * CELL;
-        
-        // If image is broken, basic fallback logic applies, but browser handles it natively
-        const img = svgEl("image", { href: pieceImage(piece), x: x + 10, y: y + 10, width: CELL - 20, height: CELL - 20, preserveAspectRatio: "xMidYMid meet" });
-        const cx = x + 50, cy = y + 50;
-        img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${cx} ${cy})`);
-        g.appendChild(img);
-  
-        g.appendChild(svgEl("rect", {
-          x: x + 10, y: y + 10, width: CELL - 20, height: CELL - 20, fill: "none",
-          stroke: piece.color === "BLUE" ? "rgba(3,233,244,.2)" : "rgba(244,67,54,.2)",
-          "stroke-width": "1", rx: "8", ry: "8"
-        }));
-        
-        g.style.cursor = "pointer";
-        g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
-        svg.appendChild(g);
-      }
-  
-      if (state.winner) {
-        svg.appendChild(svgEl("rect", {
-          x: 200, y: 300, width: 600, height: 200, rx: 16, ry: 16,
-          fill: "rgba(8,10,14,.9)", stroke: state.winner === 'BLUE' ? "var(--theme-color)" : "var(--red-theme)", "stroke-width": "2"
-        }));
-        const t = svgEl("text", { x: 500, y: 395, "text-anchor": "middle", fill: "white", "font-size": "48", "font-weight": "900", "letter-spacing": "4" });
-        t.textContent = `${state.winner} WINS`;
-        svg.appendChild(t);
-        const s = svgEl("text", { x: 500, y: 440, "text-anchor": "middle", fill: "rgba(255,255,255,.6)", "font-size": "18", "letter-spacing": "2" });
-        s.textContent = "Press Reset Game to play again";
-        svg.appendChild(s);
-      }
-    }
-  
-    function onPieceClick(piece) {
-      if (state.winner) return;
-      if (piece.color !== state.turn) { log(`It is ${state.turn}'s turn.`, "warn"); return; }
-      if (selectedId === piece.id) { selectPiece(null); return; }
-      selectPiece(piece);
-      cursor = { x: piece.x, y: piece.y };
-      updateSelectionUI();
-      render();
-    }
-  
-    function onCellClick(x, y) {
-      if (state.winner) return;
-      cursor = { x, y };
-      const sel = getSelectedPiece();
-      if (sel && sel.color === state.turn) {
-        const occ = pieceAt(x, y);
-        if (!occ || (occ.id !== sel.id && sel.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER"))) {
-          if (doMoveOrSwap(x, y)) return;
-        } else if (occ.id === sel.id) {
-          selectPiece(null); return;
-        }
-      }
-      const occ = pieceAt(x, y);
-      occ ? onPieceClick(occ) : selectPiece(null);
-    }
-  
-    function render() {
-      drawBoard();
-      updateSelectionUI();
-      saveState();
-    }
-  
-    function handleKeyboard(e) {
-      if (e.defaultPrevented) return;
-      const key = e.key;
-      if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
-      if (key === "q" || key === "Q") { e.preventDefault(); rotateCCW(); return; }
-      if (key === "e" || key === "E") { e.preventDefault(); rotateCW(); return; }
-      if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
-    }
-  
-    el.rotateCCW.addEventListener("click", () => rotateCCW());
-    el.rotateCW.addEventListener("click", () => rotateCW());
-    el.fireBtn.addEventListener("click", () => fireLaser());
-    el.resetBtn.addEventListener("click", () => resetGame());
-    el.moveBtn.addEventListener("click", () => {
-      const p = getSelectedPiece();
-      if (p) {
-        if (legalMoves(p).length) log("Choose a highlighted square to move.", "muted");
-        else log("No legal adjacent moves.", "warn");
-      }
-    });
-    el.selectBtn.addEventListener("click", () => {
-      if (selectedId) selectPiece(null);
-      else { const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); }
-    });
-    el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
-    el.rotateCWBtn.addEventListener("click", () => rotateCW());
-    el.endTurnBtn.addEventListener("click", () => {
-      if (state.winner) return;
-      selectedId = null; state.turn = enemyColor(state.turn); state.moveNumber += 1; state.lastLaserPathStr = "";
-      log(`Turn passed.`, "muted"); render();
-    });
-  
-    window.addEventListener("keydown", handleKeyboard);
-    el.board.addEventListener("click", (e) => {
-      if (state.winner) return;
-      const pt = el.board.createSVGPoint();
-      pt.x = e.clientX; pt.y = e.clientY;
-      const screenCTM = el.board.getScreenCTM();
-      if (!screenCTM) return;
-      const local = pt.matrixTransform(screenCTM.inverse());
-      const x = Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL)));
-      const y = Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL)));
-      onCellClick(x, y);
-    });
-  
-    if (!localStorage.getItem("laserchess_local_state")) log("Game Ready.", "good");
-    else log("Local game loaded.", "muted");
-    
+    return ok;
+  }
+
+  function rotateSelected(delta) {
+    const piece = getSelectedPiece();
+    if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
+    piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
+    log(`${state.turn} rotated ${piece.pieceType}.`, "good");
+    selectedId = null;
+    state.turn = enemyColor(state.turn);
+    state.moveNumber += 1;
+    state.lastLaserPathStr = "";
+    saveState();
     updateSelectionUI();
     render();
-  })();
-  </script>
-</body>
-</html>
+    return true;
+  }
+
+  function rotateCCW() { return rotateSelected(3); }
+  function rotateCW() { return rotateSelected(1); }
+
+  function resetGame() {
+    state = START_STATE();
+    selectedId = null;
+    cursor = { x: 0, y: 0 };
+    localStorage.removeItem("laserchess_local_state");
+    log("Game reset.", "muted");
+    updateSelectionUI();
+    render();
+  }
+
+  function flashLaserPath() {
+    if (flashTimer) clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => {
+      state.lastLaserPathStr = "";
+      render();
+    }, 1400);
+  }
+
+  function svgEl(name, attrs = {}) {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
+    return node;
+  }
+
+  function drawBoard() {
+    const svg = el.board;
+    svg.innerHTML = "";
+
+    svg.appendChild(svgEl("defs", {}, {}));
+    const defs = svg.querySelector("defs");
+    defs.appendChild(svgEl("filter", { id: "softGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" }));
+    const f1 = svgEl("feGaussianBlur", { stdDeviation: "3.5", result: "blur" });
+    const f2 = svgEl("feMerge");
+    f2.appendChild(svgEl("feMergeNode", { in: "blur" }));
+    f2.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    defs.appendChild(f1);
+    defs.appendChild(f2);
+
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
+        const rect = svgEl("rect", {
+          x: x * CELL, y: y * CELL, width: CELL, height: CELL,
+          fill: reserved === "blue" ? "rgba(3,233,244,.08)" : reserved === "red" ? "rgba(244,67,54,.08)" : "rgba(0,0,0,.42)",
+          stroke: "rgba(255,255,255,.07)",
+          "stroke-width": "1"
+        });
+        rect.style.cursor = "pointer";
+        rect.addEventListener("click", () => onCellClick(x, y));
+        svg.appendChild(rect);
+      }
+    }
+
+    for (let x = 0; x < W; x++) {
+      svg.appendChild(svgEl("text", {
+        x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14", "font-family": "Quantico, sans-serif", "letter-spacing": "2"
+      }));
+      svg.lastChild.textContent = x;
+    }
+    for (let y = 0; y < H; y++) {
+      const t = svgEl("text", {
+        x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14", "font-family": "Quantico, sans-serif", "letter-spacing": "2"
+      });
+      t.textContent = y;
+      svg.appendChild(t);
+    }
+
+    const sel = getSelectedPiece();
+    if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
+      for (const m of legalMoves(sel)) {
+        const r = svgEl("rect", {
+          x: m.x * CELL + 6, y: m.y * CELL + 6, width: CELL - 12, height: CELL - 12,
+          fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10", ry: "10"
+        });
+        svg.appendChild(r);
+      }
+    }
+
+    // 3. INTEGRATED: VECTOR GRAPHICS RENDERING MATRIX (GLOWING BEAMS)
+    if (state.lastLaserPathStr) {
+      const laserGroup = svgEl('g');
+      const isDestructionEvent = state.lastLaserDestroyed;
+      const themeColor = state.lastLaserColor === 'BLUE' ? '3, 233, 244' : '244, 67, 54';
+
+      const glow = svgEl('path', {
+        d: state.lastLaserPathStr,
+        stroke: isDestructionEvent ? 'rgba(120, 120, 120, 0.4)' : `rgba(${themeColor}, 0.45)`,
+        "stroke-width": "16",
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+        fill: "none",
+        filter: "url(#softGlow)"
+      });
+      
+      const core = svgEl('path', {
+        d: state.lastLaserPathStr,
+        stroke: isDestructionEvent ? 'rgba(160, 160, 160, 0.9)' : 'rgba(255, 255, 255, 1)',
+        "stroke-width": "3.5",
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+        fill: "none"
+      });
+
+      laserGroup.appendChild(glow);
+      laserGroup.appendChild(core);
+      svg.appendChild(laserGroup);
+    }
+
+    const target = sel || pieceAt(cursor.x, cursor.y);
+    if (target) {
+      svg.appendChild(svgEl("rect", {
+        x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12,
+        fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10", ry: "10"
+      }));
+    } else {
+      svg.appendChild(svgEl("rect", {
+        x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16,
+        fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", ry: "10", "stroke-dasharray": "10 8"
+      }));
+    }
+
+    for (const piece of state.pieces) {
+      const g = svgEl("g");
+      const x = piece.x * CELL;
+      const y = piece.y * CELL;
+      const img = svgEl("image", {
+        href: pieceImage(piece),
+        x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12,
+        preserveAspectRatio: "xMidYMid meet"
+      });
+      const cx = x + 50, cy = y + 50;
+      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${cx} ${cy})`);
+      g.appendChild(img);
+
+      g.appendChild(svgEl("rect", {
+        x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12,
+        fill: "none",
+        stroke: piece.color === "BLUE" ? "rgba(3,233,244,.18)" : "rgba(244,67,54,.18)",
+        "stroke-width": "1.5",
+        rx: "10", ry: "10"
+      }));
+      g.style.cursor = "pointer";
+      g.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        onPieceClick(piece);
+      });
+      svg.appendChild(g);
+    }
+
+    if (state.winner) {
+      svg.appendChild(svgEl("rect", {
+        x: 150, y: 255, width: 700, height: 290, rx: 26, ry: 26,
+        fill: "rgba(0,0,0,.72)", stroke: "rgba(255,255,255,.14)", "stroke-width": "1.5"
+      }));
+      const t = svgEl("text", {
+        x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900", "font-family": "Quantico, sans-serif", "letter-spacing": "4"
+      });
+      t.textContent = `${state.winner} WINS`;
+      svg.appendChild(t);
+      const s = svgEl("text", {
+        x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22", "font-family": "Quantico, sans-serif", "letter-spacing": "3"
+      });
+      s.textContent = "Press Reset to start again";
+      svg.appendChild(s);
+    }
+  }
+
+  function onPieceClick(piece) {
+    if (state.winner) return;
+    if (piece.color !== state.turn) {
+      log(`It is ${state.turn}'s turn.`, "warn");
+      return;
+    }
+    if (selectedId === piece.id) {
+      selectPiece(null);
+      return;
+    }
+    selectPiece(piece);
+    cursor = { x: piece.x, y: piece.y };
+    state.lastLog = `Selected ${piece.color} ${piece.pieceType}.`;
+    updateSelectionUI();
+    render();
+  }
+
+  function onCellClick(x, y) {
+    if (state.winner) return;
+    cursor = { x, y };
+    const sel = getSelectedPiece();
+    if (sel && sel.color === state.turn) {
+      const occ = pieceAt(x, y);
+      if (!occ) {
+        const moved = doMoveOrSwap(x, y);
+        if (moved) return;
+      } else if (occ.id !== sel.id && sel.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
+        const moved = doMoveOrSwap(x, y);
+        if (moved) return;
+      } else if (occ.id === sel.id) {
+        selectPiece(null);
+        return;
+      }
+    }
+    if (!pieceAt(x, y)) {
+      selectPiece(null);
+    } else {
+      onPieceClick(pieceAt(x, y));
+    }
+  }
+
+  function render() {
+    drawBoard();
+    updateSelectionUI();
+    saveState();
+  }
+
+  function endTurnWithoutAction() {
+    if (state.winner) return;
+    selectedId = null;
+    state.turn = enemyColor(state.turn);
+    state.moveNumber += 1;
+    state.lastLaserPathStr = "";
+    log(`Turn passed to ${state.turn}.`, "muted");
+    saveState();
+    updateSelectionUI();
+    render();
+  }
+
+  function handleKeyboard(e) {
+    if (e.defaultPrevented) return;
+    const key = e.key;
+    if (key === "ArrowUp") { e.preventDefault(); cursor.y = Math.max(0, cursor.y - 1); render(); return; }
+    if (key === "ArrowDown") { e.preventDefault(); cursor.y = Math.min(H - 1, cursor.y + 1); render(); return; }
+    if (key === "ArrowLeft") { e.preventDefault(); cursor.x = Math.max(0, cursor.x - 1); render(); return; }
+    if (key === "ArrowRight") { e.preventDefault(); cursor.x = Math.min(W - 1, cursor.x + 1); render(); return; }
+    if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
+    if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); p ? onPieceClick(p) : onCellClick(cursor.x, cursor.y); return; }
+    if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
+    if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
+    if (key === "l" || key === "L") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
+    if (key === "r" || key === "R") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
+    if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
+    if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
+  }
+
+  el.rotateCCW.addEventListener("click", () => rotateCCW());
+  el.rotateCW.addEventListener("click", () => rotateCW());
+  el.fireBtn.addEventListener("click", () => fireLaser());
+  el.resetBtn.addEventListener("click", () => resetGame());
+  el.moveBtn.addEventListener("click", () => {
+    const p = getSelectedPiece();
+    if (p) {
+      const moves = legalMoves(p);
+      if (moves.length) {
+        log("Choose a highlighted square to move or swap.", "muted");
+      } else {
+        log("No legal adjacent moves for that piece.", "warn");
+      }
+    } else {
+      log("Click one of your pieces first.", "muted");
+    }
+  });
+  el.selectBtn.addEventListener("click", () => {
+    if (selectedId) selectPiece(null);
+    else {
+      const p = pieceAt(cursor.x, cursor.y);
+      if (p) onPieceClick(p);
+    }
+  });
+  el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
+  el.rotateCWBtn.addEventListener("click", () => rotateCW());
+  el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
+
+  window.addEventListener("keydown", handleKeyboard);
+  el.board.addEventListener("click", (e) => {
+    if (state.winner) return;
+    const pt = el.board.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const screenCTM = el.board.getScreenCTM();
+    if (!screenCTM) return;
+    const local = pt.matrixTransform(screenCTM.inverse());
+    const x = Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL)));
+    const y = Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL)));
+    onCellClick(x, y);
+  });
+
+  if (!localStorage.getItem("laserchess_local_state")) {
+    log("New game started.", "good");
+  } else {
+    log("Loaded saved local game.", "muted");
+  }
+  updateSelectionUI();
+  render();
+})();
+</script>
