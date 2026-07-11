@@ -346,36 +346,8 @@
     SWITCH: "switch",
     LASER: "laser",
   };
-const PIECE_INTERACTION_TABLE = {
-    KING: {
-      SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-    },
-    DEFENDER: {
-      // Defenders block lasers hitting their shield. Destroyed from sides/back.
-      SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
-      NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-    },
-    DEFLECTOR: {
-      // Deflectors reflect on their mirror hypotenuse. Flat sides are destroyed.
-      SOUTH: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } },
-      EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
-      NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      WEST:  { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
-    },
-    SWITCH: {
-      // Switches have dual mirrors. They reflect all incoming paths and are indestructible.
-      SOUTH: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
-      EAST:  { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
-      NORTH: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
-      WEST:  { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
-    }
-  };
-  
+const INTERACTION_MAP = { KING: { NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } } }, DEFENDER: { NORTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }, EAST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } }, SOUTH: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } } }, DEFLECTOR: { WEST:  { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } }, NORTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 'WEST', isDestroyed: false } }, EAST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }, SOUTH: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: null, isDestroyed: true } } }, SWITCH: { WEST:  { 0: { reflect: 'NORTH', isDestroyed: false }, 1: { reflect: 'SOUTH', isDestroyed: false }, 2: { reflect: 'NORTH', isDestroyed: false }, 3: { reflect: 'SOUTH', isDestroyed: false } }, NORTH: { 0: { reflect: 'WEST', isDestroyed: false }, 1: { reflect: 'EAST', isDestroyed: false }, 2: { reflect: 'WEST', isDestroyed: false }, 3: { reflect: 'EAST', isDestroyed: false } }, EAST:  { 0: { reflect: 'SOUTH', isDestroyed: false }, 1: { reflect: 'NORTH', isDestroyed: false }, 2: { reflect: 'SOUTH', isDestroyed: false }, 3: { reflect: 'NORTH', isDestroyed: false } }, SOUTH: { 0: { reflect: 'EAST', isDestroyed: false }, 1: { reflect: 'WEST', isDestroyed: false }, 2: { reflect: 'EAST', isDestroyed: false }, 3: { reflect: 'WEST', isDestroyed: false } } } };
+
   const START_STATE = () => ({
     turn: "BLUE",
     moveNumber: 1,
