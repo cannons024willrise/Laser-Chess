@@ -264,6 +264,15 @@
       margin-left: auto;
     }
 
+    /* Laser Emission Glow Path Keys */
+    @keyframes laserPulse {
+      0%, 100% { stroke-width: 15px; opacity: 0.35; }
+      50% { stroke-width: 22px; opacity: 0.65; }
+    }
+    .animated-laser-glow {
+      animation: laserPulse 0.65s ease-in-out infinite;
+    }
+
     @media (max-width: 640px){
       .dialogue-overlay { padding: .15rem; }
       .layout {
@@ -315,6 +324,7 @@
             <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
             <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
             <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
+            <button class="btn" id="endTurnBtn">Pass / End Turn</button>
             <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
           </div>
         </section>
@@ -333,6 +343,7 @@
   const W = 10, H = 8;
   const CELL = 100;
   
+  // Directions: 0 = SOUTH, 1 = EAST, 2 = NORTH, 3 = WEST
   const DIRS = [
     {dx: 0, dy: 1},   // 0 south
     {dx: 1, dy: 0},   // 1 east
@@ -350,29 +361,32 @@
 
   const INTERACTION_MAP = {
     KING: {
-      0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true }
+      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
     DEFENDER: {
-      // Rotation 0: Shield faces South. Blocks lasers traveling North (dir 2).
+      // Rotation 0: Shield South. Blocks laser moving North (dir 2).
       0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      // Rotation 1: Shield rotated 90 deg CW, faces West. Blocks lasers traveling East (dir 1).
+      // Rotation 1: Shield West. Blocks laser moving East (dir 1).
       1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      // Rotation 2: Shield rotated 180 deg, faces North. Blocks lasers traveling South (dir 0).
+      // Rotation 2: Shield North. Blocks laser moving South (dir 0).
       2: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      // Rotation 3: Shield rotated 270 deg CW, faces East. Blocks lasers traveling West (dir 3).
+      // Rotation 3: Shield East. Blocks laser moving West (dir 3).
       3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } }
     },
     DEFLECTOR: {
       0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } },
-      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
+      1: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
       2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      3: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
     },
     SWITCH: {
-      0: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
-      1: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
-      2: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
-      3: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } }
+      0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+      1: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
+      2: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+      3: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
     },
     LASER: {
       0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
@@ -420,12 +434,14 @@
   const el = {
     board: document.getElementById("board"),
     movePill: document.getElementById("movePill"),
+    savePill: document.getElementById("savePill"),
     turnBadge: document.getElementById("turnBadge"),
     phaseBadge: document.getElementById("phaseBadge"),
     fireBtn: document.getElementById("fireBtn"),
     resetBtn: document.getElementById("resetBtn"),
     rotateCCWBtn: document.getElementById("rotateCCWBtn"),
     rotateCWBtn: document.getElementById("rotateCWBtn"),
+    endTurnBtn: document.getElementById("endTurnBtn"),
   };
 
   let state = loadState() || START_STATE();
@@ -454,7 +470,7 @@
   }
   function isReservedSquare(x, y, color) {
     const arr = color === "BLUE" ? RES_BLUE : RES_RED;
-    return arr.some(s => s.x === x && s.y === y);
+    return arr.some(s => s.x === s.x && s.x === x && s.y === y);
   }
   function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
   function normalizeRotation(rot) { return ((rot % 4) + 4) % 4; }
@@ -484,15 +500,14 @@
         const nx = piece.x + dx;
         const ny = piece.y + dy;
         if (!inBounds(nx, ny)) continue;
-        
-        if (isReservedSquare(nx, ny, enemyColor(piece.color))) continue;
-
+        if (isReservedSquare(nx, ny, piece.color)) continue;
         const occ = pieceAt(nx, ny);
         if (!occ) {
           moves.push({ type: "move", x: nx, y: ny });
         } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-          if (isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) continue;
-          moves.push({ type: "swap", x: nx, y: ny });
+          if (!isReservedSquare(piece.x, piece.y, occ.color)) {
+            moves.push({ type: "swap", x: nx, y: ny });
+          }
         }
       }
     }
@@ -501,24 +516,23 @@
 
   function movePiece(piece, nx, ny) {
     if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
-    if (isReservedSquare(nx, ny, enemyColor(piece.color))) return false;
-
     const occ = pieceAt(nx, ny);
     if (occ) {
       if (piece.pieceType !== "SWITCH") return false;
       if (!(occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) return false;
-      if (isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) return false;
-      
+      if (isReservedSquare(piece.x, piece.y, occ.color)) return false;
       const ox = piece.x, oy = piece.y;
       piece.x = nx; piece.y = ny;
       occ.x = ox; occ.y = oy;
       return true;
     }
+    if (isReservedSquare(nx, ny, piece.color)) return false;
     if (Math.max(Math.abs(nx - piece.x), Math.abs(ny - piece.y)) !== 1) return false;
     piece.x = nx; piece.y = ny;
     return true;
   }
 
+  /* Corrected vector offset: map standard rotations 0,1,2,3 -> North(2), East(1), South(0), West(3) */
   function laserDirFromRotation(rot) { return [2, 1, 0, 3][normalizeRotation(rot)]; }
 
   function interactWithLaser(piece, incomingDir) {
@@ -530,6 +544,7 @@
     if (out.isDestroyed) return { kind: "stop", destroyed: true };
     if (out.reflect !== null) return { kind: "reflect", reflected: out.reflect, destroyed: false };
     
+    // Blocked (like defender's active side)
     return { kind: "stop", destroyed: false, blocked: true };
   }
 
@@ -585,7 +600,13 @@
     if (!piece || piece.color !== state.turn) return false;
     let ok = movePiece(piece, targetX, targetY);
     if (ok) {
-      fireLaser();
+      selectedId = null;
+      state.turn = enemyColor(state.turn);
+      state.moveNumber += 1;
+      state.lastLaserPath = [];
+      saveState();
+      updateSelectionUI();
+      render();
     }
     return ok;
   }
@@ -594,7 +615,13 @@
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
     piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    fireLaser();
+    selectedId = null;
+    state.turn = enemyColor(state.turn);
+    state.moveNumber += 1;
+    state.lastLaserPath = [];
+    saveState();
+    updateSelectionUI();
+    render();
     return true;
   }
 
@@ -630,13 +657,37 @@
 
     svg.appendChild(svgEl("defs", {}, {}));
     const defs = svg.querySelector("defs");
-    defs.appendChild(svgEl("filter", { id: "softGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" }));
-    const f1 = svgEl("feGaussianBlur", { stdDeviation: "3.5", result: "blur" });
-    const f2 = svgEl("feMerge");
-    f2.appendChild(svgEl("feMergeNode", { in: "blur" }));
-    f2.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
-    defs.appendChild(f1);
-    defs.appendChild(f2);
+    
+    // Core White Laser Glow Filter
+    const fLaser = svgEl("filter", { id: "laserGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" });
+    fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "4", result: "blur" }));
+    const mLaser = svgEl("feMerge");
+    mLaser.appendChild(svgEl("feMergeNode", { in: "blur" }));
+    mLaser.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    fLaser.appendChild(mLaser);
+    defs.appendChild(fLaser);
+
+    // Blue Team Matrix Glow Filter
+    const fBlue = svgEl("filter", { id: "blueGlow", x: "-20%", y: "-20%", width: "140%", height: "140%" });
+    fBlue.appendChild(svgEl("feGaussianBlur", { stdDeviation: "3", result: "blur" }));
+    fBlue.appendChild(svgEl("feComponentTransfer", { in: "blur", result: "brightGlow" }));
+    fBlue.querySelector("feComponentTransfer").appendChild(svgEl("feFuncA", { type: "linear", slope: "1.8" }));
+    const mBlue = svgEl("feMerge");
+    mBlue.appendChild(svgEl("feMergeNode", { in: "brightGlow" }));
+    mBlue.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    fBlue.appendChild(mBlue);
+    defs.appendChild(fBlue);
+
+    // Red Team Matrix Glow Filter
+    const fRed = svgEl("filter", { id: "redGlow", x: "-20%", y: "-20%", width: "140%", height: "140%" });
+    fRed.appendChild(svgEl("feGaussianBlur", { stdDeviation: "3", result: "blur" }));
+    fRed.appendChild(svgEl("feComponentTransfer", { in: "blur", result: "brightGlow" }));
+    fRed.querySelector("feComponentTransfer").appendChild(svgEl("feFuncA", { type: "linear", slope: "1.8" }));
+    const mRed = svgEl("feMerge");
+    mRed.appendChild(svgEl("feMergeNode", { in: "brightGlow" }));
+    mRed.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    fRed.appendChild(mRed);
+    defs.appendChild(fRed);
 
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
@@ -674,10 +725,26 @@
       }
     }
 
+    // White Laser Path with dynamic CSS animation properties
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
-      svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,246,102,.35)", "stroke-width": "16", "stroke-linecap": "round", "stroke-linejoin": "round", filter: "url(#softGlow)" }));
-      svg.appendChild(svgEl("polyline", { points: pts, fill: "none", stroke: "rgba(255,255,255,.95)", "stroke-width": "4", "stroke-linecap": "round", "stroke-linejoin": "round" }));
+      svg.appendChild(svgEl("polyline", { 
+        points: pts, 
+        fill: "none", 
+        stroke: "rgba(255,255,255,.45)", 
+        "stroke-linecap": "round", 
+        "stroke-linejoin": "round", 
+        filter: "url(#laserGlow)",
+        class: "animated-laser-glow"
+      }));
+      svg.appendChild(svgEl("polyline", { 
+        points: pts, 
+        fill: "none", 
+        stroke: "rgba(255,255,255,1)", 
+        "stroke-width": "4", 
+        "stroke-linecap": "round", 
+        "stroke-linejoin": "round" 
+      }));
     }
 
     const target = sel || pieceAt(cursor.x, cursor.y);
@@ -695,7 +762,20 @@
       img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
       g.appendChild(img);
 
-      g.appendChild(svgEl("rect", { x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: piece.color === "BLUE" ? "rgba(3,233,244,.18)" : "rgba(244,67,54,.18)", "stroke-width": "1.5", rx: "10" }));
+      // Dedicated glow settings applied directly onto boundaries
+      const isBlue = piece.color === "BLUE";
+      g.appendChild(svgEl("rect", { 
+        x: x + 6, 
+        y: y + 6, 
+        width: CELL - 12, 
+        height: CELL - 12, 
+        fill: "none", 
+        stroke: isBlue ? "rgba(3,233,244,.85)" : "rgba(244,67,54,.85)", 
+        "stroke-width": "2.5", 
+        rx: "10",
+        filter: isBlue ? "url(#blueGlow)" : "url(#redGlow)"
+      }));
+      
       g.style.cursor = "pointer";
       g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
       svg.appendChild(g);
@@ -714,12 +794,6 @@
 
   function onPieceClick(piece) {
     if (state.winner) return;
-    
-    const sel = getSelectedPiece();
-    if (sel && sel.color === state.turn && sel.pieceType === "SWITCH") {
-      if (doMoveOrSwap(piece.x, piece.y)) return;
-    }
-
     if (piece.color !== state.turn) return;
     if (selectedId === piece.id) { selectPiece(null); return; }
     selectPiece(piece);
@@ -750,6 +824,17 @@
     saveState();
   }
 
+  function endTurnWithoutAction() {
+    if (state.winner) return;
+    selectedId = null;
+    state.turn = enemyColor(state.turn);
+    state.moveNumber += 1;
+    state.lastLaserPath = [];
+    saveState();
+    updateSelectionUI();
+    render();
+  }
+
   function handleKeyboard(e) {
     const key = e.key;
     if (key === "ArrowUp") { e.preventDefault(); cursor.y = Math.max(0, cursor.y - 1); render(); return; }
@@ -768,6 +853,7 @@
   el.rotateCWBtn.addEventListener("click", () => rotateCW());
   el.fireBtn.addEventListener("click", () => fireLaser());
   el.resetBtn.addEventListener("click", () => resetGame());
+  el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
 
   window.addEventListener("keydown", handleKeyboard);
   el.board.addEventListener("click", (e) => {
