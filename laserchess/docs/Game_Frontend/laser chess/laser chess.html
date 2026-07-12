@@ -277,27 +277,6 @@
       animation: laserPulse 0.5s ease-in-out infinite;
     }
 
-    /* TACTICAL GLOW UP: Soft gradual bloom aura box 
-       Direct implementation of multi-layered shadow breathing matching the themes.css lobby-pulse/hover rules.
-    */
-    @keyframes tacticalAuraPulse {
-      0%, 100% {
-        transform: scale(0.95);
-        fill-opacity: 0.08;
-        stroke-opacity: 0.25;
-        filter: url(#lowBloomFilter);
-      }
-      50% {
-        transform: scale(1.03);
-        fill-opacity: 0.32;
-        stroke-opacity: 0.90;
-        filter: url(#highBloomFilter);
-      }
-    }
-    .animated-aura-box {
-      animation: tacticalAuraPulse 2.8s infinite ease-in-out;
-    }
-
     @media (max-width: 640px){
       .dialogue-overlay { padding: .15rem; }
       .layout {
@@ -685,24 +664,6 @@
     fLaser.appendChild(mLaser);
     defs.appendChild(fLaser);
 
-    // Multi-Layer Low-Bloom Filter (For base breathing matrix state)
-    const fLow = svgEl("filter", { id: "lowBloomFilter", x: "-40%", y: "-40%", width: "180%", height: "180%" });
-    fLow.appendChild(svgEl("feGaussianBlur", { stdDeviation: "5", result: "blur1" }));
-    const mLow = svgEl("feMerge");
-    mLow.appendChild(svgEl("feMergeNode", { in: "blur1" }));
-    mLow.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
-    fLow.appendChild(mLow);
-    defs.appendChild(fLow);
-
-    // Multi-Layer High-Bloom Filter (For full progressive peak gradient bloom)
-    const fHigh = svgEl("filter", { id: "highBloomFilter", x: "-60%", y: "-60%", width: "220%", height: "220%" });
-    fHigh.appendChild(svgEl("feGaussianBlur", { stdDeviation: "12", result: "blur2" }));
-    const mHigh = svgEl("feMerge");
-    mHigh.appendChild(svgEl("feMergeNode", { in: "blur2" }));
-    mHigh.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
-    fHigh.appendChild(mHigh);
-    defs.appendChild(fHigh);
-
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
         const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
@@ -772,22 +733,6 @@
       const g = svgEl("g");
       const x = piece.x * CELL;
       const y = piece.y * CELL;
-      const isBlue = piece.color === "BLUE";
-      
-      // Dynamic, fading, pulsating translucent square background aura box
-      const auraBox = svgEl("rect", { 
-        x: x + 6, 
-        y: y + 6, 
-        width: CELL - 12, 
-        height: CELL - 12, 
-        fill: isBlue ? "rgba(3,233,244,1)" : "rgba(244,67,54,1)", 
-        stroke: isBlue ? "rgba(3,233,244,1)" : "rgba(244,67,54,1)", 
-        "stroke-width": "1.5", 
-        rx: "10",
-        class: "animated-aura-box"
-      });
-      auraBox.style.transformOrigin = `${x + 50}px ${y + 50}px`;
-      g.appendChild(auraBox);
 
       // Main Piece Graphic Asset Layer
       const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
