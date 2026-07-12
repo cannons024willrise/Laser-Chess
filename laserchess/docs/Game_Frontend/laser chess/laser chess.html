@@ -240,6 +240,11 @@
       border-color: rgba(var(--theme-rgb), .35);
       box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 8px 20px rgba(0,0,0,.24);
     }
+    .btn.primary {
+      background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
+      border-color: rgba(var(--theme-rgb), .35);
+      color: var(--theme-color);
+    }
     .btn.danger {
       background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
       border-color: rgba(244,67,54,.38);
@@ -307,6 +312,7 @@
             </div>
           </div>
           <div class="controls">
+            <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
             <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
             <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
             <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
@@ -347,13 +353,13 @@
       0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true }
     },
     DEFENDER: {
-      // Rotation 0: Red Octagon Shield is facing South (0). Laser from South is blocked.
+      // Rotation 0: Red Octagon Shield faces South (0). Laser from South is blocked.
       0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      // Rotation 1: Red Octagon Shield is facing West (3). Laser from West is blocked.
+      // Rotation 1: Red Octagon Shield faces West (3). Laser from West is blocked.
       1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
-      // Rotation 2: Red Octagon Shield is facing North (2). Laser from North is blocked.
+      // Rotation 2: Red Octagon Shield faces North (2). Laser from North is blocked.
       2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      // Rotation 3: Red Octagon Shield is facing East (1). Laser from East is blocked.
+      // Rotation 3: Red Octagon Shield faces East (1). Laser from East is blocked.
       3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
     DEFLECTOR: {
@@ -416,6 +422,7 @@
     movePill: document.getElementById("movePill"),
     turnBadge: document.getElementById("turnBadge"),
     phaseBadge: document.getElementById("phaseBadge"),
+    fireBtn: document.getElementById("fireBtn"),
     resetBtn: document.getElementById("resetBtn"),
     rotateCCWBtn: document.getElementById("rotateCCWBtn"),
     rotateCWBtn: document.getElementById("rotateCWBtn"),
@@ -546,10 +553,10 @@
     return { path, hit: { piece, destroyed: !!outcome.destroyed, blocked: !!outcome.blocked }, looped: false };
   }
 
-  function autoFireLaser() {
-    if (state.winner) return;
+  function fireLaser() {
+    if (state.winner) return false;
     const shooter = state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn);
-    if (!shooter) return;
+    if (!shooter) return false;
     const dir = laserDirFromRotation(shooter.rotation || 0);
     const startX = shooter.x + DIRS[dir].dx;
     const startY = shooter.y + DIRS[dir].dy;
@@ -569,6 +576,7 @@
     updateSelectionUI();
     render();
     flashLaserPath();
+    return true;
   }
 
   function doMoveOrSwap(targetX, targetY) {
@@ -577,7 +585,7 @@
     if (!piece || piece.color !== state.turn) return false;
     let ok = movePiece(piece, targetX, targetY);
     if (ok) {
-      autoFireLaser();
+      fireLaser();
     }
     return ok;
   }
@@ -586,7 +594,7 @@
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
     piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    autoFireLaser();
+    fireLaser();
     return true;
   }
 
@@ -752,11 +760,13 @@
     if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); else onCellClick(cursor.x, cursor.y); return; }
     if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
     if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
+    if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
     if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
   }
 
   el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
   el.rotateCWBtn.addEventListener("click", () => rotateCW());
+  el.fireBtn.addEventListener("click", () => fireLaser());
   el.resetBtn.addEventListener("click", () => resetGame());
 
   window.addEventListener("keydown", handleKeyboard);
