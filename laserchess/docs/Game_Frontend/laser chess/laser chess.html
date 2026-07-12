@@ -352,10 +352,7 @@
 
   const INTERACTION_MAP = {
     KING: {
-      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+      0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true }
     },
     DEFENDER: {
       // Rotation 0: Armored front faces South (0). Laser from South is blocked safely.
@@ -492,14 +489,14 @@
         const ny = piece.y + dy;
         if (!inBounds(nx, ny)) continue;
         
-        // Loophole prevention 1: A piece can NEVER move onto the enemy's zone
+        // Block going onto enemy reserved squares
         if (isReservedSquare(nx, ny, enemyColor(piece.color))) continue;
 
         const occ = pieceAt(nx, ny);
         if (!occ) {
           moves.push({ type: "move", x: nx, y: ny });
         } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-          // Loophole prevention 2: A swap can NEVER land any piece onto a forbidden zone
+          // If swapping, the target piece will land on the switch's current position.
           if (isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) continue;
           
           moves.push({ type: "swap", x: nx, y: ny });
@@ -512,7 +509,7 @@
   function movePiece(piece, nx, ny) {
     if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
     
-    // Strict zone verification for regular movements
+    // Block going onto enemy reserved zones
     if (isReservedSquare(nx, ny, enemyColor(piece.color))) return false;
 
     const occ = pieceAt(nx, ny);
@@ -520,7 +517,7 @@
       if (piece.pieceType !== "SWITCH") return false;
       if (!(occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) return false;
       
-      // Strict zone verification for swap landing zones (no cross-color zone trespass)
+      // Target piece cannot cross-land onto an enemy zone
       if (isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) return false;
       
       const ox = piece.x, oy = piece.y;
@@ -741,6 +738,13 @@
 
   function onPieceClick(piece) {
     if (state.winner) return;
+    
+    // Check if we can execute a swap first before selecting or throwing an ownership error
+    const sel = getSelectedPiece();
+    if (sel && sel.color === state.turn && sel.pieceType === "SWITCH") {
+      if (doMoveOrSwap(piece.x, piece.y)) return;
+    }
+
     if (piece.color !== state.turn) return;
     if (selectedId === piece.id) { selectPiece(null); return; }
     selectPiece(piece);
