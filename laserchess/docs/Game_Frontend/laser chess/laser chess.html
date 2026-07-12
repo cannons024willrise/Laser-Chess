@@ -447,7 +447,7 @@
   let selectedId = null;
   let cursor = { x: 0, y: 0 };
   let flashTimer = null;
-  let isDelaying = false; // Lock variable to prevent actions during timeouts
+  let isDelaying = false;
 
   function loadState() {
     try {
@@ -630,7 +630,7 @@
     state = START_STATE();
     selectedId = null;
     cursor = { x: 0, y: 0 };
-    isDelaying = false; // Reset the lock when the game resets
+    isDelaying = false;
     localStorage.removeItem("laserchess_local_state");
     updateSelectionUI();
     render();
@@ -770,8 +770,21 @@
 
   function onPieceClick(piece) {
     if (state.winner || isDelaying) return;
-    if (piece.color !== state.turn) return;
-    if (selectedId === piece.id) { selectPiece(null); return; }
+    
+    const sel = getSelectedPiece();
+    
+    // Intercept clicks on pieces (both friendly and enemy) if we are trying to swap with a Switch
+    if (sel && sel.color === state.turn && sel.id !== piece.id) {
+      if (sel.pieceType === "SWITCH" && (piece.pieceType === "DEFLECTOR" || piece.pieceType === "DEFENDER")) {
+        // Attempt the swap. If successful, exit the function.
+        if (doMoveOrSwap(piece.x, piece.y)) return;
+      }
+    }
+
+    // Standard Selection Logic
+    if (piece.color !== state.turn) return; // Cannot select enemy pieces
+    if (selectedId === piece.id) { selectPiece(null); return; } // Deselect if clicking the same piece
+    
     selectPiece(piece);
     cursor = { x: piece.x, y: piece.y };
     render();
