@@ -733,6 +733,17 @@
       const g = svgEl("g");
       const x = piece.x * CELL;
       const y = piece.y * CELL;
+      const isBlue = piece.color === "BLUE";
+
+      // Subtle Background Bloom / Soft Glow Circle
+      const bloom = svgEl("circle", {
+        cx: x + 50,
+        cy: y + 50,
+        r: 28,
+        fill: isBlue ? "rgba(3,233,244,0.35)" : "rgba(244,67,54,0.35)"
+      });
+      bloom.style.filter = "blur(12px)";
+      g.appendChild(bloom);
 
       // Main Piece Graphic Asset Layer
       const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
