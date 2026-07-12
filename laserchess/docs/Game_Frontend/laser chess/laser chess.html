@@ -358,9 +358,13 @@
       3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
     DEFENDER: {
+      // Rotation 0: Armored front faces South (0). Laser from South is blocked safely.
       0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      // Rotation 1: Armored front faces West (3). Laser from West is blocked safely.
       1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
+      // Rotation 2: Armored front faces North (2). Laser from North is blocked safely.
       2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      // Rotation 3: Armored front faces East (1). Laser from East is blocked safely.
       3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
     DEFLECTOR: {
@@ -487,14 +491,18 @@
         const nx = piece.x + dx;
         const ny = piece.y + dy;
         if (!inBounds(nx, ny)) continue;
-        if (isReservedSquare(nx, ny, piece.color)) continue;
+        
+        // Loophole prevention 1: A piece can NEVER move onto the enemy's zone
+        if (isReservedSquare(nx, ny, enemyColor(piece.color))) continue;
+
         const occ = pieceAt(nx, ny);
         if (!occ) {
           moves.push({ type: "move", x: nx, y: ny });
         } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-          if (!isReservedSquare(piece.x, piece.y, occ.color)) {
-            moves.push({ type: "swap", x: nx, y: ny });
-          }
+          // Loophole prevention 2: A swap can NEVER land any piece onto a forbidden zone
+          if (isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) continue;
+          
+          moves.push({ type: "swap", x: nx, y: ny });
         }
       }
     }
@@ -503,17 +511,23 @@
 
   function movePiece(piece, nx, ny) {
     if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
+    
+    // Strict zone verification for regular movements
+    if (isReservedSquare(nx, ny, enemyColor(piece.color))) return false;
+
     const occ = pieceAt(nx, ny);
     if (occ) {
       if (piece.pieceType !== "SWITCH") return false;
       if (!(occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) return false;
-      if (isReservedSquare(piece.x, piece.y, occ.color)) return false;
+      
+      // Strict zone verification for swap landing zones (no cross-color zone trespass)
+      if (isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) return false;
+      
       const ox = piece.x, oy = piece.y;
       piece.x = nx; piece.y = ny;
       occ.x = ox; occ.y = oy;
       return true;
     }
-    if (isReservedSquare(nx, ny, piece.color)) return false;
     if (Math.max(Math.abs(nx - piece.x), Math.abs(ny - piece.y)) !== 1) return false;
     piece.x = nx; piece.y = ny;
     return true;
@@ -531,7 +545,6 @@
     if (out.isDestroyed) return { kind: "stop", destroyed: true };
     if (out.reflect !== null) return { kind: "reflect", reflected: out.reflect, destroyed: false };
     
-    // Blocked (like defender's active side)
     return { kind: "stop", destroyed: false, blocked: true };
   }
 
