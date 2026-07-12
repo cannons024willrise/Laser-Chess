@@ -267,7 +267,6 @@
 
     /* --- THEMES.CSS INSPIRED ANIMATION MATRIX --- */
     
-    /* White Core Laser Vector Glow Loop */
     @keyframes laserPulse {
       0% { stroke-width: 10px; opacity: 0.15; }
       50% { stroke-width: 26px; opacity: 0.85; }
@@ -275,6 +274,24 @@
     }
     .animated-laser-glow {
       animation: laserPulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes tacticalAuraPulse {
+      0%, 100% {
+        transform: scale(0.95);
+        fill-opacity: 0.08;
+        stroke-opacity: 0.25;
+        filter: url(#lowBloomFilter);
+      }
+      50% {
+        transform: scale(1.03);
+        fill-opacity: 0.32;
+        stroke-opacity: 0.90;
+        filter: url(#highBloomFilter);
+      }
+    }
+    .animated-aura-box {
+      animation: tacticalAuraPulse 2.8s infinite ease-in-out;
     }
 
     @media (max-width: 640px){
@@ -400,6 +417,7 @@
     moveNumber: 1,
     winner: null,
     lastLaserPath: [],
+    history: {},
     pieces: [
       {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
       {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
@@ -454,6 +472,7 @@
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       if (!parsed || !Array.isArray(parsed.pieces)) return null;
+      if (!parsed.history) parsed.history = {}; // Ensure backward compatibility
       return parsed;
     } catch { return null; }
   }
@@ -487,8 +506,25 @@
     el.movePill.textContent = `Move ${state.moveNumber}`;
     el.turnBadge.textContent = `${state.turn} to move`;
     el.turnBadge.className = `turn-badge ${state.turn === "BLUE" ? "turn-blue" : "turn-red"}`;
-    el.phaseBadge.textContent = state.winner ? `${state.winner} wins` : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
+    el.phaseBadge.textContent = state.winner ? (state.winner === "DRAW" ? "DRAW" : `${state.winner} wins`) : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
   }
+
+  // --- REPETITION LOGIC ---
+  function getBoardSignature(pieces, turn) {
+    const sorted = [...pieces].sort((a, b) => a.id.localeCompare(b.id));
+    const serialized = sorted.map(p => `${p.id}:${p.x}:${p.y}:${p.rotation}`).join('|');
+    return `${turn}|${serialized}`;
+  }
+
+  function checkThreefoldRepetition() {
+    if (state.winner) return;
+    const sig = getBoardSignature(state.pieces, state.turn);
+    state.history[sig] = (state.history[sig] || 0) + 1;
+    if (state.history[sig] >= 3) {
+      state.winner = "DRAW";
+    }
+  }
+  // ------------------------
 
   function legalMoves(piece) {
     const moves = [];
@@ -584,6 +620,8 @@
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
     selectedId = null;
+    
+    checkThreefoldRepetition(); // Check for draw
     saveState();
     updateSelectionUI();
     render();
@@ -601,6 +639,8 @@
       state.turn = enemyColor(state.turn);
       state.moveNumber += 1;
       state.lastLaserPath = [];
+      
+      checkThreefoldRepetition(); // Check for draw
       saveState();
       updateSelectionUI();
       render();
@@ -616,6 +656,8 @@
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
     state.lastLaserPath = [];
+    
+    checkThreefoldRepetition(); // Check for draw
     saveState();
     updateSelectionUI();
     render();
@@ -655,7 +697,6 @@
     svg.appendChild(svgEl("defs", {}, {}));
     const defs = svg.querySelector("defs");
     
-    // Core White Laser Glow Filter
     const fLaser = svgEl("filter", { id: "laserGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" });
     fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "5", result: "blur" }));
     const mLaser = svgEl("feMerge");
@@ -663,6 +704,22 @@
     mLaser.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
     fLaser.appendChild(mLaser);
     defs.appendChild(fLaser);
+
+    const fLow = svgEl("filter", { id: "lowBloomFilter", x: "-40%", y: "-40%", width: "180%", height: "180%" });
+    fLow.appendChild(svgEl("feGaussianBlur", { stdDeviation: "5", result: "blur1" }));
+    const mLow = svgEl("feMerge");
+    mLow.appendChild(svgEl("feMergeNode", { in: "blur1" }));
+    mLow.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    fLow.appendChild(mLow);
+    defs.appendChild(fLow);
+
+    const fHigh = svgEl("filter", { id: "highBloomFilter", x: "-60%", y: "-60%", width: "220%", height: "220%" });
+    fHigh.appendChild(svgEl("feGaussianBlur", { stdDeviation: "12", result: "blur2" }));
+    const mHigh = svgEl("feMerge");
+    mHigh.appendChild(svgEl("feMergeNode", { in: "blur2" }));
+    mHigh.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    fHigh.appendChild(mHigh);
+    defs.appendChild(fHigh);
 
     for (let y = 0; y < H; y++) {
       for (let x = 0; x < W; x++) {
@@ -700,7 +757,6 @@
       }
     }
 
-    // Pure White Laser Beam Line
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
       svg.appendChild(svgEl("polyline", { 
@@ -734,18 +790,21 @@
       const x = piece.x * CELL;
       const y = piece.y * CELL;
       const isBlue = piece.color === "BLUE";
-
-      // Subtle Background Bloom / Soft Glow Circle
-      const bloom = svgEl("circle", {
-        cx: x + 50,
-        cy: y + 50,
-        r: 28,
-        fill: isBlue ? "rgba(3,233,244,0.35)" : "rgba(244,67,54,0.35)"
+      
+      const auraBox = svgEl("rect", { 
+        x: x + 6, 
+        y: y + 6, 
+        width: CELL - 12, 
+        height: CELL - 12, 
+        fill: isBlue ? "rgba(3,233,244,1)" : "rgba(244,67,54,1)", 
+        stroke: isBlue ? "rgba(3,233,244,1)" : "rgba(244,67,54,1)", 
+        "stroke-width": "1.5", 
+        rx: "10",
+        class: "animated-aura-box"
       });
-      bloom.style.filter = "blur(12px)";
-      g.appendChild(bloom);
+      auraBox.style.transformOrigin = `${x + 50}px ${y + 50}px`;
+      g.appendChild(auraBox);
 
-      // Main Piece Graphic Asset Layer
       const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
       img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
       g.appendChild(img);
@@ -758,7 +817,7 @@
     if (state.winner) {
       svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.85)", stroke: "rgba(255,255,255,.14)" }));
       const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
-      t1.textContent = `${state.winner} WINS`;
+      t1.textContent = state.winner === "DRAW" ? "DRAW" : `${state.winner} WINS`;
       svg.appendChild(t1);
       const t2 = svgEl("text", { x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22" });
       t2.textContent = "Press Reset to start again";
@@ -804,6 +863,8 @@
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
     state.lastLaserPath = [];
+    
+    checkThreefoldRepetition(); // Check for draw
     saveState();
     updateSelectionUI();
     render();
