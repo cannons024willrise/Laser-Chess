@@ -447,6 +447,7 @@
   let selectedId = null;
   let cursor = { x: 0, y: 0 };
   let flashTimer = null;
+  let isDelaying = false; // Lock variable to prevent actions during timeouts
 
   function loadState() {
     try {
@@ -592,23 +593,33 @@
   }
 
   function doMoveOrSwap(targetX, targetY) {
-    if (state.winner) return false;
+    if (state.winner || isDelaying) return false;
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn) return false;
     let ok = movePiece(piece, targetX, targetY);
     if (ok) {
-      // AUTOFIRE: Trigger laser immediately after move
-      fireLaser();
+      isDelaying = true;
+      render(); // Render immediately to show the move
+      setTimeout(() => {
+        fireLaser();
+        isDelaying = false; // Release the lock
+      }, 500); // Wait half a second before firing
     }
     return ok;
   }
 
   function rotateSelected(delta) {
+    if (isDelaying) return false;
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
     piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    // AUTOFIRE: Trigger laser immediately after rotation
-    fireLaser();
+    
+    isDelaying = true;
+    render(); // Render immediately to show the rotation
+    setTimeout(() => {
+      fireLaser();
+      isDelaying = false;
+    }, 500);
     return true;
   }
 
@@ -619,6 +630,7 @@
     state = START_STATE();
     selectedId = null;
     cursor = { x: 0, y: 0 };
+    isDelaying = false; // Reset the lock when the game resets
     localStorage.removeItem("laserchess_local_state");
     updateSelectionUI();
     render();
@@ -757,7 +769,7 @@
   }
 
   function onPieceClick(piece) {
-    if (state.winner) return;
+    if (state.winner || isDelaying) return;
     if (piece.color !== state.turn) return;
     if (selectedId === piece.id) { selectPiece(null); return; }
     selectPiece(piece);
@@ -766,7 +778,7 @@
   }
 
   function onCellClick(x, y) {
-    if (state.winner) return;
+    if (state.winner || isDelaying) return;
     cursor = { x, y };
     const sel = getSelectedPiece();
     if (sel && sel.color === state.turn) {
@@ -789,12 +801,16 @@
   }
 
   function endTurnWithoutAction() {
-    if (state.winner) return;
-    // AUTOFIRE: Trigger laser even if just passing turn
-    fireLaser();
+    if (state.winner || isDelaying) return;
+    isDelaying = true;
+    setTimeout(() => {
+      fireLaser();
+      isDelaying = false;
+    }, 500);
   }
 
   function handleKeyboard(e) {
+    if (isDelaying) return;
     const key = e.key;
     if (key === "ArrowUp") { e.preventDefault(); cursor.y = Math.max(0, cursor.y - 1); render(); return; }
     if (key === "ArrowDown") { e.preventDefault(); cursor.y = Math.min(H - 1, cursor.y + 1); render(); return; }
@@ -810,13 +826,13 @@
 
   el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
   el.rotateCWBtn.addEventListener("click", () => rotateCW());
-  el.fireBtn.addEventListener("click", () => fireLaser());
+  el.fireBtn.addEventListener("click", () => { if (!isDelaying) fireLaser(); });
   el.resetBtn.addEventListener("click", () => resetGame());
   el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
 
   window.addEventListener("keydown", handleKeyboard);
   el.board.addEventListener("click", (e) => {
-    if (state.winner) return;
+    if (state.winner || isDelaying) return;
     const pt = el.board.createSVGPoint();
     pt.x = e.clientX; pt.y = e.clientY;
     const screenCTM = el.board.getScreenCTM();
