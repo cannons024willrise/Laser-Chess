@@ -395,16 +395,12 @@
     }
   };
 
-  function getBoardSignature(pieces, turn) {
-    const sorted = [...pieces].sort((a,b) => a.id.localeCompare(b.id));
-    return JSON.stringify({
-        turn,
-        pieces: sorted.map(p => ({id: p.id, x: p.x, y: p.y, rotation: p.rotation}))
-    });
-  }
-
-  const START_STATE = () => {
-    const initialPieces = [
+  const START_STATE = () => ({
+    turn: "BLUE",
+    moveNumber: 1,
+    winner: null,
+    lastLaserPath: [],
+    pieces: [
       {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
       {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
       {id: "pmpfqugdq4", pieceType: "DEFENDER", color: "RED", rotation: 0, x: 4, y: 7},
@@ -431,16 +427,8 @@
       {id: "pmpfr2sl8u", pieceType: "DEFLECTOR", color: "RED", rotation: 1, x: 2, y: 6},
       {id: "pmpfr337lv", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 7},
       {id: "pmpfr69imw", pieceType: "LASER", color: "BLUE", rotation: 0, x: 9, y: 0},
-    ];
-    return {
-      turn: "BLUE",
-      moveNumber: 1,
-      winner: null,
-      lastLaserPath: [],
-      pieces: initialPieces,
-      history: [getBoardSignature(initialPieces, "BLUE")]
-    };
-  };
+    ],
+  });
 
   const el = {
     board: document.getElementById("board"),
@@ -466,7 +454,6 @@
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       if (!parsed || !Array.isArray(parsed.pieces)) return null;
-      if (!parsed.history) parsed.history = [getBoardSignature(parsed.pieces, parsed.turn)];
       return parsed;
     } catch { return null; }
   }
@@ -500,18 +487,7 @@
     el.movePill.textContent = `Move ${state.moveNumber}`;
     el.turnBadge.textContent = `${state.turn} to move`;
     el.turnBadge.className = `turn-badge ${state.turn === "BLUE" ? "turn-blue" : "turn-red"}`;
-    el.phaseBadge.textContent = state.winner 
-      ? (state.winner === "DRAW" ? "DRAW" : `${state.winner} wins`) 
-      : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
-  }
-
-  function recordHistory() {
-    const sig = getBoardSignature(state.pieces, state.turn);
-    const count = state.history.filter(h => h === sig).length;
-    if (count >= 2) {
-      state.winner = "DRAW";
-    }
-    state.history.push(sig);
+    el.phaseBadge.textContent = state.winner ? `${state.winner} wins` : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
   }
 
   function legalMoves(piece) {
@@ -608,7 +584,6 @@
     state.turn = enemyColor(state.turn);
     state.moveNumber += 1;
     selectedId = null;
-    recordHistory();
     saveState();
     updateSelectionUI();
     render();
@@ -622,14 +597,8 @@
     if (!piece || piece.color !== state.turn) return false;
     let ok = movePiece(piece, targetX, targetY);
     if (ok) {
-      selectedId = null;
-      state.turn = enemyColor(state.turn);
-      state.moveNumber += 1;
-      state.lastLaserPath = [];
-      recordHistory();
-      saveState();
-      updateSelectionUI();
-      render();
+      // AUTOFIRE: Trigger laser immediately after move
+      fireLaser();
     }
     return ok;
   }
@@ -638,14 +607,8 @@
     const piece = getSelectedPiece();
     if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
     piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
-    selectedId = null;
-    state.turn = enemyColor(state.turn);
-    state.moveNumber += 1;
-    state.lastLaserPath = [];
-    recordHistory();
-    saveState();
-    updateSelectionUI();
-    render();
+    // AUTOFIRE: Trigger laser immediately after rotation
+    fireLaser();
     return true;
   }
 
@@ -785,7 +748,7 @@
     if (state.winner) {
       svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.85)", stroke: "rgba(255,255,255,.14)" }));
       const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
-      t1.textContent = state.winner === "DRAW" ? "DRAW" : `${state.winner} WINS`;
+      t1.textContent = `${state.winner} WINS`;
       svg.appendChild(t1);
       const t2 = svgEl("text", { x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22" });
       t2.textContent = "Press Reset to start again";
@@ -827,14 +790,8 @@
 
   function endTurnWithoutAction() {
     if (state.winner) return;
-    selectedId = null;
-    state.turn = enemyColor(state.turn);
-    state.moveNumber += 1;
-    state.lastLaserPath = [];
-    recordHistory();
-    saveState();
-    updateSelectionUI();
-    render();
+    // AUTOFIRE: Trigger laser even if just passing turn
+    fireLaser();
   }
 
   function handleKeyboard(e) {
