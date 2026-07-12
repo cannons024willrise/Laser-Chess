@@ -353,14 +353,14 @@
       0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true }
     },
     DEFENDER: {
-      // Rotation 0: Shield faces South (0). Laser from South is blocked.
-      0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      // Rotation 1: Shield rotated 90 deg CW, faces West (3). Laser from West is blocked.
-      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
-      // Rotation 2: Shield rotated 180 deg, faces North (2). Laser from North is blocked.
-      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      // Rotation 3: Shield rotated 270 deg CW, faces East (1). Laser from East is blocked.
-      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+      // Rotation 0: Shield faces South. Blocks lasers traveling North (dir 2).
+      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      // Rotation 1: Shield rotated 90 deg CW, faces West. Blocks lasers traveling East (dir 1).
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      // Rotation 2: Shield rotated 180 deg, faces North. Blocks lasers traveling South (dir 0).
+      2: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      // Rotation 3: Shield rotated 270 deg CW, faces East. Blocks lasers traveling West (dir 3).
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } }
     },
     DEFLECTOR: {
       0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } },
