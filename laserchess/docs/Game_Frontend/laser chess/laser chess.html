@@ -578,7 +578,9 @@
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
       state.pieces.splice(state.pieces.findIndex(p => p.id === victim.id), 1);
-      if (victim.pieceType === "KING") state.winner = state.turn;
+      
+      // FIX: The person whose King dies loses, so the enemy of that king wins.
+      if (victim.pieceType === "KING") state.winner = enemyColor(victim.color);
     }
 
     state.turn = enemyColor(state.turn);
