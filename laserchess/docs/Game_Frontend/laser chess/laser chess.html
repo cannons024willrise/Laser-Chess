@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Laser Chess</title>
+  <title>Laser Chess with Matrix Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700;900&display=swap" rel="stylesheet">
@@ -94,11 +94,11 @@
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 240px);
       gap: 1rem;
       width: 100%;
       height: 100%;
-      max-width: 1600px;
+      max-width: 1800px;
       background: var(--panel);
       border: 2px solid rgba(255, 255, 255, 0.12);
       border-radius: 20px;
@@ -126,14 +126,13 @@
       background: rgba(0, 0, 0, 0.25);
       border: 1px solid var(--line);
       border-radius: 14px;
+      height: 100%;
     }
     .board-panel {
       padding: .25rem;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100%;
-      height: 100%;
       overflow: hidden;
     }
     .board-wrap {
@@ -167,6 +166,50 @@
       border-radius: 12px;
       touch-action: manipulation;
     }
+
+    /* Matrix Console Tab Panel Styles */
+    .matrix-panel {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: rgba(4, 6, 9, 0.85);
+    }
+    .matrix-header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .matrix-header h3 {
+      margin: 0;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--theme-color);
+    }
+    .matrix-view-container {
+      flex: 1;
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .matrix-grid-text {
+      font-family: "Courier New", Courier, monospace;
+      font-size: clamp(11px, 1.3vw, 16px);
+      line-height: 1.5;
+      white-space: pre;
+      color: #8fa3b3;
+      user-select: none;
+    }
+    .m-blue { color: var(--theme-color); font-weight: bold; }
+    .m-red { color: #ff6b6b; font-weight: bold; }
+    .m-empty { color: rgba(255, 255, 255, 0.15); }
+    .m-coord { color: #51697a; }
     
     .sidebar {
       width: 100%;
@@ -265,32 +308,6 @@
       margin-left: auto;
     }
 
-    /* Modal Styles */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-      display: none; justify-content: center; align-items: center; z-index: 100;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-content {
-      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-      padding: 1.5rem; width: 95%; max-width: 800px; max-height: 90vh; overflow-y: auto;
-      box-shadow: var(--shadow);
-    }
-    .interaction-table {
-      width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center; margin-bottom: 1rem;
-    }
-    .interaction-table th, .interaction-table td {
-      border: 1px solid var(--line); padding: 0.6rem;
-    }
-    .interaction-table th { 
-      background: rgba(255,255,255,0.05); color: var(--theme-color); text-transform: uppercase; 
-    }
-    .interaction-table td b { color: var(--text); font-weight: 900;}
-    .interaction-table .destroy { color: var(--red-theme); }
-    .interaction-table .block { color: var(--muted); }
-    .interaction-table .reflect { color: var(--theme-color); }
-
-    /* Base Keyframes for Inline Animations */
     @keyframes neonPulse {
       0% { stroke-width: 12px; opacity: 0.5; }
       50% { stroke-width: 28px; opacity: 1; }
@@ -302,21 +319,17 @@
       100% { stroke-width: 3px; opacity: 0.8; }
     }
 
-    @media (max-width: 640px){
-      .dialogue-overlay { padding: .15rem; }
+    @media (max-width: 980px){
       .layout {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 130px);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 150px);
+        grid-template-rows: minmax(0, 1.2fr) minmax(0, 0.8fr);
         padding: .4rem;
         gap: .35rem;
-        border-radius: 12px;
       }
-      .layout::before { border-radius: 12px; }
-      .kbd { display: none; }
-      .btn { font-size: 0.58rem; padding: .45rem .2rem; border-radius: 6px; }
-      .side-card h3 { font-size: 0.62rem; margin-bottom: 0.2rem; }
-      .turn-badge { font-size: 0.55rem; padding: .25rem .1rem; }
-      .interaction-table { font-size: 0.65rem; }
-      .interaction-table th, .interaction-table td { padding: 0.3rem; }
+      .matrix-panel {
+        grid-column: span 2;
+        height: 100%;
+      }
     }
   </style>
 </head>
@@ -342,6 +355,15 @@
         </div>
       </section>
 
+      <section class="panel matrix-panel">
+        <div class="matrix-header">
+          <h3>Real-time Board Matrix Tab</h3>
+        </div>
+        <div class="matrix-view-container">
+          <div id="matrixConsole" class="matrix-grid-text"></div>
+        </div>
+      </section>
+
       <aside class="sidebar">
         <section class="panel side-card">
           <div>
@@ -357,7 +379,6 @@
             <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
             <button class="btn" id="endTurnBtn">Pass / End Turn</button>
             <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
-            <button class="btn" id="rulesBtn">Rules Matrix <span class="kbd">M</span></button>
           </div>
         </section>
       </aside>
@@ -365,43 +386,10 @@
   </div>
 </div>
 
-<div id="rulesModal" class="modal-overlay">
-  <div class="modal-content">
-    <h3 style="margin-top:0; color: var(--theme-color); text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">Laser Interaction Matrix</h3>
-    <div style="overflow-x: auto;">
-      <table class="interaction-table">
-        <thead>
-          <tr><th>Piece</th><th>Inbound Vector</th><th>Rotation 0</th><th>Rotation 1</th><th>Rotation 2</th><th>Rotation 3</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><b>KING</b></td><td><b>ALL</b></td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td></tr>
-          
-          <tr><td rowspan="4"><b>DEFENDER</b></td><td><b>NORTH</b></td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="block">Blocks</td><td class="destroy">Destroyed</td></tr>
-          <tr><td><b>EAST</b></td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="block">Blocks</td></tr>
-          <tr><td><b>SOUTH</b></td><td class="block">Blocks</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td></tr>
-          <tr><td><b>WEST</b></td><td class="destroy">Destroyed</td><td class="block">Blocks</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td></tr>
-          
-          <tr><td rowspan="4"><b>DEFLECTOR</b></td><td><b>NORTH</b></td><td class="reflect">Reflects EAST</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="reflect">Reflects WEST</td></tr>
-          <tr><td><b>EAST</b></td><td class="reflect">Reflects NORTH</td><td class="reflect">Reflects SOUTH</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td></tr>
-          <tr><td><b>SOUTH</b></td><td class="destroy">Destroyed</td><td class="reflect">Reflects EAST</td><td class="reflect">Reflects WEST</td><td class="destroy">Destroyed</td></tr>
-          <tr><td><b>WEST</b></td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="reflect">Reflects SOUTH</td><td class="reflect">Reflects NORTH</td></tr>
-          
-          <tr><td rowspan="4"><b>SWITCH</b></td><td><b>NORTH</b></td><td class="reflect">Reflects WEST</td><td class="reflect">Reflects EAST</td><td class="reflect">Reflects WEST</td><td class="reflect">Reflects EAST</td></tr>
-          <tr><td><b>EAST</b></td><td class="reflect">Reflects SOUTH</td><td class="reflect">Reflects NORTH</td><td class="reflect">Reflects SOUTH</td><td class="reflect">Reflects NORTH</td></tr>
-          <tr><td><b>SOUTH</b></td><td class="reflect">Reflects EAST</td><td class="reflect">Reflects WEST</td><td class="reflect">Reflects EAST</td><td class="reflect">Reflects WEST</td></tr>
-          <tr><td><b>WEST</b></td><td class="reflect">Reflects NORTH</td><td class="reflect">Reflects SOUTH</td><td class="reflect">Reflects NORTH</td><td class="reflect">Reflects SOUTH</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <button class="btn" id="closeRulesBtn" style="width: 100%; margin-top: 10px;">Close Matrix <span class="kbd">ESC</span></button>
-  </div>
-</div>
-
 <script>
 (() => {
   "use strict";
 
-  const PIECE_BASE = "./";
   const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
   const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
   const W = 10, H = 8;
@@ -413,13 +401,13 @@
     {dx: 0, dy: -1},  // 2 north
     {dx: -1, dy: 0},  // 3 west
   ];
-  
-  const PIECE_MAP = {
-    KING: "king",
-    DEFENDER: "defender",
-    DEFLECTOR: "deflector",
-    SWITCH: "switch",
-    LASER: "laser",
+
+  const SYMBOL_MAP = {
+    KING: { 0: "◈", 1: "◈", 2: "◈", 3: "◈" },
+    DEFENDER: { 0: "⬓", 1: "◧", 2: "⬒", 3: "◨" },
+    DEFLECTOR: { 0: "◤", 1: "◥", 2: "◢", 3: "◣" },
+    SWITCH: { 0: "⟋", 1: "⟍", 2: "⟋", 3: "⟍" },
+    LASER: { 0: "⫝", 1: "⟜", 2: "Ͳ", 3: "Ð" }
   };
 
   const INTERACTION_MAP = {
@@ -493,6 +481,7 @@
 
   const el = {
     board: document.getElementById("board"),
+    matrixConsole: document.getElementById("matrixConsole"),
     movePill: document.getElementById("movePill"),
     savePill: document.getElementById("savePill"),
     turnBadge: document.getElementById("turnBadge"),
@@ -502,9 +491,6 @@
     rotateCCWBtn: document.getElementById("rotateCCWBtn"),
     rotateCWBtn: document.getElementById("rotateCWBtn"),
     endTurnBtn: document.getElementById("endTurnBtn"),
-    rulesBtn: document.getElementById("rulesBtn"),
-    closeRulesBtn: document.getElementById("closeRulesBtn"),
-    rulesModal: document.getElementById("rulesModal")
   };
 
   let state = loadState() || START_STATE();
@@ -526,9 +512,6 @@
     localStorage.setItem("laserchess_local_state", JSON.stringify(state));
   }
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
-  function pieceImage(piece) {
-    return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`;
-  }
   function pieceAt(x, y, pieces = state.pieces) {
     return pieces.find(p => p.x === x && p.y === y) || null;
   }
@@ -702,10 +685,6 @@
     updateSelectionUI();
     render();
   }
-  
-  function toggleRules() {
-    el.rulesModal.classList.toggle("active");
-  }
 
   function flashLaserPath() {
     if (flashTimer) clearTimeout(flashTimer);
@@ -721,6 +700,33 @@
     return node;
   }
 
+  /* Real-time Render loop for the Matrix Tab */
+  function updateMatrixConsoleView() {
+    let outputHtml = "";
+    
+    // Header tracking top coordinates [0] to [9]
+    outputHtml += "    <span class='m-coord'>[0]  [1]  [2]  [3]  [4]  [5]  [6]  [7]  [8]  [9]</span>\n";
+    
+    // Matrix row render tracking y from 0 to 7
+    for (let y = 0; y < H; y++) {
+      outputHtml += `<span class='m-coord'>[${y}]</span> `;
+      for (let x = 0; x < W; x++) {
+        const piece = pieceAt(x, y);
+        if (piece) {
+          const sym = SYMBOL_MAP[piece.pieceType][normalizeRotation(piece.rotation || 0)];
+          const colorClass = piece.color === "BLUE" ? "m-blue" : "m-red";
+          const suffix = piece.color === "BLUE" ? "B" : "R";
+          outputHtml += `<span class='${colorClass}'>${sym}${suffix}</span> `;
+        } else {
+          outputHtml += "<span class='m-empty'>.  </span> ";
+        }
+      }
+      outputHtml += "\n";
+    }
+    
+    el.matrixConsole.innerHTML = outputHtml;
+  }
+
   function drawBoard() {
     const svg = el.board;
     svg.innerHTML = "";
@@ -731,10 +737,7 @@
     const fLaser = svgEl("filter", { 
       id: "laserGlow", 
       filterUnits: "userSpaceOnUse",
-      x: "0", 
-      y: "0", 
-      width: "1000", 
-      height: "800" 
+      x: "0", y: "0", width: "1000", height: "800" 
     });
     fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "8", result: "blur" }));
     const mLaser = svgEl("feMerge");
@@ -750,8 +753,7 @@
         const rect = svgEl("rect", {
           x: x * CELL, y: y * CELL, width: CELL, height: CELL,
           fill: reserved === "blue" ? "rgba(3,233,244,.08)" : reserved === "red" ? "rgba(244,67,54,.08)" : "rgba(0,0,0,.42)",
-          stroke: "rgba(255,255,255,.07)",
-          "stroke-width": "1"
+          stroke: "rgba(255,255,255,.07)", "stroke-width": "1"
         });
         rect.style.cursor = "pointer";
         rect.addEventListener("click", () => onCellClick(x, y));
@@ -783,26 +785,16 @@
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
       const isRed = state.lastLaserColor === "RED";
-      
       const beamColor = isRed ? "#ff003c" : "#00f0ff"; 
 
       const aura = svgEl("polyline", { 
-        points: pts, 
-        fill: "none", 
-        stroke: beamColor,
-        "stroke-linecap": "round", 
-        "stroke-linejoin": "round", 
-        filter: "url(#laserGlow)"
+        points: pts, fill: "none", stroke: beamColor, "stroke-linecap": "round", "stroke-linejoin": "round", filter: "url(#laserGlow)"
       });
       aura.style.animation = "neonPulse 0.4s ease-in-out infinite"; 
       svg.appendChild(aura);
       
       const core = svgEl("polyline", { 
-        points: pts, 
-        fill: "none", 
-        stroke: "#ffffff",
-        "stroke-linecap": "round", 
-        "stroke-linejoin": "round"
+        points: pts, fill: "none", stroke: "#ffffff", "stroke-linecap": "round", "stroke-linejoin": "round"
       });
       core.style.animation = "corePulse 0.4s ease-in-out infinite"; 
       svg.appendChild(core);
@@ -821,18 +813,17 @@
       const y = piece.y * CELL;
       const isBlue = piece.color === "BLUE";
 
-      const bloom = svgEl("circle", {
-        cx: x + 50,
-        cy: y + 50,
-        r: 28,
-        fill: isBlue ? "rgba(3,233,244,0.35)" : "rgba(244,67,54,0.35)"
-      });
+      const bloom = svgEl("circle", { cx: x + 50, cy: y + 50, r: 28, fill: isBlue ? "rgba(3,233,244,0.35)" : "rgba(244,67,54,0.35)" });
       bloom.style.filter = "blur(12px)";
       g.appendChild(bloom);
 
-      const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
-      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
-      g.appendChild(img);
+      const symbol = SYMBOL_MAP[piece.pieceType][normalizeRotation(piece.rotation || 0)];
+      const text = svgEl("text", {
+        x: x + 50, y: y + 50, "text-anchor": "middle", "dominant-baseline": "central",
+        fill: isBlue ? "var(--theme-color)" : "#ff8f84", "font-size": "60", "font-weight": "bold"
+      });
+      text.textContent = symbol;
+      g.appendChild(text);
       
       g.style.cursor = "pointer";
       g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
@@ -852,18 +843,14 @@
 
   function onPieceClick(piece) {
     if (state.winner || isDelaying) return;
-    
     const sel = getSelectedPiece();
-    
     if (sel && sel.color === state.turn && sel.id !== piece.id) {
       if (sel.pieceType === "SWITCH" && (piece.pieceType === "DEFLECTOR" || piece.pieceType === "DEFENDER")) {
         if (doMoveOrSwap(piece.x, piece.y)) return;
       }
     }
-
     if (piece.color !== state.turn) return; 
     if (selectedId === piece.id) { selectPiece(null); return; } 
-    
     selectPiece(piece);
     cursor = { x: piece.x, y: piece.y };
     render();
@@ -888,6 +875,7 @@
 
   function render() {
     drawBoard();
+    updateMatrixConsoleView();
     updateSelectionUI();
     saveState();
   }
@@ -908,23 +896,12 @@
     if (key === "ArrowDown") { e.preventDefault(); cursor.y = Math.min(H - 1, cursor.y + 1); render(); return; }
     if (key === "ArrowLeft") { e.preventDefault(); cursor.x = Math.max(0, cursor.x - 1); render(); return; }
     if (key === "ArrowRight") { e.preventDefault(); cursor.x = Math.min(W - 1, cursor.x + 1); render(); return; }
-    
-    if (key === "Escape") { 
-      e.preventDefault(); 
-      if (el.rulesModal.classList.contains("active")) {
-        toggleRules();
-      } else {
-        selectPiece(null); 
-      }
-      return; 
-    }
-    
+    if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
     if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); else onCellClick(cursor.x, cursor.y); return; }
     if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
     if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
     if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
     if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
-    if (key === "m" || key === "M") { e.preventDefault(); toggleRules(); return; }
   }
 
   el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
@@ -932,9 +909,6 @@
   el.fireBtn.addEventListener("click", () => { if (!isDelaying) fireLaser(); });
   el.resetBtn.addEventListener("click", () => resetGame());
   el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
-  
-  el.rulesBtn.addEventListener("click", toggleRules);
-  el.closeRulesBtn.addEventListener("click", toggleRules);
 
   window.addEventListener("keydown", handleKeyboard);
   el.board.addEventListener("click", (e) => {
