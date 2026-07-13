@@ -265,6 +265,31 @@
       margin-left: auto;
     }
 
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+      padding: 1.5rem; width: 95%; max-width: 800px; max-height: 90vh; overflow-y: auto;
+      box-shadow: var(--shadow);
+    }
+    .interaction-table {
+      width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center; margin-bottom: 1rem;
+    }
+    .interaction-table th, .interaction-table td {
+      border: 1px solid var(--line); padding: 0.6rem;
+    }
+    .interaction-table th { 
+      background: rgba(255,255,255,0.05); color: var(--theme-color); text-transform: uppercase; 
+    }
+    .interaction-table td b { color: var(--text); font-weight: 900;}
+    .interaction-table .destroy { color: var(--red-theme); }
+    .interaction-table .block { color: var(--muted); }
+    .interaction-table .reflect { color: var(--theme-color); }
+
     /* Base Keyframes for Inline Animations */
     @keyframes neonPulse {
       0% { stroke-width: 12px; opacity: 0.5; }
@@ -290,6 +315,8 @@
       .btn { font-size: 0.58rem; padding: .45rem .2rem; border-radius: 6px; }
       .side-card h3 { font-size: 0.62rem; margin-bottom: 0.2rem; }
       .turn-badge { font-size: 0.55rem; padding: .25rem .1rem; }
+      .interaction-table { font-size: 0.65rem; }
+      .interaction-table th, .interaction-table td { padding: 0.3rem; }
     }
   </style>
 </head>
@@ -330,10 +357,43 @@
             <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
             <button class="btn" id="endTurnBtn">Pass / End Turn</button>
             <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
+            <button class="btn" id="rulesBtn">Rules Matrix <span class="kbd">M</span></button>
           </div>
         </section>
       </aside>
     </main>
+  </div>
+</div>
+
+<div id="rulesModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0; color: var(--theme-color); text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">Laser Interaction Matrix</h3>
+    <div style="overflow-x: auto;">
+      <table class="interaction-table">
+        <thead>
+          <tr><th>Piece</th><th>Inbound Vector</th><th>Rotation 0</th><th>Rotation 1</th><th>Rotation 2</th><th>Rotation 3</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>KING</b></td><td><b>ALL</b></td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td></tr>
+          
+          <tr><td rowspan="4"><b>DEFENDER</b></td><td><b>NORTH</b></td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="block">Blocks</td><td class="destroy">Destroyed</td></tr>
+          <tr><td><b>EAST</b></td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="block">Blocks</td></tr>
+          <tr><td><b>SOUTH</b></td><td class="block">Blocks</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td></tr>
+          <tr><td><b>WEST</b></td><td class="destroy">Destroyed</td><td class="block">Blocks</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td></tr>
+          
+          <tr><td rowspan="4"><b>DEFLECTOR</b></td><td><b>NORTH</b></td><td class="reflect">Reflects EAST</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="reflect">Reflects WEST</td></tr>
+          <tr><td><b>EAST</b></td><td class="reflect">Reflects NORTH</td><td class="reflect">Reflects SOUTH</td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td></tr>
+          <tr><td><b>SOUTH</b></td><td class="destroy">Destroyed</td><td class="reflect">Reflects EAST</td><td class="reflect">Reflects WEST</td><td class="destroy">Destroyed</td></tr>
+          <tr><td><b>WEST</b></td><td class="destroy">Destroyed</td><td class="destroy">Destroyed</td><td class="reflect">Reflects SOUTH</td><td class="reflect">Reflects NORTH</td></tr>
+          
+          <tr><td rowspan="4"><b>SWITCH</b></td><td><b>NORTH</b></td><td class="reflect">Reflects WEST</td><td class="reflect">Reflects EAST</td><td class="reflect">Reflects WEST</td><td class="reflect">Reflects EAST</td></tr>
+          <tr><td><b>EAST</b></td><td class="reflect">Reflects SOUTH</td><td class="reflect">Reflects NORTH</td><td class="reflect">Reflects SOUTH</td><td class="reflect">Reflects NORTH</td></tr>
+          <tr><td><b>SOUTH</b></td><td class="reflect">Reflects EAST</td><td class="reflect">Reflects WEST</td><td class="reflect">Reflects EAST</td><td class="reflect">Reflects WEST</td></tr>
+          <tr><td><b>WEST</b></td><td class="reflect">Reflects NORTH</td><td class="reflect">Reflects SOUTH</td><td class="reflect">Reflects NORTH</td><td class="reflect">Reflects SOUTH</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="btn" id="closeRulesBtn" style="width: 100%; margin-top: 10px;">Close Matrix <span class="kbd">ESC</span></button>
   </div>
 </div>
 
@@ -442,6 +502,9 @@
     rotateCCWBtn: document.getElementById("rotateCCWBtn"),
     rotateCWBtn: document.getElementById("rotateCWBtn"),
     endTurnBtn: document.getElementById("endTurnBtn"),
+    rulesBtn: document.getElementById("rulesBtn"),
+    closeRulesBtn: document.getElementById("closeRulesBtn"),
+    rulesModal: document.getElementById("rulesModal")
   };
 
   let state = loadState() || START_STATE();
@@ -639,6 +702,10 @@
     updateSelectionUI();
     render();
   }
+  
+  function toggleRules() {
+    el.rulesModal.classList.toggle("active");
+  }
 
   function flashLaserPath() {
     if (flashTimer) clearTimeout(flashTimer);
@@ -661,7 +728,6 @@
     svg.appendChild(svgEl("defs", {}, {}));
     const defs = svg.querySelector("defs");
     
-    // CHANGED: Fixed filter calculation constraints by setting filterUnits to userSpaceOnUse
     const fLaser = svgEl("filter", { 
       id: "laserGlow", 
       filterUnits: "userSpaceOnUse",
@@ -842,12 +908,23 @@
     if (key === "ArrowDown") { e.preventDefault(); cursor.y = Math.min(H - 1, cursor.y + 1); render(); return; }
     if (key === "ArrowLeft") { e.preventDefault(); cursor.x = Math.max(0, cursor.x - 1); render(); return; }
     if (key === "ArrowRight") { e.preventDefault(); cursor.x = Math.min(W - 1, cursor.x + 1); render(); return; }
-    if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
+    
+    if (key === "Escape") { 
+      e.preventDefault(); 
+      if (el.rulesModal.classList.contains("active")) {
+        toggleRules();
+      } else {
+        selectPiece(null); 
+      }
+      return; 
+    }
+    
     if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); else onCellClick(cursor.x, cursor.y); return; }
     if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
     if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
     if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
     if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
+    if (key === "m" || key === "M") { e.preventDefault(); toggleRules(); return; }
   }
 
   el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
@@ -855,6 +932,9 @@
   el.fireBtn.addEventListener("click", () => { if (!isDelaying) fireLaser(); });
   el.resetBtn.addEventListener("click", () => resetGame());
   el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
+  
+  el.rulesBtn.addEventListener("click", toggleRules);
+  el.closeRulesBtn.addEventListener("click", toggleRules);
 
   window.addEventListener("keydown", handleKeyboard);
   el.board.addEventListener("click", (e) => {
