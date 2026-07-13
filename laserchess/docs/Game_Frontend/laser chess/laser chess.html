@@ -23,52 +23,307 @@
       --shadow:0 25px 70px rgba(0,0,0,.85);
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden !important; }
-    body { font-family: "Quantico", sans-serif; color: var(--text); background: linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.9)), url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat; }
+    html, body { 
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden !important;
+    }
+    body {
+      font-family: "Quantico", sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.9)),
+        url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
+    }
     
-    .shell { height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow: hidden; }
-    header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.4rem 1.25rem; border-bottom: 1px solid var(--line); background: rgba(5,7,10,.84); box-shadow: 0 10px 30px rgba(0,0,0,.45); z-index: 5; flex-shrink: 0; }
-    .brand h1 { margin: 0; font-size: clamp(1rem, 1.8vw, 1.4rem); letter-spacing: .16em; font-weight: 900; text-transform: uppercase; }
-    .header-meta { display: flex; align-items: center; gap: .7rem; }
-    .pill { padding: .25rem .65rem; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.04); font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+    .shell {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.4rem 1.25rem;
+      border-bottom: 1px solid var(--line);
+      background: rgba(5,7,10,.84);
+      box-shadow: 0 10px 30px rgba(0,0,0,.45);
+      z-index: 5;
+      flex-shrink: 0;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1rem, 1.8vw, 1.4rem);
+      letter-spacing: .16em;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+    }
+    .pill {
+      padding: .25rem .65rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      font-size: .7rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
     
-    .dialogue-overlay { flex: 1; width: 100%; background: rgba(3, 4, 7, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 0.5rem; overflow: hidden; }
-    .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 240px); gap: 1rem; width: 100%; height: 100%; max-width: 1600px; background: var(--panel); border: 2px solid rgba(255, 255, 255, 0.12); border-radius: 20px; box-shadow: var(--shadow); padding: 0.75rem; align-items: center; position: relative; overflow: hidden; }
-    .panel { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--line); border-radius: 14px; }
-    .board-panel { padding: .25rem; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; overflow: hidden; }
-    .board-shell { width: 100%; height: 100%; padding: .25rem; border-radius: 16px; background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    svg#board { width: auto; height: auto; max-width: 100%; max-height: 100%; aspect-ratio: 10 / 8; object-fit: contain; display: block; background: linear-gradient(180deg, rgba(1,3,6,.95), rgba(10,12,15,.92)); border-radius: 12px; touch-action: manipulation; }
+    .dialogue-overlay {
+      flex: 1;
+      width: 100%;
+      background: rgba(3, 4, 7, 0.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      overflow: hidden;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
+      gap: 1rem;
+      width: 100%;
+      height: 100%;
+      max-width: 1600px;
+      background: var(--panel);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 0.75rem;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .layout::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 20px;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(var(--theme-rgb), 0.3), transparent 60%, rgba(244,67,54,0.15));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .panel {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .board-panel {
+      padding: .25rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .board-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .board-shell {
+      width: 100%;
+      height: 100%;
+      padding: .25rem;
+      border-radius: 16px;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    svg#board {
+      width: auto;
+      height: auto;
+      max-width: 100%;
+      max-height: 100%;
+      aspect-ratio: 10 / 8;
+      object-fit: contain;
+      display: block;
+      background: linear-gradient(180deg, rgba(1,3,6,.95), rgba(10,12,15,.92));
+      border-radius: 12px;
+      touch-action: manipulation;
+    }
     
-    .sidebar { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-    .side-card { padding: .75rem; height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
-    .side-card h3 { margin: 0 0 .4rem; text-transform: uppercase; letter-spacing: .18em; font-size: .8rem; text-align: center; }
-    .turn-row { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .4rem; }
-    .turn-badge { padding: .4rem .5rem; border-radius: 999px; text-transform: uppercase; letter-spacing: .12em; font-size: .65rem; border: 1px solid var(--line); background: rgba(255,255,255,.04); text-align: center; }
+    .sidebar {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .side-card {
+      padding: .75rem;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+    .side-card h3 {
+      margin: 0 0 .4rem;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .8rem;
+      text-align: center;
+    }
+    .turn-row {
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+      margin-bottom: .4rem;
+    }
+    .turn-badge {
+      padding: .4rem .5rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .65rem;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
     .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
     
-    .controls { display: grid; grid-template-columns: 1fr; gap: .3rem; }
-    .btn { appearance: none; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--text); padding: .55rem .45rem; border-radius: 10px; cursor: pointer; letter-spacing: .08em; text-transform: uppercase; font-size: .68rem; transition: transform .15s ease, background .2s ease; width: 100%; display: inline-flex; justify-content: center; align-items: center; }
-    .btn.primary { border-color: rgba(var(--theme-rgb), .35); color: var(--theme-color); }
-    .btn.danger { border-color: rgba(244,67,54,.38); color: #ffb0a8; }
-    .kbd { margin-left: auto; padding: .1rem .25rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; font-size: .7em; background: rgba(255,255,255,.04); }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .3rem;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      padding: .55rem .45rem;
+      border-radius: 10px;
+      cursor: pointer;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-size: .68rem;
+      transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      user-select: none;
+      width: 100%;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(var(--theme-rgb), .35);
+      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 8px 20px rgba(0,0,0,.24);
+    }
+    .btn.primary {
+      background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
+      border-color: rgba(var(--theme-rgb), .35);
+      color: var(--theme-color);
+    }
+    .btn.danger {
+      background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
+      border-color: rgba(244,67,54,.38);
+      color: #ffb0a8;
+    }
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: .1rem .25rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-bottom-width: 2px;
+      border-radius: 4px;
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      font-size: .7em;
+      margin-left: auto;
+    }
 
-    @keyframes neonPulse { 0% { stroke-width: 12px; opacity: 0.5; } 50% { stroke-width: 28px; opacity: 1; } 100% { stroke-width: 12px; opacity: 0.5; } }
-    @keyframes corePulse { 0% { stroke-width: 3px; opacity: 0.8; } 50% { stroke-width: 6px; opacity: 1; } 100% { stroke-width: 3px; opacity: 0.8; } }
+    /* Base Keyframes for Inline Animations */
+    @keyframes neonPulse {
+      0% { stroke-width: 12px; opacity: 0.5; }
+      50% { stroke-width: 28px; opacity: 1; }
+      100% { stroke-width: 12px; opacity: 0.5; }
+    }
+    @keyframes corePulse {
+      0% { stroke-width: 3px; opacity: 0.8; }
+      50% { stroke-width: 6px; opacity: 1; }
+      100% { stroke-width: 3px; opacity: 0.8; }
+    }
+
+    @media (max-width: 640px){
+      .dialogue-overlay { padding: .15rem; }
+      .layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 130px);
+        padding: .4rem;
+        gap: .35rem;
+        border-radius: 12px;
+      }
+      .layout::before { border-radius: 12px; }
+      .kbd { display: none; }
+      .btn { font-size: 0.58rem; padding: .45rem .2rem; border-radius: 6px; }
+      .side-card h3 { font-size: 0.62rem; margin-bottom: 0.2rem; }
+      .turn-badge { font-size: 0.55rem; padding: .25rem .1rem; }
+    }
   </style>
 </head>
 <body>
 <div class="shell">
   <header>
-    <div class="brand"><h1>Laser Chess</h1></div>
-    <div class="header-meta"><div class="pill" id="movePill">Move 1</div><div class="pill">Saved locally</div></div>
+    <div class="brand">
+      <h1>Laser Chess</h1>
+    </div>
+    <div class="header-meta">
+      <div class="pill" id="movePill">Move 1</div>
+      <div class="pill" id="savePill">Saved locally</div>
+    </div>
   </header>
+
   <div class="dialogue-overlay">
-    <main class="layout">
-      <section class="panel board-panel"><div class="board-shell"><svg id="board" viewBox="0 0 1000 800"></svg></div></section>
+    <main class="layout" role="dialog" aria-modal="true" aria-label="Laser Chess Gameplay Interface">
+      <section class="panel board-panel">
+        <div class="board-wrap">
+          <div class="board-shell">
+            <svg id="board" viewBox="0 0 1000 800" aria-label="Laser Chess board" tabindex="0"></svg>
+          </div>
+        </div>
+      </section>
+
       <aside class="sidebar">
         <section class="panel side-card">
-          <div><h3>Turn controls</h3><div class="turn-row"><div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div><div class="turn-badge" id="phaseBadge">Select a piece</div></div></div>
+          <div>
+            <h3>Turn controls</h3>
+            <div class="turn-row">
+              <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
+              <div class="turn-badge" id="phaseBadge">Select a piece</div>
+            </div>
+          </div>
           <div class="controls">
             <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
             <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
@@ -81,42 +336,532 @@
     </main>
   </div>
 </div>
+
 <script>
 (() => {
-  const W = 10, H = 8, CELL = 100;
-  const DIRS = [{dx: 0, dy: 1}, {dx: 1, dy: 0}, {dx: 0, dy: -1}, {dx: -1, dy: 0}];
-  // ... (Keep existing game logic constants and state)
-  const PIECE_MAP = { KING: "king", DEFENDER: "defender", DEFLECTOR: "deflector", SWITCH: "switch", LASER: "laser" };
-  const INTERACTION_MAP = { /* ... (Existing Map) ... */ }; 
-  // [Note: Truncated for brevity, maintain your original full maps here]
+  "use strict";
 
-  // ... (Full script functionality including drawBoard)
+  const PIECE_BASE = "./";
+  const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
+  const RES_RED  = [{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3},{x:0,y:4},{x:0,y:5},{x:0,y:6},{x:0,y:7},{x:8,y:0},{x:8,y:7}];
+  const W = 10, H = 8;
+  const CELL = 100;
+  
+  const DIRS = [
+    {dx: 0, dy: 1},   // 0 south
+    {dx: 1, dy: 0},   // 1 east
+    {dx: 0, dy: -1},  // 2 north
+    {dx: -1, dy: 0},  // 3 west
+  ];
+  
+  const PIECE_MAP = {
+    KING: "king",
+    DEFENDER: "defender",
+    DEFLECTOR: "deflector",
+    SWITCH: "switch",
+    LASER: "laser",
+  };
+
+  const INTERACTION_MAP = {
+    KING: {
+      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+    },
+    DEFENDER: {
+      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      2: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } }
+    },
+    DEFLECTOR: {
+      0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } },
+      1: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
+    },
+    SWITCH: {
+      0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+      1: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
+      2: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+      3: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
+    },
+    LASER: {
+      0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
+      1: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
+      2: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
+      3: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } }
+    }
+  };
+
+  const START_STATE = () => ({
+    turn: "BLUE",
+    moveNumber: 1,
+    winner: null,
+    lastLaserPath: [],
+    lastLaserColor: null, 
+    pieces: [
+      {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
+      {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
+      {id: "pmpfqugdq4", pieceType: "DEFENDER", color: "RED", rotation: 0, x: 4, y: 7},
+      {id: "pmpfquhvx5", pieceType: "DEFENDER", color: "RED", rotation: 2, x: 6, y: 7},
+      {id: "pmpfqunnp6", pieceType: "DEFENDER", color: "BLUE", rotation: 2, x: 5, y: 0},
+      {id: "pmpfquoqi7", pieceType: "DEFENDER", color: "BLUE", rotation: 2, x: 3, y: 0},
+      {id: "pmpfqvc388", pieceType: "SWITCH", color: "BLUE", rotation: 0, x: 5, y: 3},
+      {id: "pmpfqvfrb9", pieceType: "SWITCH", color: "BLUE", rotation: 1, x: 4, y: 3},
+      {id: "pmpfqvl06a", pieceType: "SWITCH", color: "RED", rotation: 0, x: 4, y: 4},
+      {id: "pmpfqvre4b", pieceType: "SWITCH", color: "RED", rotation: 1, x: 5, y: 4},
+      {id: "pmpfqwdqec", pieceType: "LASER", color: "RED", rotation: 2, x: 0, y: 7},
+      {id: "pmpfqy5dve", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 0},
+      {id: "pmpfqya0pf", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 3},
+      {id: "pmpfqyd1rg", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 2, y: 4},
+      {id: "pmpfqz0jlj", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 0, y: 3},
+      {id: "pmpfqz7fpk", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 0, y: 4},
+      {id: "pmpfqzj2ul", pieceType: "DEFLECTOR", color: "BLUE", rotation: 3, x: 7, y: 1},
+      {id: "pmpfr0e5km", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 6, y: 2},
+      {id: "pmpfr0t7zn", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 4},
+      {id: "pmpfr0ww1o", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 7, y: 3},
+      {id: "pmpfr18esp", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 9, y: 3},
+      {id: "pmpfr1bjtq", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 9, y: 4},
+      {id: "pmpfr2ek5s", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 3, y: 5},
+      {id: "pmpfr2sl8u", pieceType: "DEFLECTOR", color: "RED", rotation: 1, x: 2, y: 6},
+      {id: "pmpfr337lv", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 7},
+      {id: "pmpfr69imw", pieceType: "LASER", color: "BLUE", rotation: 0, x: 9, y: 0},
+    ],
+  });
+
+  const el = {
+    board: document.getElementById("board"),
+    movePill: document.getElementById("movePill"),
+    savePill: document.getElementById("savePill"),
+    turnBadge: document.getElementById("turnBadge"),
+    phaseBadge: document.getElementById("phaseBadge"),
+    fireBtn: document.getElementById("fireBtn"),
+    resetBtn: document.getElementById("resetBtn"),
+    rotateCCWBtn: document.getElementById("rotateCCWBtn"),
+    rotateCWBtn: document.getElementById("rotateCWBtn"),
+    endTurnBtn: document.getElementById("endTurnBtn"),
+  };
+
+  let state = loadState() || START_STATE();
+  let selectedId = null;
+  let cursor = { x: 0, y: 0 };
+  let flashTimer = null;
+  let isDelaying = false;
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem("laserchess_local_state");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.pieces)) return null;
+      return parsed;
+    } catch { return null; }
+  }
+  function saveState() {
+    localStorage.setItem("laserchess_local_state", JSON.stringify(state));
+  }
+  function clone(v) { return JSON.parse(JSON.stringify(v)); }
+  function pieceImage(piece) {
+    return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`;
+  }
+  function pieceAt(x, y, pieces = state.pieces) {
+    return pieces.find(p => p.x === x && p.y === y) || null;
+  }
+  function isReservedSquare(x, y, color) {
+    const arr = color === "BLUE" ? RES_BLUE : RES_RED;
+    return arr.some(s => s.x === x && s.y === y);
+  }
+  function inBounds(x, y) { return x >= 0 && x < W && y >= 0 && y < H; }
+  function normalizeRotation(rot) { return ((rot % 4) + 4) % 4; }
+  function enemyColor(c) { return c === "BLUE" ? "RED" : "BLUE"; }
+  function getSelectedPiece() {
+    return selectedId ? state.pieces.find(p => p.id === selectedId) || null : null;
+  }
+  function selectPiece(pieceOrNull) {
+    selectedId = pieceOrNull ? pieceOrNull.id : null;
+    updateSelectionUI();
+    render();
+  }
+  function updateSelectionUI() {
+    const piece = getSelectedPiece();
+    el.movePill.textContent = `Move ${state.moveNumber}`;
+    el.turnBadge.textContent = `${state.turn} to move`;
+    el.turnBadge.className = `turn-badge ${state.turn === "BLUE" ? "turn-blue" : "turn-red"}`;
+    el.phaseBadge.textContent = state.winner ? `${state.winner} wins` : (piece ? `Selected ${piece.pieceType}` : "Select a piece");
+  }
+
+  function legalMoves(piece) {
+    const moves = [];
+    if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return moves;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = piece.x + dx;
+        const ny = piece.y + dy;
+        if (!inBounds(nx, ny)) continue;
+        if (isReservedSquare(nx, ny, piece.color)) continue;
+        const occ = pieceAt(nx, ny);
+        if (!occ) {
+          moves.push({ type: "move", x: nx, y: ny });
+        } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
+          if (!isReservedSquare(piece.x, piece.y, occ.color)) {
+            moves.push({ type: "swap", x: nx, y: ny });
+          }
+        }
+      }
+    }
+    return moves;
+  }
+
+  function movePiece(piece, nx, ny) {
+    if (!piece || piece.color !== state.turn || piece.pieceType === "LASER") return false;
+    const occ = pieceAt(nx, ny);
+    if (occ) {
+      if (piece.pieceType !== "SWITCH") return false;
+      if (!(occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) return false;
+      if (isReservedSquare(piece.x, piece.y, occ.color)) return false;
+      const ox = piece.x, oy = piece.y;
+      piece.x = nx; piece.y = ny;
+      occ.x = ox; occ.y = oy;
+      return true;
+    }
+    if (isReservedSquare(nx, ny, piece.color)) return false;
+    if (Math.max(Math.abs(nx - piece.x), Math.abs(ny - piece.y)) !== 1) return false;
+    piece.x = nx; piece.y = ny;
+    return true;
+  }
+
+  function laserDirFromRotation(rot) { return [2, 1, 0, 3][normalizeRotation(rot)]; }
+
+  function interactWithLaser(piece, incomingDir) {
+    const typeMap = INTERACTION_MAP[piece.pieceType];
+    if (!typeMap) return { kind: "stop", destroyed: false };
+    const out = typeMap[normalizeRotation(piece.rotation || 0)]?.[incomingDir];
+    
+    if (!out) return { kind: "stop", destroyed: false };
+    if (out.isDestroyed) return { kind: "stop", destroyed: true };
+    if (out.reflect !== null) return { kind: "reflect", reflected: out.reflect, destroyed: false };
+    
+    return { kind: "stop", destroyed: false, blocked: true };
+  }
+
+  function resolveLaserVector(x, y, dir, pieces = state.pieces, path = [], seen = new Set()) {
+    if (!inBounds(x, y)) return { path, hit: null, looped: false };
+    const key = `${x},${y},${dir}`;
+    if (seen.has(key)) return { path, hit: null, looped: true };
+    seen.add(key);
+    path.push({ x, y, dir });
+
+    const piece = pieceAt(x, y, pieces);
+    if (!piece) {
+      return resolveLaserVector(x + DIRS[dir].dx, y + DIRS[dir].dy, dir, pieces, path, seen);
+    }
+
+    const outcome = interactWithLaser(piece, dir);
+    if (outcome.kind === "reflect") {
+      const nextDir = outcome.reflected;
+      return resolveLaserVector(x + DIRS[nextDir].dx, y + DIRS[nextDir].dy, nextDir, pieces, path, seen);
+    }
+    return { path, hit: { piece, destroyed: !!outcome.destroyed, blocked: !!outcome.blocked }, looped: false };
+  }
+
+  function fireLaser() {
+    if (state.winner) return false;
+    const shooter = state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn);
+    if (!shooter) return false;
+    
+    const dir = laserDirFromRotation(shooter.rotation || 0);
+    const startX = shooter.x + DIRS[dir].dx;
+    const startY = shooter.y + DIRS[dir].dy;
+    const result = resolveLaserVector(startX, startY, dir, clone(state.pieces));
+    
+    state.lastLaserPath = result.path;
+    state.lastLaserColor = shooter.color; 
+
+    if (result.hit && result.hit.destroyed) {
+      const victim = result.hit.piece;
+      state.pieces.splice(state.pieces.findIndex(p => p.id === victim.id), 1);
+      if (victim.pieceType === "KING") state.winner = state.turn;
+    }
+
+    state.turn = enemyColor(state.turn);
+    state.moveNumber += 1;
+    selectedId = null;
+    saveState();
+    updateSelectionUI();
+    render();
+    flashLaserPath();
+    return true;
+  }
+
+  function doMoveOrSwap(targetX, targetY) {
+    if (state.winner || isDelaying) return false;
+    const piece = getSelectedPiece();
+    if (!piece || piece.color !== state.turn) return false;
+    let ok = movePiece(piece, targetX, targetY);
+    if (ok) {
+      isDelaying = true;
+      render(); 
+      setTimeout(() => {
+        fireLaser();
+        isDelaying = false; 
+      }, 500); 
+    }
+    return ok;
+  }
+
+  function rotateSelected(delta) {
+    if (isDelaying) return false;
+    const piece = getSelectedPiece();
+    if (!piece || piece.color !== state.turn || piece.pieceType === "KING") return false;
+    piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
+    
+    isDelaying = true;
+    render(); 
+    setTimeout(() => {
+      fireLaser();
+      isDelaying = false;
+    }, 500);
+    return true;
+  }
+
+  function rotateCCW() { return rotateSelected(3); }
+  function rotateCW() { return rotateSelected(1); }
+
+  function resetGame() {
+    state = START_STATE();
+    selectedId = null;
+    cursor = { x: 0, y: 0 };
+    isDelaying = false;
+    localStorage.removeItem("laserchess_local_state");
+    updateSelectionUI();
+    render();
+  }
+
+  function flashLaserPath() {
+    if (flashTimer) clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => {
+      state.lastLaserPath = [];
+      render();
+    }, 1400);
+  }
+
+  function svgEl(name, attrs = {}) {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, String(v));
+    return node;
+  }
+
   function drawBoard() {
-    const svg = document.getElementById("board");
+    const svg = el.board;
     svg.innerHTML = "";
-    // ... (Grid rendering)
+
+    svg.appendChild(svgEl("defs", {}, {}));
+    const defs = svg.querySelector("defs");
+    
+    const fLaser = svgEl("filter", { id: "laserGlow", x: "-50%", y: "-50%", width: "200%", height: "200%" });
+    fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "8", result: "blur" }));
+    const mLaser = svgEl("feMerge");
+    mLaser.appendChild(svgEl("feMergeNode", { in: "blur" }));
+    mLaser.appendChild(svgEl("feMergeNode", { in: "blur" })); 
+    mLaser.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+    fLaser.appendChild(mLaser);
+    defs.appendChild(fLaser);
+
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
+        const rect = svgEl("rect", {
+          x: x * CELL, y: y * CELL, width: CELL, height: CELL,
+          fill: reserved === "blue" ? "rgba(3,233,244,.08)" : reserved === "red" ? "rgba(244,67,54,.08)" : "rgba(0,0,0,.42)",
+          stroke: "rgba(255,255,255,.07)",
+          "stroke-width": "1"
+        });
+        rect.style.cursor = "pointer";
+        rect.addEventListener("click", () => onCellClick(x, y));
+        svg.appendChild(rect);
+      }
+    }
+
+    for (let x = 0; x < W; x++) {
+      const txt = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14" });
+      txt.textContent = x;
+      svg.appendChild(txt);
+    }
+    for (let y = 0; y < H; y++) {
+      const txt = svgEl("text", { x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14" });
+      txt.textContent = y;
+      svg.appendChild(txt);
+    }
+
+    const sel = getSelectedPiece();
+    if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
+      for (const m of legalMoves(sel)) {
+        svg.appendChild(svgEl("rect", {
+          x: m.x * CELL + 6, y: m.y * CELL + 6, width: CELL - 12, height: CELL - 12,
+          fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10"
+        }));
+      }
+    }
+
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
-      const beamColor = state.lastLaserColor === "RED" ? "#ff003c" : "#00f0ff";
+      const isRed = state.lastLaserColor === "RED";
       
-      const aura = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-      aura.setAttribute("points", pts);
-      aura.setAttribute("fill", "none");
-      aura.setAttribute("stroke-linecap", "round");
-      aura.setAttribute("filter", "url(#laserGlow)");
-      aura.style.stroke = beamColor; // FIX: Set color via style
-      aura.style.animation = "neonPulse 0.4s ease-in-out infinite";
-      svg.appendChild(aura);
+      const beamColor = isRed ? "#ff003c" : "#00f0ff"; 
 
-      const core = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-      core.setAttribute("points", pts);
-      core.setAttribute("fill", "none");
-      core.setAttribute("stroke", "#ffffff");
-      core.style.animation = "corePulse 0.4s ease-in-out infinite";
+      const aura = svgEl("polyline", { 
+        points: pts, 
+        fill: "none", 
+        stroke: beamColor,
+        "stroke-linecap": "round", 
+        "stroke-linejoin": "round", 
+        filter: "url(#laserGlow)"
+      });
+      aura.style.animation = "neonPulse 0.4s ease-in-out infinite"; 
+      svg.appendChild(aura);
+      
+      const core = svgEl("polyline", { 
+        points: pts, 
+        fill: "none", 
+        stroke: "#ffffff",
+        "stroke-linecap": "round", 
+        "stroke-linejoin": "round"
+      });
+      // FIXED: Referenced existing 'corePulse' instead of missing 'whiteCorePulse'
+      core.style.animation = "corePulse 0.4s ease-in-out infinite"; 
       svg.appendChild(core);
     }
-    // ... (Rest of rendering)
+
+    const target = sel || pieceAt(cursor.x, cursor.y);
+    if (target) {
+      svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10" }));
+    } else {
+      svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
+    }
+
+    for (const piece of state.pieces) {
+      const g = svgEl("g");
+      const x = piece.x * CELL;
+      const y = piece.y * CELL;
+      const isBlue = piece.color === "BLUE";
+
+      const bloom = svgEl("circle", {
+        cx: x + 50,
+        cy: y + 50,
+        r: 28,
+        fill: isBlue ? "rgba(3,233,244,0.35)" : "rgba(244,67,54,0.35)"
+      });
+      bloom.style.filter = "blur(12px)";
+      g.appendChild(bloom);
+
+      const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
+      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
+      g.appendChild(img);
+      
+      g.style.cursor = "pointer";
+      g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
+      svg.appendChild(g);
+    }
+
+    if (state.winner) {
+      svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.85)", stroke: "rgba(255,255,255,.14)" }));
+      const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
+      t1.textContent = `${state.winner} WINS`;
+      svg.appendChild(t1);
+      const t2 = svgEl("text", { x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22" });
+      t2.textContent = "Press Reset to start again";
+      svg.appendChild(t2);
+    }
   }
+
+  function onPieceClick(piece) {
+    if (state.winner || isDelaying) return;
+    
+    const sel = getSelectedPiece();
+    
+    if (sel && sel.color === state.turn && sel.id !== piece.id) {
+      if (sel.pieceType === "SWITCH" && (piece.pieceType === "DEFLECTOR" || piece.pieceType === "DEFENDER")) {
+        if (doMoveOrSwap(piece.x, piece.y)) return;
+      }
+    }
+
+    if (piece.color !== state.turn) return; 
+    if (selectedId === piece.id) { selectPiece(null); return; } 
+    
+    selectPiece(piece);
+    cursor = { x: piece.x, y: piece.y };
+    render();
+  }
+
+  function onCellClick(x, y) {
+    if (state.winner || isDelaying) return;
+    cursor = { x, y };
+    const sel = getSelectedPiece();
+    if (sel && sel.color === state.turn) {
+      const occ = pieceAt(x, y);
+      if (!occ || (occ.id !== sel.id && sel.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER"))) {
+        if (doMoveOrSwap(x, y)) return;
+      } else if (occ.id === sel.id) {
+        selectPiece(null);
+        return;
+      }
+    }
+    const target = pieceAt(x, y);
+    if (!target) selectPiece(null); else onPieceClick(target);
+  }
+
+  function render() {
+    drawBoard();
+    updateSelectionUI();
+    saveState();
+  }
+
+  function endTurnWithoutAction() {
+    if (state.winner || isDelaying) return;
+    isDelaying = true;
+    setTimeout(() => {
+      fireLaser();
+      isDelaying = false;
+    }, 500);
+  }
+
+  function handleKeyboard(e) {
+    if (isDelaying) return;
+    const key = e.key;
+    if (key === "ArrowUp") { e.preventDefault(); cursor.y = Math.max(0, cursor.y - 1); render(); return; }
+    if (key === "ArrowDown") { e.preventDefault(); cursor.y = Math.min(H - 1, cursor.y + 1); render(); return; }
+    if (key === "ArrowLeft") { e.preventDefault(); cursor.x = Math.max(0, cursor.x - 1); render(); return; }
+    if (key === "ArrowRight") { e.preventDefault(); cursor.x = Math.min(W - 1, cursor.x + 1); render(); return; }
+    if (key === "Escape") { e.preventDefault(); selectPiece(null); return; }
+    if (key === "Enter") { e.preventDefault(); const p = pieceAt(cursor.x, cursor.y); if (p) onPieceClick(p); else onCellClick(cursor.x, cursor.y); return; }
+    if (key === "q" || key === "Q") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCCW(); return; }
+    if (key === "e" || key === "E") { e.preventDefault(); const p = getSelectedPiece(); if (p && p.color === state.turn && p.pieceType !== "KING") rotateCW(); return; }
+    if (key === "f" || key === "F") { e.preventDefault(); fireLaser(); return; }
+    if (key === "n" || key === "N") { e.preventDefault(); resetGame(); return; }
+  }
+
+  el.rotateCCWBtn.addEventListener("click", () => rotateCCW());
+  el.rotateCWBtn.addEventListener("click", () => rotateCW());
+  el.fireBtn.addEventListener("click", () => { if (!isDelaying) fireLaser(); });
+  el.resetBtn.addEventListener("click", () => resetGame());
+  el.endTurnBtn.addEventListener("click", () => endTurnWithoutAction());
+
+  window.addEventListener("keydown", handleKeyboard);
+  el.board.addEventListener("click", (e) => {
+    if (state.winner || isDelaying) return;
+    const pt = el.board.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    const screenCTM = el.board.getScreenCTM();
+    if (!screenCTM) return;
+    const local = pt.matrixTransform(screenCTM.inverse());
+    onCellClick(Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL))), Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL))));
+  });
+
+  updateSelectionUI();
+  render();
 })();
 </script>
 </body>
