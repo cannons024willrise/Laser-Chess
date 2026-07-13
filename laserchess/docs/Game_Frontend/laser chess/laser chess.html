@@ -400,7 +400,7 @@
     moveNumber: 1,
     winner: null,
     lastLaserPath: [],
-    lastLaserColor: null, // Tracks which team fired the current laser beam
+    lastLaserColor: null, 
     pieces: [
       {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
       {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
@@ -661,12 +661,11 @@
     svg.appendChild(svgEl("defs", {}, {}));
     const defs = svg.querySelector("defs");
     
-    // Create an intense double-stacked blur filter to force an undeniably bright glow
     const fLaser = svgEl("filter", { id: "laserGlow", x: "-50%", y: "-50%", width: "200%", height: "200%" });
     fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "8", result: "blur" }));
     const mLaser = svgEl("feMerge");
     mLaser.appendChild(svgEl("feMergeNode", { in: "blur" }));
-    mLaser.appendChild(svgEl("feMergeNode", { in: "blur" })); // Stacked for extra brightness
+    mLaser.appendChild(svgEl("feMergeNode", { in: "blur" })); 
     mLaser.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
     fLaser.appendChild(mLaser);
     defs.appendChild(fLaser);
@@ -711,10 +710,8 @@
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
       const isRed = state.lastLaserColor === "RED";
       
-      // Force highly saturated hex codes for neon glow base
       const beamColor = isRed ? "#ff003c" : "#00f0ff"; 
 
-      // Outer colored pulse ring - using inline style assignment to bypass CSS class issues
       const aura = svgEl("polyline", { 
         points: pts, 
         fill: "none", 
@@ -723,10 +720,9 @@
         "stroke-linejoin": "round", 
         filter: "url(#laserGlow)"
       });
-      aura.style.animation = "neonPulse 0.4s ease-in-out infinite"; // Direct inline animation
+      aura.style.animation = "neonPulse 0.4s ease-in-out infinite"; 
       svg.appendChild(aura);
       
-      // Inner solid pulsing white core
       const core = svgEl("polyline", { 
         points: pts, 
         fill: "none", 
@@ -734,7 +730,8 @@
         "stroke-linecap": "round", 
         "stroke-linejoin": "round"
       });
-      core.style.animation = "whiteCorePulse 0.4s ease-in-out infinite"; // Direct inline animation
+      // FIXED: Referenced existing 'corePulse' instead of missing 'whiteCorePulse'
+      core.style.animation = "corePulse 0.4s ease-in-out infinite"; 
       svg.appendChild(core);
     }
 
