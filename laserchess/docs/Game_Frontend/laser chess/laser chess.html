@@ -267,14 +267,28 @@
 
     /* --- THEMES.CSS INSPIRED ANIMATION MATRIX --- */
     
-    /* White Core Laser Vector Glow Loop */
-    @keyframes laserPulse {
-      0% { stroke-width: 10px; opacity: 0.15; }
-      50% { stroke-width: 26px; opacity: 0.85; }
-      100% { stroke-width: 10px; opacity: 0.15; }
+    @keyframes beamPulse {
+      0% { stroke-width: 12px; opacity: 0.4; }
+      50% { stroke-width: 28px; opacity: 0.95; }
+      100% { stroke-width: 12px; opacity: 0.4; }
     }
-    .animated-laser-glow {
-      animation: laserPulse 0.5s ease-in-out infinite;
+    @keyframes corePulse {
+      0% { stroke-width: 3px; opacity: 0.7; }
+      50% { stroke-width: 6px; opacity: 1; }
+      100% { stroke-width: 3px; opacity: 0.7; }
+    }
+    
+    .beam-blue {
+      stroke: #03e9f4;
+      animation: beamPulse 0.4s ease-in-out infinite;
+    }
+    .beam-red {
+      stroke: #ff3b2f; /* Brighter neon red */
+      animation: beamPulse 0.4s ease-in-out infinite;
+    }
+    .beam-core {
+      stroke: #ffffff;
+      animation: corePulse 0.4s ease-in-out infinite;
     }
 
     @media (max-width: 640px){
@@ -578,7 +592,7 @@
     const result = resolveLaserVector(startX, startY, dir, clone(state.pieces));
     
     state.lastLaserPath = result.path;
-    state.lastLaserColor = shooter.color; // Save the color of the team firing the laser
+    state.lastLaserColor = shooter.color; 
 
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
@@ -603,11 +617,11 @@
     let ok = movePiece(piece, targetX, targetY);
     if (ok) {
       isDelaying = true;
-      render(); // Render immediately to show the move
+      render(); 
       setTimeout(() => {
         fireLaser();
-        isDelaying = false; // Release the lock
-      }, 500); // Wait half a second before firing
+        isDelaying = false; 
+      }, 500); 
     }
     return ok;
   }
@@ -619,7 +633,7 @@
     piece.rotation = normalizeRotation((piece.rotation || 0) + delta);
     
     isDelaying = true;
-    render(); // Render immediately to show the rotation
+    render(); 
     setTimeout(() => {
       fireLaser();
       isDelaying = false;
@@ -661,7 +675,6 @@
     svg.appendChild(svgEl("defs", {}, {}));
     const defs = svg.querySelector("defs");
     
-    // Core Laser Glow Filter
     const fLaser = svgEl("filter", { id: "laserGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" });
     fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "5", result: "blur" }));
     const mLaser = svgEl("feMerge");
@@ -706,30 +719,27 @@
       }
     }
 
-    // Dynamic Colored Laser Beam Line
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
       const isRed = state.lastLaserColor === "RED";
-      const laserGlowColor = isRed ? "rgba(244,67,54,.6)" : "rgba(3,233,244,.6)";
       
-      // The outer animated pulse ring
+      // Outer colored pulse ring
       svg.appendChild(svgEl("polyline", { 
         points: pts, 
         fill: "none", 
-        stroke: laserGlowColor, 
         "stroke-linecap": "round", 
         "stroke-linejoin": "round", 
         filter: "url(#laserGlow)",
-        class: "animated-laser-glow"
+        class: isRed ? "beam-red" : "beam-blue"
       }));
-      // The solid core line
+      
+      // Inner solid pulsing white core
       svg.appendChild(svgEl("polyline", { 
         points: pts, 
         fill: "none", 
-        stroke: "rgba(255,255,255,0.9)", 
-        "stroke-width": "4", 
         "stroke-linecap": "round", 
-        "stroke-linejoin": "round" 
+        "stroke-linejoin": "round",
+        class: "beam-core"
       }));
     }
 
@@ -746,7 +756,6 @@
       const y = piece.y * CELL;
       const isBlue = piece.color === "BLUE";
 
-      // Subtle Background Bloom / Soft Glow Circle
       const bloom = svgEl("circle", {
         cx: x + 50,
         cy: y + 50,
@@ -756,7 +765,6 @@
       bloom.style.filter = "blur(12px)";
       g.appendChild(bloom);
 
-      // Main Piece Graphic Asset Layer
       const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
       img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
       g.appendChild(img);
@@ -782,17 +790,14 @@
     
     const sel = getSelectedPiece();
     
-    // Intercept clicks on pieces (both friendly and enemy) if we are trying to swap with a Switch
     if (sel && sel.color === state.turn && sel.id !== piece.id) {
       if (sel.pieceType === "SWITCH" && (piece.pieceType === "DEFLECTOR" || piece.pieceType === "DEFENDER")) {
-        // Attempt the swap. If successful, exit the function.
         if (doMoveOrSwap(piece.x, piece.y)) return;
       }
     }
 
-    // Standard Selection Logic
-    if (piece.color !== state.turn) return; // Cannot select enemy pieces
-    if (selectedId === piece.id) { selectPiece(null); return; } // Deselect if clicking the same piece
+    if (piece.color !== state.turn) return; 
+    if (selectedId === piece.id) { selectPiece(null); return; } 
     
     selectPiece(piece);
     cursor = { x: piece.x, y: piece.y };
