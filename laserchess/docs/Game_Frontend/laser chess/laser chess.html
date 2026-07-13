@@ -661,7 +661,15 @@
     svg.appendChild(svgEl("defs", {}, {}));
     const defs = svg.querySelector("defs");
     
-    const fLaser = svgEl("filter", { id: "laserGlow", x: "-50%", y: "-50%", width: "200%", height: "200%" });
+    // CHANGED: Fixed filter calculation constraints by setting filterUnits to userSpaceOnUse
+    const fLaser = svgEl("filter", { 
+      id: "laserGlow", 
+      filterUnits: "userSpaceOnUse",
+      x: "0", 
+      y: "0", 
+      width: "1000", 
+      height: "800" 
+    });
     fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "8", result: "blur" }));
     const mLaser = svgEl("feMerge");
     mLaser.appendChild(svgEl("feMergeNode", { in: "blur" }));
@@ -730,7 +738,6 @@
         "stroke-linecap": "round", 
         "stroke-linejoin": "round"
       });
-      // FIXED: Referenced existing 'corePulse' instead of missing 'whiteCorePulse'
       core.style.animation = "corePulse 0.4s ease-in-out infinite"; 
       svg.appendChild(core);
     }
