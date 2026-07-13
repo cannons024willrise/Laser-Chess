@@ -265,30 +265,16 @@
       margin-left: auto;
     }
 
-    /* --- THEMES.CSS INSPIRED ANIMATION MATRIX --- */
-    
-    @keyframes beamPulse {
-      0% { stroke-width: 12px; opacity: 0.4; }
-      50% { stroke-width: 28px; opacity: 0.95; }
-      100% { stroke-width: 12px; opacity: 0.4; }
+    /* Base Keyframes for Inline Animations */
+    @keyframes neonPulse {
+      0% { stroke-width: 12px; opacity: 0.5; }
+      50% { stroke-width: 28px; opacity: 1; }
+      100% { stroke-width: 12px; opacity: 0.5; }
     }
     @keyframes corePulse {
-      0% { stroke-width: 3px; opacity: 0.7; }
+      0% { stroke-width: 3px; opacity: 0.8; }
       50% { stroke-width: 6px; opacity: 1; }
-      100% { stroke-width: 3px; opacity: 0.7; }
-    }
-    
-    .beam-blue {
-      stroke: #03e9f4;
-      animation: beamPulse 0.4s ease-in-out infinite;
-    }
-    .beam-red {
-      stroke: #ff3b2f; /* Brighter neon red */
-      animation: beamPulse 0.4s ease-in-out infinite;
-    }
-    .beam-core {
-      stroke: #ffffff;
-      animation: corePulse 0.4s ease-in-out infinite;
+      100% { stroke-width: 3px; opacity: 0.8; }
     }
 
     @media (max-width: 640px){
@@ -675,10 +661,12 @@
     svg.appendChild(svgEl("defs", {}, {}));
     const defs = svg.querySelector("defs");
     
-    const fLaser = svgEl("filter", { id: "laserGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" });
-    fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "5", result: "blur" }));
+    // Create an intense double-stacked blur filter to force an undeniably bright glow
+    const fLaser = svgEl("filter", { id: "laserGlow", x: "-50%", y: "-50%", width: "200%", height: "200%" });
+    fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "8", result: "blur" }));
     const mLaser = svgEl("feMerge");
     mLaser.appendChild(svgEl("feMergeNode", { in: "blur" }));
+    mLaser.appendChild(svgEl("feMergeNode", { in: "blur" })); // Stacked for extra brightness
     mLaser.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
     fLaser.appendChild(mLaser);
     defs.appendChild(fLaser);
@@ -723,24 +711,31 @@
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
       const isRed = state.lastLaserColor === "RED";
       
-      // Outer colored pulse ring
-      svg.appendChild(svgEl("polyline", { 
+      // Force highly saturated hex codes for neon glow base
+      const beamColor = isRed ? "#ff003c" : "#00f0ff"; 
+
+      // Outer colored pulse ring - using inline style assignment to bypass CSS class issues
+      const aura = svgEl("polyline", { 
         points: pts, 
         fill: "none", 
+        stroke: beamColor,
         "stroke-linecap": "round", 
         "stroke-linejoin": "round", 
-        filter: "url(#laserGlow)",
-        class: isRed ? "beam-red" : "beam-blue"
-      }));
+        filter: "url(#laserGlow)"
+      });
+      aura.style.animation = "neonPulse 0.4s ease-in-out infinite"; // Direct inline animation
+      svg.appendChild(aura);
       
       // Inner solid pulsing white core
-      svg.appendChild(svgEl("polyline", { 
+      const core = svgEl("polyline", { 
         points: pts, 
         fill: "none", 
+        stroke: "#ffffff",
         "stroke-linecap": "round", 
-        "stroke-linejoin": "round",
-        class: "beam-core"
-      }));
+        "stroke-linejoin": "round"
+      });
+      core.style.animation = "whiteCorePulse 0.4s ease-in-out infinite"; // Direct inline animation
+      svg.appendChild(core);
     }
 
     const target = sel || pieceAt(cursor.x, cursor.y);
