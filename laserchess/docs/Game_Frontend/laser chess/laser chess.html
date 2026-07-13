@@ -400,6 +400,7 @@
     moveNumber: 1,
     winner: null,
     lastLaserPath: [],
+    lastLaserColor: null, // Tracks which team fired the current laser beam
     pieces: [
       {id: "pmpfnkxpm1", pieceType: "KING", color: "BLUE", rotation: 0, x: 4, y: 0},
       {id: "pmpfnl4j03", pieceType: "KING", color: "RED", rotation: 0, x: 5, y: 7},
@@ -570,11 +571,14 @@
     if (state.winner) return false;
     const shooter = state.pieces.find(p => p.pieceType === "LASER" && p.color === state.turn);
     if (!shooter) return false;
+    
     const dir = laserDirFromRotation(shooter.rotation || 0);
     const startX = shooter.x + DIRS[dir].dx;
     const startY = shooter.y + DIRS[dir].dy;
     const result = resolveLaserVector(startX, startY, dir, clone(state.pieces));
+    
     state.lastLaserPath = result.path;
+    state.lastLaserColor = shooter.color; // Save the color of the team firing the laser
 
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
@@ -657,7 +661,7 @@
     svg.appendChild(svgEl("defs", {}, {}));
     const defs = svg.querySelector("defs");
     
-    // Core White Laser Glow Filter
+    // Core Laser Glow Filter
     const fLaser = svgEl("filter", { id: "laserGlow", x: "-30%", y: "-30%", width: "160%", height: "160%" });
     fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "5", result: "blur" }));
     const mLaser = svgEl("feMerge");
@@ -702,22 +706,27 @@
       }
     }
 
-    // Pure White Laser Beam Line
+    // Dynamic Colored Laser Beam Line
     if (state.lastLaserPath?.length) {
       const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
+      const isRed = state.lastLaserColor === "RED";
+      const laserGlowColor = isRed ? "rgba(244,67,54,.6)" : "rgba(3,233,244,.6)";
+      
+      // The outer animated pulse ring
       svg.appendChild(svgEl("polyline", { 
         points: pts, 
         fill: "none", 
-        stroke: "rgba(255,255,255,.5)", 
+        stroke: laserGlowColor, 
         "stroke-linecap": "round", 
         "stroke-linejoin": "round", 
         filter: "url(#laserGlow)",
         class: "animated-laser-glow"
       }));
+      // The solid core line
       svg.appendChild(svgEl("polyline", { 
         points: pts, 
         fill: "none", 
-        stroke: "rgba(255,255,255,1)", 
+        stroke: "rgba(255,255,255,0.9)", 
         "stroke-width": "4", 
         "stroke-linecap": "round", 
         "stroke-linejoin": "round" 
