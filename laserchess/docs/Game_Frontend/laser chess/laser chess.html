@@ -426,12 +426,11 @@
   const W = 10, H = 8;
   const CELL = 100;
   
-  // DIRECTION INTEGER MAPPING TO CODE LINKS:
-  // Use this DIRS array as the source of truth for the game engine's cardinal directions.
+  // DIRECTION INTEGER MAPPING (Strictly Clockwise)
   const DIRS = [
-    {dx: 0, dy: 1},   // 0 = SOUTH
+    {dx: 0, dy: -1},  // 0 = NORTH
     {dx: 1, dy: 0},   // 1 = EAST
-    {dx: 0, dy: -1},  // 2 = NORTH
+    {dx: 0, dy: 1},   // 2 = SOUTH
     {dx: -1, dy: 0},  // 3 = WEST
   ];
   
@@ -450,17 +449,17 @@
       2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
       3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
-    DEFENDER: {
-      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+    DEFENDER: { // Assuming rotation 0 shield faces NORTH
+      0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
       1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      2: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
       3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } }
     },
-    DEFLECTOR: {
-      0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      1: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 3, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } },
-      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } }
+    DEFLECTOR: { 
+      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
+      2: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 0, isDestroyed: false } },
+      3: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
     SWITCH: {
       0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
@@ -468,7 +467,7 @@
       2: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
       3: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
     },
-    LASER: {
+    LASER: { // Lasers are generally immune to internal destruction loops
       0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
       1: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
       2: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: false } },
@@ -553,8 +552,8 @@
   function buildEngineGUI() {
     el.engineTableBody.innerHTML = "";
     const piecesToConfig = ["KING", "DEFENDER", "DEFLECTOR", "SWITCH"];
-    const DIRS_MAP = { 2: "NORTH", 1: "EAST", 0: "SOUTH", 3: "WEST" };
-    const DIRS_ORDER = [2, 1, 0, 3]; // standard N, E, S, W layout for table visually
+    const DIRS_MAP = { 0: "NORTH", 1: "EAST", 2: "SOUTH", 3: "WEST" };
+    const DIRS_ORDER = [0, 1, 2, 3]; // standard N, E, S, W layout for table visually
 
     piecesToConfig.forEach(piece => {
       DIRS_ORDER.forEach((inDir, i) => {
@@ -579,9 +578,9 @@
           const options = [
             { val: "destroy", text: "Destroyed" },
             { val: "block", text: "Blocks" },
-            { val: "reflect_2", text: "Reflects NORTH" },
+            { val: "reflect_0", text: "Reflects NORTH" },
             { val: "reflect_1", text: "Reflects EAST" },
-            { val: "reflect_0", text: "Reflects SOUTH" },
+            { val: "reflect_2", text: "Reflects SOUTH" },
             { val: "reflect_3", text: "Reflects WEST" }
           ];
 
@@ -722,7 +721,7 @@
     return true;
   }
 
-  function laserDirFromRotation(rot) { return [2, 1, 0, 3][normalizeRotation(rot)]; }
+  function laserDirFromRotation(rot) { return normalizeRotation(rot); }
 
   function interactWithLaser(piece, incomingDir) {
     const typeMap = INTERACTION_MAP[piece.pieceType];
@@ -751,7 +750,7 @@
     const outcome = interactWithLaser(piece, dir);
     
     // --- INJECTED TRACKER START ---
-    const dirNames = ["SOUTH", "EAST", "NORTH", "WEST"]; // Maps 0, 1, 2, 3 based on DIRS array
+    const dirNames = ["NORTH", "EAST", "SOUTH", "WEST"]; // Maps 0, 1, 2, 3 clockwise
     const outcomeStr = outcome.kind === "reflect" 
       ? `Reflected to ${dirNames[outcome.reflected]} (Code: ${outcome.reflected})` 
       : (outcome.destroyed ? "Destroyed" : "Blocked/Stopped");
