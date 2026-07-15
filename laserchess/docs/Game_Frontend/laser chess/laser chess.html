@@ -434,11 +434,12 @@
   const CELL = 100;
   
   // Absolute direction mapping on the game board (used for vector math)
+  // Modified: Clockwise sequence starting from 0 = SOUTH ⬇
   const DIRS = [
-    {dx: 0, dy: -1},  // 0 = NORTH ⬆
-    {dx: 1, dy: 0},   // 1 = EAST ➡️
-    {dx: 0, dy: 1},   // 2 = SOUTH ⬇
-    {dx: -1, dy: 0},  // 3 = WEST ⬅
+    {dx: 0, dy: 1},   // 0 = SOUTH ⬇
+    {dx: -1, dy: 0},  // 1 = WEST ⬅
+    {dx: 0, dy: -1},  // 2 = NORTH ⬆
+    {dx: 1, dy: 0},   // 3 = EAST ➡️
   ];
   
   const PIECE_MAP = {
@@ -449,6 +450,7 @@
     LASER: "laser",
   };
 
+  // Re-mapped to support: 0-SOUTH, 1-WEST, 2-NORTH, 3-EAST
   const INTERACTION_MAP = {
     KING: {
       0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
@@ -457,16 +459,16 @@
       3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
     DEFENDER: { 
-      0: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } }
+      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: false } },
+      2: { 0: { reflect: null, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
     DEFLECTOR: { 
-      0: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
-      2: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 0, isDestroyed: false } },
-      3: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
+      0: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } },
+      1: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } }
     },
     SWITCH: {
       0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
@@ -559,7 +561,7 @@
   function buildEngineGUI() {
     el.engineTableBody.innerHTML = "";
     const piecesToConfig = ["KING", "DEFENDER", "DEFLECTOR", "SWITCH"];
-    const DIRS_MAP = { 0: "NORTH ⬆", 1: "EAST ➡️", 2: "SOUTH ⬇", 3: "WEST ⬅" };
+    const DIRS_MAP = { 0: "SOUTH ⬇", 1: "WEST ⬅", 2: "NORTH ⬆", 3: "EAST ➡️" };
     const DIRS_ORDER = [0, 1, 2, 3]; 
 
     piecesToConfig.forEach(piece => {
@@ -585,10 +587,10 @@
           const options = [
             { val: "destroy", text: "Destroyed" },
             { val: "block", text: "Blocks" },
-            { val: "reflect_0", text: "Reflects NORTH ⬆" },
-            { val: "reflect_1", text: "Reflects EAST ➡️" },
-            { val: "reflect_2", text: "Reflects SOUTH ⬇" },
-            { val: "reflect_3", text: "Reflects WEST ⬅" }
+            { val: "reflect_0", text: "Reflects SOUTH ⬇" },
+            { val: "reflect_1", text: "Reflects WEST ⬅" },
+            { val: "reflect_2", text: "Reflects NORTH ⬆" },
+            { val: "reflect_3", text: "Reflects EAST ➡️" }
           ];
 
           const state = INTERACTION_MAP[piece][rot][inDir];
@@ -757,7 +759,7 @@
     const outcome = interactWithLaser(piece, dir);
     
     // Developer Diagnostic Tracker
-    const dirNames = ["NORTH ⬆", "EAST ➡️", "SOUTH ⬇", "WEST ⬅"];
+    const dirNames = ["SOUTH ⬇", "WEST ⬅", "NORTH ⬆", "EAST ➡️"];
     const outcomeStr = outcome.kind === "reflect" 
       ? `Reflected to ${dirNames[outcome.reflected]} (Code: ${outcome.reflected})` 
       : (outcome.destroyed ? "Destroyed" : "Blocked/Stopped");
@@ -836,6 +838,7 @@
     return true;
   }
 
+  // Delta CW = 1, Delta CCW = 3 (retaining coordinate logic orientation)
   function rotateCCW() { return rotateSelected(3); }
   function rotateCW() { return rotateSelected(1); }
 
