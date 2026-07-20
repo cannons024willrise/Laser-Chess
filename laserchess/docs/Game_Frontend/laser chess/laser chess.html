@@ -428,7 +428,7 @@
   "use strict";
 
   // Force reset stale local storage objects to prevent old legacy physics conflicts!
-  const PHYSICS_VERSION = "laser_chess_v5_deflector_fix";
+  const PHYSICS_VERSION = "laser_chess_v6_reserved_square_fix";
   if (localStorage.getItem("laserchess_engine_version") !== PHYSICS_VERSION) {
     localStorage.removeItem("laserchess_local_state");
     localStorage.removeItem("laserchess_custom_rules");
@@ -708,12 +708,12 @@
         const nx = piece.x + dx;
         const ny = piece.y + dy;
         if (!inBounds(nx, ny)) continue;
-        if (isReservedSquare(nx, ny, piece.color)) continue;
+        if (isReservedSquare(nx, ny, enemyColor(piece.color))) continue;
         const occ = pieceAt(nx, ny);
         if (!occ) {
           moves.push({ type: "move", x: nx, y: ny });
         } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
-          if (!isReservedSquare(piece.x, piece.y, occ.color)) {
+          if (!isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) {
             moves.push({ type: "swap", x: nx, y: ny });
           }
         }
@@ -728,13 +728,13 @@
     if (occ) {
       if (piece.pieceType !== "SWITCH") return false;
       if (!(occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) return false;
-      if (isReservedSquare(piece.x, piece.y, occ.color)) return false;
+      if (isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) return false;
       const ox = piece.x, oy = piece.y;
       piece.x = nx; piece.y = ny;
       occ.x = ox; occ.y = oy;
       return true;
     }
-    if (isReservedSquare(nx, ny, piece.color)) return false;
+    if (isReservedSquare(nx, ny, enemyColor(piece.color))) return false;
     if (Math.max(Math.abs(nx - piece.x), Math.abs(ny - piece.y)) !== 1) return false;
     piece.x = nx; piece.y = ny;
     return true;
