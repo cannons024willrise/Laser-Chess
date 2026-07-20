@@ -428,7 +428,7 @@
   "use strict";
 
   // Force reset stale local storage objects to prevent old legacy physics conflicts!
-  const PHYSICS_VERSION = "laser_chess_v4_clockwise_south0";
+  const PHYSICS_VERSION = "laser_chess_v5_deflector_fix";
   if (localStorage.getItem("laserchess_engine_version") !== PHYSICS_VERSION) {
     localStorage.removeItem("laserchess_local_state");
     localStorage.removeItem("laserchess_custom_rules");
@@ -473,14 +473,16 @@
       3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } }
     },
     DEFLECTOR: { 
-      // 0: \ mirror facing NW (reflects SOUTH to EAST, EAST to SOUTH)
-      0: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 0, isDestroyed: false } },
-      // 1: / mirror facing NE (reflects SOUTH to WEST, WEST to SOUTH)
-      1: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
-      // 2: \ mirror facing SE (reflects NORTH to WEST, WEST to NORTH)
-      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
-      // 3: / mirror facing SW (reflects NORTH to EAST, EAST to NORTH)
-      3: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } }
+      // Reconciled with the interactive tutorial engine (docs/home/tutorials.js
+      // PIECE_INTERACTION_TABLE.DEFLECTOR), which is the declared source of truth.
+      // 0: reflects SOUTH->EAST, WEST->NORTH; destroyed from NORTH or EAST
+      0: { 0: { reflect: 3, isDestroyed: false }, 1: { reflect: 2, isDestroyed: false }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: null, isDestroyed: true } },
+      // 1: reflects WEST->SOUTH, NORTH->EAST; destroyed from SOUTH or EAST
+      1: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: null, isDestroyed: true } },
+      // 2: reflects NORTH->WEST, EAST->SOUTH; destroyed from SOUTH or WEST
+      2: { 0: { reflect: null, isDestroyed: true }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: 1, isDestroyed: false }, 3: { reflect: 0, isDestroyed: false } },
+      // 3: reflects SOUTH->WEST, EAST->NORTH; destroyed from WEST or NORTH
+      3: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: null, isDestroyed: true }, 2: { reflect: null, isDestroyed: true }, 3: { reflect: 2, isDestroyed: false } }
     },
     SWITCH: {
       0: { 0: { reflect: 1, isDestroyed: false }, 1: { reflect: 0, isDestroyed: false }, 2: { reflect: 3, isDestroyed: false }, 3: { reflect: 2, isDestroyed: false } },
