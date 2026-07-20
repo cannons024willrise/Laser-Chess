@@ -991,7 +991,11 @@
       g.appendChild(bloom);
 
       const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
-      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90} ${x + 50} ${y + 50})`);
+      // The LASER artwork's barrel is drawn facing the opposite way from the
+      // direction laserDirFromRotation() actually fires at rotation 0, so it
+      // needs a fixed 180-degree correction to stay visually in sync with the beam.
+      const visualOffset = piece.pieceType === "LASER" ? 180 : 0;
+      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90 + visualOffset} ${x + 50} ${y + 50})`);
       g.appendChild(img);
       
       g.style.cursor = "pointer";
