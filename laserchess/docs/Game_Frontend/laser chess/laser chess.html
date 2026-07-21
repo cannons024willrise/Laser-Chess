@@ -173,15 +173,18 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      overflow: hidden;
+      gap: .65rem;
+      justify-content: flex-start;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-right: .15rem;
     }
     .side-card {
       padding: .75rem;
-      height: 100%;
+      height: auto;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start;
       overflow: hidden;
     }
     .side-card h3 {
@@ -190,6 +193,46 @@
       letter-spacing: .18em;
       font-size: .8rem;
       text-align: center;
+    }
+    .quick-tip {
+      margin: 0 0 .55rem;
+      font-size: .78rem;
+      line-height: 1.45;
+      color: var(--muted);
+      text-align: left;
+    }
+    .advanced-panel {
+      padding: 0;
+    }
+    .advanced-panel > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: .72rem .8rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-size: .75rem;
+      text-align: center;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      user-select: none;
+    }
+    .advanced-panel > summary::-webkit-details-marker { display: none; }
+    .advanced-body {
+      padding: .75rem;
+      display: grid;
+      gap: .85rem;
+    }
+    .advanced-group {
+      display: grid;
+      gap: .45rem;
+    }
+    .advanced-group h4 {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .72rem;
+      color: var(--theme-color);
+      text-align: left;
     }
     .turn-row {
       display: flex;
@@ -345,6 +388,8 @@
       .kbd { display: none; }
       .btn { font-size: 0.58rem; padding: .45rem .2rem; border-radius: 6px; }
       .side-card h3 { font-size: 0.62rem; margin-bottom: 0.2rem; }
+      .quick-tip { font-size: 0.66rem; }
+      .advanced-panel > summary { font-size: 0.62rem; padding: .55rem .5rem; }
       .turn-badge { font-size: 0.55rem; padding: .25rem .1rem; }
       .interaction-table { font-size: 0.65rem; }
       .interaction-table th, .interaction-table td { padding: 0.3rem; }
@@ -376,7 +421,8 @@
       <aside class="sidebar">
         <section class="panel side-card">
           <div>
-            <h3>Turn controls</h3>
+            <h3>Quick Start</h3>
+            <p class="quick-tip">Select a piece, then move or rotate it. Your turn ends with an automatic laser shot. The first king destroyed loses immediately.</p>
             <div class="turn-row">
               <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
               <div class="turn-badge" id="phaseBadge">Select a piece</div>
@@ -391,27 +437,49 @@
             <button class="btn" id="rulesBtn">Modify Rules <span class="kbd">M</span></button>
           </div>
         </section>
+
         <section class="panel side-card">
           <div>
-            <h3>AI Opponent (twin RL models)</h3>
+            <h3>AI Opponent</h3>
+            <p class="quick-tip">Switch the AI on for one or both colors. Casual players can ignore the rest until they are ready to let the robots embarrass each other.</p>
             <div class="controls">
               <button class="btn" id="aiOffBtn">2-Player (AI off)</button>
               <button class="btn" id="aiBlueBtn">AI plays BLUE</button>
               <button class="btn" id="aiRedBtn">AI plays RED</button>
               <button class="btn" id="aiBothBtn">AI vs AI</button>
+            </div>
+            <div id="aiStatus" style="font-size:12px; opacity:0.75; margin-top:8px;"></div>
+          </div>
+        </section>
+
+        <section class="panel side-card">
+          <div>
+            <h3>AI Training</h3>
+            <p class="quick-tip">Twin RL self-play stays visible here. It still uses sparse end-of-match rewards only, because overcomplicating reward signals is how models become confident garbage.</p>
+            <div class="controls">
               <button class="btn primary" id="trainAIBtn">Train AI…</button>
             </div>
             <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.85; margin-top:8px;">
               <input type="checkbox" id="aiAutoLoopChk"> Auto-continue AI vs AI (loop games, no clicking Reset)
             </label>
-            <div class="controls" style="margin-top:6px;">
-              <button class="btn" id="downloadWeightsBtn">⬇ Download Weights</button>
-              <button class="btn" id="importWeightsBtn">⬆ Import Weights</button>
-              <input type="file" id="importWeightsFile" accept="application/json" style="display:none;">
-            </div>
-            <div id="aiStatus" style="font-size:12px; opacity:0.75; margin-top:8px;"></div>
           </div>
         </section>
+
+        <details class="panel advanced-panel">
+          <summary>Advanced Options</summary>
+          <div class="advanced-body">
+            <div class="advanced-group">
+              <h4>Weight Management</h4>
+              <p class="quick-tip">Export, import, or reset the learned twin weights.</p>
+              <div class="controls">
+                <button class="btn" id="downloadWeightsBtn">⬇ Download Weights</button>
+                <button class="btn" id="importWeightsBtn">⬆ Import Weights</button>
+                <button class="btn danger" id="resetWeightsBtn">Reset Weights</button>
+                <input type="file" id="importWeightsFile" accept="application/json" style="display:none;">
+              </div>
+            </div>
+          </div>
+        </details>
       </aside>
     </main>
   </div>
@@ -422,8 +490,8 @@
     <h3 style="margin-top:0; color: var(--theme-color); text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">Train the Twin RL Models</h3>
     <p style="text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: -10px;">
       Runs fast, unrendered self-play games (no 500ms move delay) directly through this file's own
-      rules engine. Reward is only assigned at the end of each game (+1 win / -1 loss). Each color
-      updates only its own weights from its own games — BLUE and RED never share memory.
+      rules engine. Rewards stay sparse: the first king destroyed loses, the surviving king wins,
+      and only end-of-match outcomes update the models. BLUE and RED never share memory.
     </p>
     <div style="display:flex; flex-direction:column; gap:10px; max-width:420px; margin:0 auto;">
       <label style="font-size:0.85rem;">Games to play
@@ -567,6 +635,7 @@
     turn: "BLUE",
     moveNumber: 1,
     winner: null,
+    loser: null,
     lastLaserPath: [],
     lastLaserColor: null, 
     pieces: [
@@ -623,6 +692,7 @@
     aiAutoLoopChk: document.getElementById("aiAutoLoopChk"),
     downloadWeightsBtn: document.getElementById("downloadWeightsBtn"),
     importWeightsBtn: document.getElementById("importWeightsBtn"),
+    resetWeightsBtn: document.getElementById("resetWeightsBtn"),
     importWeightsFile: document.getElementById("importWeightsFile"),
     trainAIBtn: document.getElementById("trainAIBtn"),
     trainModal: document.getElementById("trainModal"),
@@ -872,7 +942,10 @@
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
       state.pieces.splice(state.pieces.findIndex(p => p.id === victim.id), 1);
-      if (victim.pieceType === "KING") state.winner = state.turn;
+      if (victim.pieceType === "KING") {
+        state.loser = victim.color;
+        state.winner = enemyColor(victim.color);
+      }
     }
 
     state.turn = enemyColor(state.turn);
@@ -1066,17 +1139,20 @@
 
   function fireLaserPure(pieces, turnColor) {
     const shooter = pieces.find(p => p.pieceType === "LASER" && p.color === turnColor);
-    if (!shooter) return { pieces, winner: enemyColor(turnColor) };
+    if (!shooter) return { pieces, winner: enemyColor(turnColor), loser: turnColor };
     const dir = laserDirFromRotation(shooter.rotation || 0);
     const startX = shooter.x + DIRS[dir].dx, startY = shooter.y + DIRS[dir].dy;
     const result = resolveLaserVector(startX, startY, dir, pieces, [{ x: shooter.x, y: shooter.y, dir }], new Set(), true);
-    let newPieces = pieces, winner = null;
+    let newPieces = pieces, winner = null, loser = null;
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
       newPieces = pieces.filter(p => p.id !== victim.id);
-      if (victim.pieceType === "KING") winner = turnColor;
+      if (victim.pieceType === "KING") {
+        loser = victim.color;
+        winner = enemyColor(victim.color);
+      }
     }
-    return { pieces: newPieces, winner };
+    return { pieces: newPieces, winner, loser };
   }
 
   function aiImmediateThreat(pieces, shooterColor) {
@@ -1085,8 +1161,8 @@
 
   function aiStepGame(pieces, turnColor, action) {
     const moved = applyActionPure(pieces, action);
-    const { pieces: after, winner } = fireLaserPure(moved, turnColor);
-    return { pieces: after, winner, nextTurn: enemyColor(turnColor) };
+    const { pieces: after, winner, loser } = fireLaserPure(moved, turnColor);
+    return { pieces: after, winner, loser, nextTurn: enemyColor(turnColor) };
   }
 
   function aiExtractFeatures(pieces, color) {
@@ -1195,9 +1271,10 @@
   // share gradients or memory.
   function handleGameEndForAI() {
     const winner = state.winner;
+    const loser = state.loser;
     for (const color of ["BLUE", "RED"]) {
       if (!aiControl[color] || aiTrajectory[color].length === 0) continue;
-      const target = winner === color ? 1 : -1;
+      const target = winner ? (color === loser ? -1 : 1) : 0;
       for (const feats of aiTrajectory[color]) applyRLUpdate(color, feats, target);
       saveAIWeights(color, aiWeights[color]);
       bumpAIGamesLearned(color);
@@ -1244,7 +1321,7 @@
     let pieces = START_STATE().pieces.map(p => ({ ...p }));
     let turn = "BLUE";
     const trajectory = { BLUE: [], RED: [] };
-    let winner = null, plies = 0;
+    let winner = null, loser = null, plies = 0;
     const MOVE_LIMIT = 120;
     while (!winner && plies < MOVE_LIMIT) {
       const action = Math.random() < 0.15
@@ -1252,9 +1329,9 @@
         : aiSoftmaxPick(pieces, turn, aiWeights[turn], Math.max(aiTemperature[turn], 0.3));
       trajectory[turn].push(aiExtractFeatures(pieces, turn));
       const step = aiStepGame(pieces, turn, action);
-      pieces = step.pieces; winner = step.winner; turn = step.nextTurn; plies++;
+      pieces = step.pieces; winner = step.winner; loser = step.loser; turn = step.nextTurn; plies++;
     }
-    return { trajectory, winner, plies };
+    return { trajectory, winner, loser, plies };
   }
 
   // Runs `numGames` self-play games in small chunks (setTimeout(0)
@@ -1273,11 +1350,11 @@
       if (!trainingActive) { onDone(results, played, true); return; }
       const end = Math.min(played + CHUNK, numGames);
       for (; played < end; played++) {
-        const { trajectory, winner, plies } = playOneTrainingGame();
+        const { trajectory, winner, loser, plies } = playOneTrainingGame();
         const outcome = winner || "DRAW";
         results[outcome] = (results[outcome] || 0) + 1;
         for (const color of trainColors) {
-          const target = winner === null ? 0 : (winner === color ? 1 : -1);
+          const target = winner === null ? 0 : (color === loser ? -1 : 1);
           for (const feats of trajectory[color]) applyRLUpdate(color, feats, target);
           decayAITemperature(color);
         }
@@ -1368,6 +1445,24 @@
       }
     };
     reader.readAsText(file);
+  }
+
+  function resetAIWeightsToDefaults() {
+    aiWeights.BLUE = AI_DEFAULT_WEIGHTS.BLUE.slice();
+    aiWeights.RED = AI_DEFAULT_WEIGHTS.RED.slice();
+    aiTemperature.BLUE = 0.6;
+    aiTemperature.RED = 0.6;
+    aiGamesLearnedCache.BLUE = 0;
+    aiGamesLearnedCache.RED = 0;
+    aiTrajectory = { BLUE: [], RED: [] };
+    saveAIWeights("BLUE", aiWeights.BLUE.slice());
+    saveAIWeights("RED", aiWeights.RED.slice());
+    saveAITemperature("BLUE", aiTemperature.BLUE);
+    saveAITemperature("RED", aiTemperature.RED);
+    aiDBSet("games_blue", 0);
+    aiDBSet("games_red", 0);
+    updateAIStatusUI();
+    if (el.trainProgress) el.trainProgress.textContent = "Weights reset to defaults.";
   }
 
   function updateAIStatusUI() {
@@ -1690,6 +1785,7 @@
   el.aiAutoLoopChk.addEventListener("change", () => { aiAutoLoop = el.aiAutoLoopChk.checked; });
   el.downloadWeightsBtn.addEventListener("click", downloadAIWeights);
   el.importWeightsBtn.addEventListener("click", () => el.importWeightsFile.click());
+  el.resetWeightsBtn.addEventListener("click", resetAIWeightsToDefaults);
   el.importWeightsFile.addEventListener("change", () => {
     if (el.importWeightsFile.files && el.importWeightsFile.files[0]) {
       importAIWeightsFromFile(el.importWeightsFile.files[0]);
