@@ -399,12 +399,47 @@
               <button class="btn" id="aiBlueBtn">AI plays BLUE</button>
               <button class="btn" id="aiRedBtn">AI plays RED</button>
               <button class="btn" id="aiBothBtn">AI vs AI</button>
+              <button class="btn primary" id="trainAIBtn">Train AI…</button>
+            </div>
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.85; margin-top:8px;">
+              <input type="checkbox" id="aiAutoLoopChk"> Auto-continue AI vs AI (loop games, no clicking Reset)
+            </label>
+            <div class="controls" style="margin-top:6px;">
+              <button class="btn" id="downloadWeightsBtn">⬇ Download Weights</button>
+              <button class="btn" id="importWeightsBtn">⬆ Import Weights</button>
+              <input type="file" id="importWeightsFile" accept="application/json" style="display:none;">
             </div>
             <div id="aiStatus" style="font-size:12px; opacity:0.75; margin-top:8px;"></div>
           </div>
         </section>
       </aside>
     </main>
+  </div>
+</div>
+
+<div id="trainModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0; color: var(--theme-color); text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">Train the Twin RL Models</h3>
+    <p style="text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: -10px;">
+      Runs fast, unrendered self-play games (no 500ms move delay) directly through this file's own
+      rules engine. Reward is only assigned at the end of each game (+1 win / -1 loss). Each color
+      updates only its own weights from its own games — BLUE and RED never share memory.
+    </p>
+    <div style="display:flex; flex-direction:column; gap:10px; max-width:420px; margin:0 auto;">
+      <label style="font-size:0.85rem;">Games to play
+        <input type="number" id="trainGamesInput" value="500" min="10" max="20000" step="10" style="width:100%; padding:6px; margin-top:4px;">
+      </label>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="trainBlueBtn" style="flex:1;">Train BLUE only</button>
+        <button class="btn" id="trainRedBtn" style="flex:1;">Train RED only</button>
+      </div>
+      <button class="btn primary" id="trainBothBtn">Train BLUE + RED (self-play)</button>
+      <button class="btn danger" id="trainStopBtn" style="display:none;">Stop Training</button>
+      <div id="trainProgress" style="font-size:0.8rem; opacity:0.85; text-align:center; min-height:3.5em;"></div>
+    </div>
+    <div style="text-align:center; margin-top:14px;">
+      <button class="btn" id="closeTrainBtn">Close <span class="kbd">ESC</span></button>
+    </div>
   </div>
 </div>
 
@@ -584,7 +619,20 @@
     aiBlueBtn: document.getElementById("aiBlueBtn"),
     aiRedBtn: document.getElementById("aiRedBtn"),
     aiBothBtn: document.getElementById("aiBothBtn"),
-    aiStatus: document.getElementById("aiStatus")
+    aiStatus: document.getElementById("aiStatus"),
+    aiAutoLoopChk: document.getElementById("aiAutoLoopChk"),
+    downloadWeightsBtn: document.getElementById("downloadWeightsBtn"),
+    importWeightsBtn: document.getElementById("importWeightsBtn"),
+    importWeightsFile: document.getElementById("importWeightsFile"),
+    trainAIBtn: document.getElementById("trainAIBtn"),
+    trainModal: document.getElementById("trainModal"),
+    trainGamesInput: document.getElementById("trainGamesInput"),
+    trainBlueBtn: document.getElementById("trainBlueBtn"),
+    trainRedBtn: document.getElementById("trainRedBtn"),
+    trainBothBtn: document.getElementById("trainBothBtn"),
+    trainStopBtn: document.getElementById("trainStopBtn"),
+    trainProgress: document.getElementById("trainProgress"),
+    closeTrainBtn: document.getElementById("closeTrainBtn")
   };
 
   function buildEngineGUI() {
@@ -854,7 +902,8 @@
   const AI_FEATURE_NAMES = ["bias", "defenderDiff", "deflectorDiff", "switchDiff", "mobilityDiff", "iCanWinNow", "enemyCanWinNow"];
   // Baked-in defaults from an offline self-play run (3000 games, depth-2
   // search, softmax exploration, reward only at game end). Overridden by
-  // whatever's in localStorage once a browser has played/learned locally.
+  // whatever's in the AI's own IndexedDB store once a browser has
+  // played/trained locally.
   const AI_DEFAULT_WEIGHTS = {
     BLUE: [0.390, -0.096, 0.583, -0.013, -0.715, 1.340, -0.667],
     RED:  [0.248, -0.514, 0.306, 0.014, -0.663, 1.432, -0.337]
@@ -862,43 +911,100 @@
 
   let aiControl = { BLUE: false, RED: false };
   let aiTrajectory = { BLUE: [], RED: [] };
+  let aiAutoLoop = false;
 
-  function loadAIWeights(color) {
+  /* ---- Storage: IndexedDB instead of localStorage --------------------
+     localStorage caps out around 5-10MB and is synchronous/blocking.
+     IndexedDB gets each origin a much larger quota (commonly a large
+     percentage of free disk space) and is async, so it won't ever stall
+     the UI thread even if the AI's stored data grows (full trajectories,
+     many training runs, etc.). Falls back to localStorage only if a
+     browser genuinely has no IndexedDB. */
+  const AI_DB_NAME = "laserchess_ai_store";
+  const AI_DB_VERSION = 1;
+  const AI_DB_TABLE = "kv";
+  let aiDBPromise = null;
+
+  function openAIDB() {
+    if (aiDBPromise) return aiDBPromise;
+    aiDBPromise = new Promise((resolve, reject) => {
+      if (typeof indexedDB === "undefined") { reject(new Error("no indexedDB")); return; }
+      const req = indexedDB.open(AI_DB_NAME, AI_DB_VERSION);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(AI_DB_TABLE)) db.createObjectStore(AI_DB_TABLE, { keyPath: "key" });
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return aiDBPromise;
+  }
+  async function aiDBGet(key) {
     try {
-      const raw = localStorage.getItem("laserchess_ai_weights_" + color.toLowerCase());
-      if (raw) {
-        const arr = JSON.parse(raw);
-        if (Array.isArray(arr) && arr.length === AI_FEATURE_NAMES.length) return arr;
-      }
-    } catch (e) {}
-    return AI_DEFAULT_WEIGHTS[color].slice();
+      const db = await openAIDB();
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(AI_DB_TABLE, "readonly");
+        const req = tx.objectStore(AI_DB_TABLE).get(key);
+        req.onsuccess = () => resolve(req.result ? req.result.value : undefined);
+        req.onerror = () => reject(req.error);
+      });
+    } catch (e) {
+      try { const raw = localStorage.getItem("laserchess_ai_" + key); return raw !== null ? JSON.parse(raw) : undefined; }
+      catch (e2) { return undefined; }
+    }
   }
-  function saveAIWeights(color, weights) {
-    localStorage.setItem("laserchess_ai_weights_" + color.toLowerCase(), JSON.stringify(weights));
-  }
-  function aiGamesLearned(color) {
-    return parseInt(localStorage.getItem("laserchess_ai_games_" + color.toLowerCase()) || "0", 10);
-  }
-  function bumpAIGamesLearned(color) {
-    localStorage.setItem("laserchess_ai_games_" + color.toLowerCase(), String(aiGamesLearned(color) + 1));
+  async function aiDBSet(key, value) {
+    try {
+      const db = await openAIDB();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(AI_DB_TABLE, "readwrite");
+        const req = tx.objectStore(AI_DB_TABLE).put({ key, value });
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    } catch (e) {
+      try { localStorage.setItem("laserchess_ai_" + key, JSON.stringify(value)); } catch (e2) {}
+    }
   }
 
-  // Each color owns its own exploration "temperature" — how often it
-  // takes a softmax-sampled exploratory move instead of its best-search
-  // move. It persists per color and decays as that color accumulates
-  // learned games, so BLUE and RED anneal independently based on their
-  // own experience, not a shared global schedule.
-  function loadAITemperature(color) {
-    const raw = localStorage.getItem("laserchess_ai_temp_" + color.toLowerCase());
-    const v = raw !== null ? parseFloat(raw) : 0.6;
-    return isFinite(v) ? Math.max(0.05, Math.min(1, v)) : 0.6;
+  // In-memory caches so gameplay code (search, feature extraction, the
+  // status UI) can read/write synchronously; every write also fires an
+  // async persist to IndexedDB underneath.
+  let aiWeights = { BLUE: AI_DEFAULT_WEIGHTS.BLUE.slice(), RED: AI_DEFAULT_WEIGHTS.RED.slice() };
+  let aiTemperature = { BLUE: 0.6, RED: 0.6 };
+  let aiGamesLearnedCache = { BLUE: 0, RED: 0 };
+  let aiHydrated = false;
+
+  async function hydrateAIFromDB() {
+    const [wb, wr, tb, tr, gb, gr] = await Promise.all([
+      aiDBGet("weights_blue"), aiDBGet("weights_red"),
+      aiDBGet("temp_blue"), aiDBGet("temp_red"),
+      aiDBGet("games_blue"), aiDBGet("games_red"),
+    ]);
+    if (Array.isArray(wb) && wb.length === AI_FEATURE_NAMES.length) aiWeights.BLUE = wb;
+    if (Array.isArray(wr) && wr.length === AI_FEATURE_NAMES.length) aiWeights.RED = wr;
+    if (typeof tb === "number" && isFinite(tb)) aiTemperature.BLUE = Math.max(0.05, Math.min(1, tb));
+    if (typeof tr === "number" && isFinite(tr)) aiTemperature.RED = Math.max(0.05, Math.min(1, tr));
+    if (typeof gb === "number") aiGamesLearnedCache.BLUE = gb;
+    if (typeof gr === "number") aiGamesLearnedCache.RED = gr;
+    aiHydrated = true;
+    updateAIStatusUI();
+  }
+
+  function saveAIWeights(color, weights) {
+    aiWeights[color] = weights;
+    aiDBSet("weights_" + color.toLowerCase(), weights);
+  }
+  function aiGamesLearned(color) { return aiGamesLearnedCache[color]; }
+  function bumpAIGamesLearned(color) { bumpAIGamesLearnedBy(color, 1); }
+  function bumpAIGamesLearnedBy(color, n) {
+    aiGamesLearnedCache[color] += n;
+    aiDBSet("games_" + color.toLowerCase(), aiGamesLearnedCache[color]);
   }
   function saveAITemperature(color, t) {
-    localStorage.setItem("laserchess_ai_temp_" + color.toLowerCase(), String(t));
+    aiTemperature[color] = t;
+    aiDBSet("temp_" + color.toLowerCase(), t);
   }
-  let aiTemperature = { BLUE: loadAITemperature("BLUE"), RED: loadAITemperature("RED") };
-
-  let aiWeights = { BLUE: loadAIWeights("BLUE"), RED: loadAIWeights("RED") };
 
   function legalMovesPure(piece, pieces, turnColor) {
     const moves = [];
@@ -1071,6 +1177,18 @@
     return actions[actions.length - 1];
   }
 
+  function applyRLUpdate(color, feats, target) {
+    const w = aiWeights[color];
+    let s = 0;
+    for (let i = 0; i < feats.length; i++) s += feats[i] * w[i];
+    const pred = Math.tanh(s);
+    const grad = Math.max(-1, Math.min(1, (pred - target) * (1 - pred * pred)));
+    for (let i = 0; i < feats.length; i++) w[i] -= 0.01 * grad * feats[i];
+  }
+  function decayAITemperature(color) {
+    aiTemperature[color] = Math.max(0.05, aiTemperature[color] * 0.97);
+  }
+
   // Sparse-reward online learning: called once per game, right when
   // state.winner is set. Every AI-controlled color updates its OWN
   // weights from its OWN recorded trajectory — the two models never
@@ -1080,22 +1198,17 @@
     for (const color of ["BLUE", "RED"]) {
       if (!aiControl[color] || aiTrajectory[color].length === 0) continue;
       const target = winner === color ? 1 : -1;
-      const w = aiWeights[color];
-      const lr = 0.01;
-      for (const feats of aiTrajectory[color]) {
-        let s = 0;
-        for (let i = 0; i < feats.length; i++) s += feats[i] * w[i];
-        const pred = Math.tanh(s);
-        const grad = Math.max(-1, Math.min(1, (pred - target) * (1 - pred * pred)));
-        for (let i = 0; i < feats.length; i++) w[i] -= lr * grad * feats[i];
-      }
-      saveAIWeights(color, w);
+      for (const feats of aiTrajectory[color]) applyRLUpdate(color, feats, target);
+      saveAIWeights(color, aiWeights[color]);
       bumpAIGamesLearned(color);
-      aiTemperature[color] = Math.max(0.05, aiTemperature[color] * 0.97);
+      decayAITemperature(color);
       saveAITemperature(color, aiTemperature[color]);
     }
     aiTrajectory = { BLUE: [], RED: [] };
     updateAIStatusUI();
+    if (aiAutoLoop && aiControl.BLUE && aiControl.RED) {
+      setTimeout(() => { if (aiAutoLoop && aiControl.BLUE && aiControl.RED) resetGame(); }, 1500);
+    }
   }
 
   function aiTakeTurn(color) {
@@ -1118,11 +1231,151 @@
     }
   }
 
+  let trainingActive = false;
+
+  // One full self-play game against the CURRENT weights, off the live
+  // `state` entirely — no rendering, no 500ms move delay, just the pure
+  // engine (aiEnumerateActions / aiStepGame / aiExtractFeatures — the
+  // exact same functions aiTakeTurn uses for real play). Returns the
+  // recorded per-color trajectories and the outcome; does NOT apply any
+  // weight update itself, so the caller decides which color(s) learn
+  // from it.
+  function playOneTrainingGame() {
+    let pieces = START_STATE().pieces.map(p => ({ ...p }));
+    let turn = "BLUE";
+    const trajectory = { BLUE: [], RED: [] };
+    let winner = null, plies = 0;
+    const MOVE_LIMIT = 120;
+    while (!winner && plies < MOVE_LIMIT) {
+      const action = Math.random() < 0.15
+        ? chooseAIAction(pieces, turn, aiWeights[turn], 30, 2)
+        : aiSoftmaxPick(pieces, turn, aiWeights[turn], Math.max(aiTemperature[turn], 0.3));
+      trajectory[turn].push(aiExtractFeatures(pieces, turn));
+      const step = aiStepGame(pieces, turn, action);
+      pieces = step.pieces; winner = step.winner; turn = step.nextTurn; plies++;
+    }
+    return { trajectory, winner, plies };
+  }
+
+  // Runs `numGames` self-play games in small chunks (setTimeout(0)
+  // between chunks) so the tab stays responsive. `trainColors` says
+  // which color(s) actually learn from the games — the other color, if
+  // any, still plays with its current weights as a sparring partner but
+  // its own weights are left untouched (so you can train just one twin
+  // model against the other's fixed current skill level).
+  function runTrainingBatch(trainColors, numGames, onProgress, onDone) {
+    trainingActive = true;
+    let played = 0;
+    const results = { BLUE: 0, RED: 0, DRAW: 0 };
+    const CHUNK = 20;
+
+    function chunk() {
+      if (!trainingActive) { onDone(results, played, true); return; }
+      const end = Math.min(played + CHUNK, numGames);
+      for (; played < end; played++) {
+        const { trajectory, winner, plies } = playOneTrainingGame();
+        const outcome = winner || "DRAW";
+        results[outcome] = (results[outcome] || 0) + 1;
+        for (const color of trainColors) {
+          const target = winner === null ? 0 : (winner === color ? 1 : -1);
+          for (const feats of trajectory[color]) applyRLUpdate(color, feats, target);
+          decayAITemperature(color);
+        }
+      }
+      onProgress(played, numGames, results);
+      if (played < numGames) {
+        setTimeout(chunk, 0);
+      } else {
+        for (const color of trainColors) {
+          saveAIWeights(color, aiWeights[color]);
+          bumpAIGamesLearnedBy(color, numGames);
+          saveAITemperature(color, aiTemperature[color]);
+        }
+        trainingActive = false;
+        onDone(results, played, false);
+      }
+    }
+    chunk();
+  }
+
+  function stopTraining() { trainingActive = false; }
+
+  function toggleTrainModal() {
+    el.trainModal.classList.toggle("active");
+  }
+
+  function startTrainingFromUI(trainColors) {
+    const numGames = Math.max(10, Math.min(20000, parseInt(el.trainGamesInput.value, 10) || 500));
+    el.trainStopBtn.style.display = "block";
+    el.trainBlueBtn.disabled = el.trainRedBtn.disabled = el.trainBothBtn.disabled = true;
+    runTrainingBatch(
+      trainColors,
+      numGames,
+      (played, total, results) => {
+        el.trainProgress.textContent =
+          `${played} / ${total} games  ·  BLUE ${results.BLUE}  RED ${results.RED}  DRAW ${results.DRAW}`;
+      },
+      (results, played, stopped) => {
+        el.trainStopBtn.style.display = "none";
+        el.trainBlueBtn.disabled = el.trainRedBtn.disabled = el.trainBothBtn.disabled = false;
+        el.trainProgress.textContent =
+          `${stopped ? "Stopped" : "Done"} after ${played} games  ·  BLUE ${results.BLUE}  RED ${results.RED}  DRAW ${results.DRAW}`;
+        updateAIStatusUI();
+      }
+    );
+  }
+
+  function downloadAIWeights() {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      source: "laser chess.html twin RL AI",
+      featureNames: AI_FEATURE_NAMES,
+      weights: aiWeights,
+      temperature: aiTemperature,
+      gamesLearned: { BLUE: aiGamesLearnedCache.BLUE, RED: aiGamesLearnedCache.RED }
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `laserchess-ai-weights-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importAIWeightsFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(reader.result);
+        for (const color of ["BLUE", "RED"]) {
+          const w = payload.weights && payload.weights[color];
+          if (Array.isArray(w) && w.length === AI_FEATURE_NAMES.length) saveAIWeights(color, w);
+          const t = payload.temperature && payload.temperature[color];
+          if (typeof t === "number" && isFinite(t)) saveAITemperature(color, Math.max(0.05, Math.min(1, t)));
+          const g = payload.gamesLearned && payload.gamesLearned[color];
+          if (typeof g === "number" && isFinite(g)) {
+            aiGamesLearnedCache[color] = g;
+            aiDBSet("games_" + color.toLowerCase(), g);
+          }
+        }
+        updateAIStatusUI();
+        el.trainProgress.textContent = "Imported weights from file.";
+      } catch (e) {
+        el.trainProgress.textContent = "Import failed — not a valid weights file.";
+      }
+    };
+    reader.readAsText(file);
+  }
+
   function updateAIStatusUI() {
     if (!el.aiStatus) return;
     const parts = [];
     parts.push(`BLUE AI: ${aiControl.BLUE ? "ON" : "off"} · ${aiGamesLearned("BLUE")} games learned · randomness ${(aiTemperature.BLUE * 100).toFixed(0)}%`);
     parts.push(`RED AI: ${aiControl.RED ? "ON" : "off"} · ${aiGamesLearned("RED")} games learned · randomness ${(aiTemperature.RED * 100).toFixed(0)}%`);
+    parts.push(`Storage: ${typeof indexedDB !== "undefined" ? "IndexedDB (" + AI_DB_NAME + ")" : "localStorage fallback"} · ${aiHydrated ? "loaded" : "loading…"}`);
     el.aiStatus.innerHTML = parts.join("<br/>");
   }
 
@@ -1390,7 +1643,9 @@
     
     if (key === "Escape") { 
       e.preventDefault(); 
-      if (el.rulesModal.classList.contains("active")) {
+      if (el.trainModal.classList.contains("active")) {
+        toggleTrainModal();
+      } else if (el.rulesModal.classList.contains("active")) {
         toggleRules();
       } else {
         selectPiece(null); 
@@ -1425,6 +1680,23 @@
   el.aiRedBtn.addEventListener("click", () => setAIControl(false, true));
   el.aiBothBtn.addEventListener("click", () => setAIControl(true, true));
 
+  el.trainAIBtn.addEventListener("click", toggleTrainModal);
+  el.closeTrainBtn.addEventListener("click", toggleTrainModal);
+  el.trainBlueBtn.addEventListener("click", () => startTrainingFromUI(["BLUE"]));
+  el.trainRedBtn.addEventListener("click", () => startTrainingFromUI(["RED"]));
+  el.trainBothBtn.addEventListener("click", () => startTrainingFromUI(["BLUE", "RED"]));
+  el.trainStopBtn.addEventListener("click", stopTraining);
+
+  el.aiAutoLoopChk.addEventListener("change", () => { aiAutoLoop = el.aiAutoLoopChk.checked; });
+  el.downloadWeightsBtn.addEventListener("click", downloadAIWeights);
+  el.importWeightsBtn.addEventListener("click", () => el.importWeightsFile.click());
+  el.importWeightsFile.addEventListener("change", () => {
+    if (el.importWeightsFile.files && el.importWeightsFile.files[0]) {
+      importAIWeightsFromFile(el.importWeightsFile.files[0]);
+      el.importWeightsFile.value = "";
+    }
+  });
+
   window.addEventListener("keydown", handleKeyboard);
   el.board.addEventListener("click", (e) => {
     if (state.winner || isDelaying) return;
@@ -1440,6 +1712,7 @@
   buildEngineGUI();
   updateSelectionUI();
   updateAIStatusUI();
+  hydrateAIFromDB();
   render();
 })();
 </script>
