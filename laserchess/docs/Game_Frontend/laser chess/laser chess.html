@@ -391,6 +391,18 @@
             <button class="btn" id="rulesBtn">Modify Rules <span class="kbd">M</span></button>
           </div>
         </section>
+        <section class="panel side-card">
+          <div>
+            <h3>AI Opponent (twin RL models)</h3>
+            <div class="controls">
+              <button class="btn" id="aiOffBtn">2-Player (AI off)</button>
+              <button class="btn" id="aiBlueBtn">AI plays BLUE</button>
+              <button class="btn" id="aiRedBtn">AI plays RED</button>
+              <button class="btn" id="aiBothBtn">AI vs AI</button>
+            </div>
+            <div id="aiStatus" style="font-size:12px; opacity:0.75; margin-top:8px;"></div>
+          </div>
+        </section>
       </aside>
     </main>
   </div>
@@ -538,12 +550,12 @@
       {id: "pmpfqya0pf", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 2, y: 3},
       {id: "pmpfqyd1rg", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 2, y: 4},
       {id: "pmpfqz0jlj", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 0, y: 3},
-      {id: "pmpfqz7fpk", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 0, y: 4},
+      {id: "pmpfqz7fpk", pieceType: "DEFLECTOR", color: "RED", rotation: 1, x: 0, y: 4},
       {id: "pmpfqzj2ul", pieceType: "DEFLECTOR", color: "BLUE", rotation: 3, x: 7, y: 1},
       {id: "pmpfr0e5km", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 6, y: 2},
       {id: "pmpfr0t7zn", pieceType: "DEFLECTOR", color: "RED", rotation: 0, x: 7, y: 4},
       {id: "pmpfr0ww1o", pieceType: "DEFLECTOR", color: "RED", rotation: 3, x: 7, y: 3},
-      {id: "pmpfr18esp", pieceType: "DEFLECTOR", color: "BLUE", rotation: 1, x: 9, y: 3},
+      {id: "pmpfr18esp", pieceType: "DEFLECTOR", color: "BLUE", rotation: 3, x: 9, y: 3},
       {id: "pmpfr1bjtq", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 9, y: 4},
       {id: "pmpfr2ek5s", pieceType: "DEFLECTOR", color: "BLUE", rotation: 2, x: 3, y: 5},
       {id: "pmpfr2sl8u", pieceType: "DEFLECTOR", color: "RED", rotation: 1, x: 2, y: 6},
@@ -567,7 +579,12 @@
     closeRulesBtn: document.getElementById("closeRulesBtn"),
     resetRulesBtn: document.getElementById("resetRulesBtn"),
     rulesModal: document.getElementById("rulesModal"),
-    engineTableBody: document.querySelector("#engineTable tbody")
+    engineTableBody: document.querySelector("#engineTable tbody"),
+    aiOffBtn: document.getElementById("aiOffBtn"),
+    aiBlueBtn: document.getElementById("aiBlueBtn"),
+    aiRedBtn: document.getElementById("aiRedBtn"),
+    aiBothBtn: document.getElementById("aiBothBtn"),
+    aiStatus: document.getElementById("aiStatus")
   };
 
   function buildEngineGUI() {
@@ -754,7 +771,7 @@
     return { kind: "stop", destroyed: false, blocked: true };
   }
 
-  function resolveLaserVector(x, y, dir, pieces = state.pieces, path = [], seen = new Set()) {
+  function resolveLaserVector(x, y, dir, pieces = state.pieces, path = [], seen = new Set(), silent = false) {
     if (!inBounds(x, y)) return { path, hit: null, looped: false };
     const key = `${x},${y},${dir}`;
     if (seen.has(key)) return { path, hit: null, looped: true };
@@ -763,26 +780,27 @@
 
     const piece = pieceAt(x, y, pieces);
     if (!piece) {
-      return resolveLaserVector(x + DIRS[dir].dx, y + DIRS[dir].dy, dir, pieces, path, seen);
+      return resolveLaserVector(x + DIRS[dir].dx, y + DIRS[dir].dy, dir, pieces, path, seen, silent);
     }
 
     const outcome = interactWithLaser(piece, dir);
-    
-    const dirNames = ["SOUTH ⬇", "WEST ⬅", "NORTH ⬆", "EAST ➡️"];
-    const outcomeStr = outcome.kind === "reflect" 
-      ? `Reflected to ${dirNames[outcome.reflected]} (Code: ${outcome.reflected})` 
-      : (outcome.destroyed ? "Destroyed" : "Blocked/Stopped");
 
-    console.log(
-      `💥 [Tracker] ${piece.color} ${piece.pieceType} @ (${x}, ${y}) | ` +
-      `Rot state: ${piece.rotation} | ` +
-      `Inbound: ${dirNames[dir]} (Code: ${dir}) | ` +
-      `Interaction: ${outcomeStr}`
-    );
+    if (!silent) {
+      const dirNames = ["SOUTH ⬇", "WEST ⬅", "NORTH ⬆", "EAST ➡️"];
+      const outcomeStr = outcome.kind === "reflect" 
+        ? `Reflected to ${dirNames[outcome.reflected]} (Code: ${outcome.reflected})` 
+        : (outcome.destroyed ? "Destroyed" : "Blocked/Stopped");
+      console.log(
+        `💥 [Tracker] ${piece.color} ${piece.pieceType} @ (${x}, ${y}) | ` +
+        `Rot state: ${piece.rotation} | ` +
+        `Inbound: ${dirNames[dir]} (Code: ${dir}) | ` +
+        `Interaction: ${outcomeStr}`
+      );
+    }
 
     if (outcome.kind === "reflect") {
       const nextDir = outcome.reflected;
-      return resolveLaserVector(x + DIRS[nextDir].dx, y + DIRS[nextDir].dy, nextDir, pieces, path, seen);
+      return resolveLaserVector(x + DIRS[nextDir].dx, y + DIRS[nextDir].dy, nextDir, pieces, path, seen, silent);
     }
     return { path, hit: { piece, destroyed: !!outcome.destroyed, blocked: !!outcome.blocked }, looped: false };
   }
@@ -816,7 +834,302 @@
     updateSelectionUI();
     render();
     flashLaserPath();
+    if (state.winner) handleGameEndForAI();
+    else if (aiControl[state.turn]) setTimeout(() => aiTakeTurn(state.turn), 700);
     return true;
+  }
+
+  /* =====================================================================
+     TWIN RL AI MODULE
+     Two independent linear-value models, one per color, each with its
+     own persisted "memory" (localStorage) and trained via self-play with
+     reward only at the end of a match (+1 win / -1 loss). Every function
+     below is built directly on top of this file's own DIRS,
+     INTERACTION_MAP, isReservedSquare, pieceAt, interactWithLaser,
+     resolveLaserVector, laserDirFromRotation and normalizeRotation — no
+     separate physics table exists, so the AI can never drift from the
+     rules it's actually playing under.
+     ===================================================================== */
+
+  const AI_FEATURE_NAMES = ["bias", "defenderDiff", "deflectorDiff", "switchDiff", "mobilityDiff", "iCanWinNow", "enemyCanWinNow"];
+  // Baked-in defaults from an offline self-play run (3000 games, depth-2
+  // search, softmax exploration, reward only at game end). Overridden by
+  // whatever's in localStorage once a browser has played/learned locally.
+  const AI_DEFAULT_WEIGHTS = {
+    BLUE: [0.390, -0.096, 0.583, -0.013, -0.715, 1.340, -0.667],
+    RED:  [0.248, -0.514, 0.306, 0.014, -0.663, 1.432, -0.337]
+  };
+
+  let aiControl = { BLUE: false, RED: false };
+  let aiTrajectory = { BLUE: [], RED: [] };
+
+  function loadAIWeights(color) {
+    try {
+      const raw = localStorage.getItem("laserchess_ai_weights_" + color.toLowerCase());
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.length === AI_FEATURE_NAMES.length) return arr;
+      }
+    } catch (e) {}
+    return AI_DEFAULT_WEIGHTS[color].slice();
+  }
+  function saveAIWeights(color, weights) {
+    localStorage.setItem("laserchess_ai_weights_" + color.toLowerCase(), JSON.stringify(weights));
+  }
+  function aiGamesLearned(color) {
+    return parseInt(localStorage.getItem("laserchess_ai_games_" + color.toLowerCase()) || "0", 10);
+  }
+  function bumpAIGamesLearned(color) {
+    localStorage.setItem("laserchess_ai_games_" + color.toLowerCase(), String(aiGamesLearned(color) + 1));
+  }
+
+  // Each color owns its own exploration "temperature" — how often it
+  // takes a softmax-sampled exploratory move instead of its best-search
+  // move. It persists per color and decays as that color accumulates
+  // learned games, so BLUE and RED anneal independently based on their
+  // own experience, not a shared global schedule.
+  function loadAITemperature(color) {
+    const raw = localStorage.getItem("laserchess_ai_temp_" + color.toLowerCase());
+    const v = raw !== null ? parseFloat(raw) : 0.6;
+    return isFinite(v) ? Math.max(0.05, Math.min(1, v)) : 0.6;
+  }
+  function saveAITemperature(color, t) {
+    localStorage.setItem("laserchess_ai_temp_" + color.toLowerCase(), String(t));
+  }
+  let aiTemperature = { BLUE: loadAITemperature("BLUE"), RED: loadAITemperature("RED") };
+
+  let aiWeights = { BLUE: loadAIWeights("BLUE"), RED: loadAIWeights("RED") };
+
+  function legalMovesPure(piece, pieces, turnColor) {
+    const moves = [];
+    if (!piece || piece.color !== turnColor || piece.pieceType === "LASER") return moves;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = piece.x + dx, ny = piece.y + dy;
+        if (!inBounds(nx, ny)) continue;
+        if (isReservedSquare(nx, ny, enemyColor(piece.color))) continue;
+        const occ = pieceAt(nx, ny, pieces);
+        if (!occ) {
+          moves.push({ type: "move", x: nx, y: ny });
+        } else if (piece.pieceType === "SWITCH" && (occ.pieceType === "DEFLECTOR" || occ.pieceType === "DEFENDER")) {
+          if (!isReservedSquare(piece.x, piece.y, enemyColor(occ.color))) {
+            moves.push({ type: "swap", x: nx, y: ny });
+          }
+        }
+      }
+    }
+    return moves;
+  }
+
+  function aiEnumerateActions(pieces, turnColor) {
+    const actions = [{ type: "pass" }];
+    for (const piece of pieces) {
+      if (piece.color !== turnColor) continue;
+      if (piece.pieceType !== "KING") {
+        actions.push({ type: "rotate", pieceId: piece.id, delta: 1 });
+        actions.push({ type: "rotate", pieceId: piece.id, delta: 3 });
+      }
+      if (piece.pieceType !== "LASER") {
+        for (const m of legalMovesPure(piece, pieces, turnColor)) {
+          actions.push({ type: m.type, pieceId: piece.id, x: m.x, y: m.y });
+        }
+      }
+    }
+    return actions;
+  }
+
+  function applyActionPure(pieces, action) {
+    if (action.type === "pass") return pieces;
+    const next = pieces.map(p => ({ ...p }));
+    const p = next.find(p => p.id === action.pieceId);
+    if (action.type === "rotate") {
+      p.rotation = normalizeRotation((p.rotation || 0) + action.delta);
+      return next;
+    }
+    if (action.type === "move") {
+      p.x = action.x; p.y = action.y;
+    } else if (action.type === "swap") {
+      const occ = next.find(o => o.x === action.x && o.y === action.y);
+      const ox = p.x, oy = p.y;
+      p.x = action.x; p.y = action.y;
+      occ.x = ox; occ.y = oy;
+    }
+    return next;
+  }
+
+  function fireLaserPure(pieces, turnColor) {
+    const shooter = pieces.find(p => p.pieceType === "LASER" && p.color === turnColor);
+    if (!shooter) return { pieces, winner: enemyColor(turnColor) };
+    const dir = laserDirFromRotation(shooter.rotation || 0);
+    const startX = shooter.x + DIRS[dir].dx, startY = shooter.y + DIRS[dir].dy;
+    const result = resolveLaserVector(startX, startY, dir, pieces, [{ x: shooter.x, y: shooter.y, dir }], new Set(), true);
+    let newPieces = pieces, winner = null;
+    if (result.hit && result.hit.destroyed) {
+      const victim = result.hit.piece;
+      newPieces = pieces.filter(p => p.id !== victim.id);
+      if (victim.pieceType === "KING") winner = turnColor;
+    }
+    return { pieces: newPieces, winner };
+  }
+
+  function aiImmediateThreat(pieces, shooterColor) {
+    return fireLaserPure(pieces, shooterColor).winner === shooterColor;
+  }
+
+  function aiStepGame(pieces, turnColor, action) {
+    const moved = applyActionPure(pieces, action);
+    const { pieces: after, winner } = fireLaserPure(moved, turnColor);
+    return { pieces: after, winner, nextTurn: enemyColor(turnColor) };
+  }
+
+  function aiExtractFeatures(pieces, color) {
+    const enemy = enemyColor(color);
+    let defenderDiff = 0, deflectorDiff = 0, switchDiff = 0, myMobility = 0, enemyMobility = 0;
+    for (const p of pieces) {
+      const sign = p.color === color ? 1 : -1;
+      if (p.pieceType === "DEFENDER") defenderDiff += sign;
+      else if (p.pieceType === "DEFLECTOR") deflectorDiff += sign;
+      else if (p.pieceType === "SWITCH") switchDiff += sign;
+      if (p.pieceType !== "LASER") {
+        const n = legalMovesPure(p, pieces, p.color).length;
+        if (p.color === color) myMobility += n; else enemyMobility += n;
+      }
+    }
+    const mobilityDiff = (myMobility - enemyMobility) / 10;
+    const iCanWinNow = aiImmediateThreat(pieces, color) ? 1 : 0;
+    const enemyCanWinNow = aiImmediateThreat(pieces, enemy) ? 1 : 0;
+    return [1, defenderDiff, deflectorDiff, switchDiff, mobilityDiff, iCanWinNow, enemyCanWinNow];
+  }
+
+  function aiEvaluate(pieces, color, weights) {
+    const f = aiExtractFeatures(pieces, color);
+    let s = 0;
+    for (let i = 0; i < f.length; i++) s += f[i] * weights[i];
+    return Math.tanh(s);
+  }
+
+  function aiSearch(pieces, turnColor, aiColor, weights, depth, alpha, beta, deadline) {
+    const actions = aiEnumerateActions(pieces, turnColor);
+    if (depth === 0 || actions.length === 0 || Date.now() > deadline) {
+      return { score: aiEvaluate(pieces, aiColor, weights), action: null };
+    }
+    let bestAction = actions[0];
+    const maximizing = turnColor === aiColor;
+    let best = maximizing ? -Infinity : Infinity;
+    for (const action of actions) {
+      const { pieces: next, winner } = aiStepGame(pieces, turnColor, action);
+      let score;
+      if (winner === aiColor) score = 1;
+      else if (winner === enemyColor(aiColor)) score = -1;
+      else score = aiSearch(next, enemyColor(turnColor), aiColor, weights, depth - 1, alpha, beta, deadline).score;
+      if (maximizing) {
+        if (score > best) { best = score; bestAction = action; }
+        alpha = Math.max(alpha, best);
+      } else {
+        if (score < best) { best = score; bestAction = action; }
+        beta = Math.min(beta, best);
+      }
+      if (alpha >= beta || Date.now() > deadline) break;
+    }
+    return { score: best, action: bestAction };
+  }
+
+  function chooseAIAction(pieces, turnColor, weights, timeBudgetMs, maxDepth) {
+    const deadline = Date.now() + timeBudgetMs;
+    let best = { score: -Infinity, action: { type: "pass" } };
+    for (let d = 1; d <= maxDepth; d++) {
+      const result = aiSearch(pieces, turnColor, turnColor, weights, d, -Infinity, Infinity, deadline);
+      if (result.action) best = result;
+      if (Date.now() > deadline) break;
+    }
+    return best.action;
+  }
+
+  function aiScoreAction(pieces, turnColor, action, weights) {
+    const { pieces: next, winner } = aiStepGame(pieces, turnColor, action);
+    if (winner === turnColor) return 1;
+    if (winner === enemyColor(turnColor)) return -1;
+    return aiEvaluate(next, turnColor, weights);
+  }
+
+  // Same softmax-over-evaluated-actions technique used offline during
+  // training, now available for live play so the deployed model's own
+  // temperature (its own randomness) — not a fixed constant — decides
+  // how often it explores instead of exploiting its best line.
+  function aiSoftmaxPick(pieces, turnColor, weights, temperature) {
+    const actions = aiEnumerateActions(pieces, turnColor);
+    const scores = actions.map(a => aiScoreAction(pieces, turnColor, a, weights));
+    const maxScore = Math.max(...scores);
+    const exps = scores.map(s => Math.exp((s - maxScore) / Math.max(temperature, 0.02)));
+    const sum = exps.reduce((a, b) => a + b, 0);
+    let r = Math.random() * sum;
+    for (let i = 0; i < actions.length; i++) {
+      r -= exps[i];
+      if (r <= 0) return actions[i];
+    }
+    return actions[actions.length - 1];
+  }
+
+  // Sparse-reward online learning: called once per game, right when
+  // state.winner is set. Every AI-controlled color updates its OWN
+  // weights from its OWN recorded trajectory — the two models never
+  // share gradients or memory.
+  function handleGameEndForAI() {
+    const winner = state.winner;
+    for (const color of ["BLUE", "RED"]) {
+      if (!aiControl[color] || aiTrajectory[color].length === 0) continue;
+      const target = winner === color ? 1 : -1;
+      const w = aiWeights[color];
+      const lr = 0.01;
+      for (const feats of aiTrajectory[color]) {
+        let s = 0;
+        for (let i = 0; i < feats.length; i++) s += feats[i] * w[i];
+        const pred = Math.tanh(s);
+        const grad = Math.max(-1, Math.min(1, (pred - target) * (1 - pred * pred)));
+        for (let i = 0; i < feats.length; i++) w[i] -= lr * grad * feats[i];
+      }
+      saveAIWeights(color, w);
+      bumpAIGamesLearned(color);
+      aiTemperature[color] = Math.max(0.05, aiTemperature[color] * 0.97);
+      saveAITemperature(color, aiTemperature[color]);
+    }
+    aiTrajectory = { BLUE: [], RED: [] };
+    updateAIStatusUI();
+  }
+
+  function aiTakeTurn(color) {
+    if (state.winner || isDelaying) return;
+    if (state.turn !== color || !aiControl[color]) return;
+    const action = Math.random() < aiTemperature[color]
+      ? aiSoftmaxPick(state.pieces, color, aiWeights[color], aiTemperature[color])
+      : chooseAIAction(state.pieces, color, aiWeights[color], 900, 3);
+    aiTrajectory[color].push(aiExtractFeatures(state.pieces, color));
+    if (action.type === "pass") {
+      fireLaser();
+    } else if (action.type === "rotate") {
+      const piece = state.pieces.find(p => p.id === action.pieceId);
+      selectPiece(piece);
+      rotateSelected(action.delta);
+    } else {
+      const piece = state.pieces.find(p => p.id === action.pieceId);
+      selectPiece(piece);
+      doMoveOrSwap(action.x, action.y);
+    }
+  }
+
+  function updateAIStatusUI() {
+    if (!el.aiStatus) return;
+    const parts = [];
+    parts.push(`BLUE AI: ${aiControl.BLUE ? "ON" : "off"} · ${aiGamesLearned("BLUE")} games learned · randomness ${(aiTemperature.BLUE * 100).toFixed(0)}%`);
+    parts.push(`RED AI: ${aiControl.RED ? "ON" : "off"} · ${aiGamesLearned("RED")} games learned · randomness ${(aiTemperature.RED * 100).toFixed(0)}%`);
+    el.aiStatus.innerHTML = parts.join("<br/>");
+  }
+
+  function setAIControl(blueOn, redOn) {
+    aiControl = { BLUE: blueOn, RED: redOn };
+    updateAIStatusUI();
+    if (!state.winner) setTimeout(() => aiTakeTurn(state.turn), 400);
   }
 
   function doMoveOrSwap(targetX, targetY) {
@@ -858,9 +1171,11 @@
     selectedId = null;
     cursor = { x: 0, y: 0 };
     isDelaying = false;
+    aiTrajectory = { BLUE: [], RED: [] };
     localStorage.removeItem("laserchess_local_state");
     updateSelectionUI();
     render();
+    if (aiControl[state.turn]) setTimeout(() => aiTakeTurn(state.turn), 400);
   }
   
   function toggleRules() {
@@ -1105,6 +1420,11 @@
     location.reload(); 
   });
 
+  el.aiOffBtn.addEventListener("click", () => setAIControl(false, false));
+  el.aiBlueBtn.addEventListener("click", () => setAIControl(true, false));
+  el.aiRedBtn.addEventListener("click", () => setAIControl(false, true));
+  el.aiBothBtn.addEventListener("click", () => setAIControl(true, true));
+
   window.addEventListener("keydown", handleKeyboard);
   el.board.addEventListener("click", (e) => {
     if (state.winner || isDelaying) return;
@@ -1119,6 +1439,7 @@
   loadCustomRules();
   buildEngineGUI();
   updateSelectionUI();
+  updateAIStatusUI();
   render();
 })();
 </script>
