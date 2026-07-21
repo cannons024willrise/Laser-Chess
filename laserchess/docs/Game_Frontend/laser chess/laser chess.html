@@ -95,6 +95,7 @@
     .layout {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
+      align-items: stretch;
       gap: 1rem;
       width: 100%;
       height: 100%;
@@ -171,6 +172,7 @@
     .sidebar {
       width: 100%;
       height: 100%;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       gap: .65rem;
@@ -233,6 +235,70 @@
       font-size: .72rem;
       color: var(--theme-color);
       text-align: left;
+    }
+    .accordion-section {
+      padding: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .accordion-section > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: .72rem .8rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-size: .75rem;
+      text-align: center;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem;
+    }
+    .accordion-section > summary::-webkit-details-marker { display: none; }
+    .accordion-summary-note {
+      font-size: .62rem;
+      letter-spacing: .08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .accordion-toggle {
+      appearance: none;
+      border: 1px solid rgba(var(--theme-rgb), .22);
+      background: rgba(var(--theme-rgb), .08);
+      color: var(--theme-color);
+      border-radius: 999px;
+      font: inherit;
+      font-size: .62rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: .18rem .5rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .accordion-toggle:hover {
+      background: rgba(var(--theme-rgb), .14);
+      border-color: rgba(var(--theme-rgb), .38);
+    }
+    .accordion-toggle:focus-visible {
+      outline: 2px solid rgba(var(--theme-rgb), .65);
+      outline-offset: 2px;
+    }
+    .accordion-body {
+      padding: .75rem;
+      display: grid;
+      gap: .75rem;
+    }
+    .accordion-section[open] > summary {
+      background: rgba(var(--theme-rgb), .08);
+      color: var(--theme-color);
+    }
+    .accordion-section[open] > summary .accordion-summary-note {
+      color: var(--theme-color);
     }
     .turn-row {
       display: flex;
@@ -419,29 +485,41 @@
       </section>
 
       <aside class="sidebar">
-        <section class="panel side-card">
-          <div>
-            <h3>Quick Start</h3>
-            <p class="quick-tip">Select a piece, then move or rotate it. Your turn ends with an automatic laser shot. The first king destroyed loses immediately.</p>
+        <details class="panel accordion-section" data-accordion open>
+          <summary>
+            <span>Quick Start</span>
+            <span style="display:flex; align-items:center; gap:.45rem;">
+              <span class="accordion-summary-note">How to play</span>
+              <button type="button" class="accordion-toggle" aria-label="Collapse Quick Start">Collapse</button>
+            </span>
+          </summary>
+          <div class="accordion-body">
+            <p class="quick-tip">Select a piece, then move or rotate it. End your turn with the laser shot. The first king destroyed loses immediately.</p>
             <div class="turn-row">
               <div id="turnBadge" class="turn-badge turn-blue">BLUE to move</div>
               <div class="turn-badge" id="phaseBadge">Select a piece</div>
             </div>
+            <div class="controls">
+              <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
+              <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
+              <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
+              <button class="btn" id="endTurnBtn">Pass / End Turn</button>
+              <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
+              <button class="btn" id="rulesBtn">Modify Rules <span class="kbd">M</span></button>
+            </div>
           </div>
-          <div class="controls">
-            <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
-            <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
-            <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
-            <button class="btn" id="endTurnBtn">Pass / End Turn</button>
-            <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
-            <button class="btn" id="rulesBtn">Modify Rules <span class="kbd">M</span></button>
-          </div>
-        </section>
+        </details>
 
-        <section class="panel side-card">
-          <div>
-            <h3>AI Opponent</h3>
-            <p class="quick-tip">Switch the AI on for one or both colors. Casual players can ignore the rest until they are ready to let the robots embarrass each other.</p>
+        <details class="panel accordion-section" data-accordion>
+          <summary>
+            <span>AI Opponent</span>
+            <span style="display:flex; align-items:center; gap:.45rem;">
+              <span class="accordion-summary-note">One or both colors</span>
+              <button type="button" class="accordion-toggle" aria-label="Open AI Opponent">Open</button>
+            </span>
+          </summary>
+          <div class="accordion-body">
+            <p class="quick-tip">Switch the AI on for one or both colors. Casual play stays simple. The machines can still embarrass each other later.</p>
             <div class="controls">
               <button class="btn" id="aiOffBtn">2-Player (AI off)</button>
               <button class="btn" id="aiBlueBtn">AI plays BLUE</button>
@@ -450,12 +528,18 @@
             </div>
             <div id="aiStatus" style="font-size:12px; opacity:0.75; margin-top:8px;"></div>
           </div>
-        </section>
+        </details>
 
-        <section class="panel side-card">
-          <div>
-            <h3>AI Training</h3>
-            <p class="quick-tip">Twin RL self-play stays visible here. It still uses sparse end-of-match rewards only, because overcomplicating reward signals is how models become confident garbage.</p>
+        <details class="panel accordion-section" data-accordion>
+          <summary>
+            <span>AI Training</span>
+            <span style="display:flex; align-items:center; gap:.45rem;">
+              <span class="accordion-summary-note">Twin RL self-play</span>
+              <button type="button" class="accordion-toggle" aria-label="Open AI Training">Open</button>
+            </span>
+          </summary>
+          <div class="accordion-body">
+            <p class="quick-tip">Twin RL self-play stays visible here. It uses sparse end-of-match rewards only, because confusing the reward signal is a hobby humans never stop perfecting.</p>
             <div class="controls">
               <button class="btn primary" id="trainAIBtn">Train AI…</button>
             </div>
@@ -463,11 +547,17 @@
               <input type="checkbox" id="aiAutoLoopChk"> Auto-continue AI vs AI (loop games, no clicking Reset)
             </label>
           </div>
-        </section>
+        </details>
 
-        <details class="panel advanced-panel">
-          <summary>Advanced Options</summary>
-          <div class="advanced-body">
+        <details class="panel accordion-section" data-accordion>
+          <summary>
+            <span>Advanced Options</span>
+            <span style="display:flex; align-items:center; gap:.45rem;">
+              <span class="accordion-summary-note">Weights and export</span>
+              <button type="button" class="accordion-toggle" aria-label="Open Advanced Options">Open</button>
+            </span>
+          </summary>
+          <div class="accordion-body">
             <div class="advanced-group">
               <h4>Weight Management</h4>
               <p class="quick-tip">Export, import, or reset the learned twin weights.</p>
@@ -1804,8 +1894,50 @@
     onCellClick(Math.max(0, Math.min(W - 1, Math.floor(local.x / CELL))), Math.max(0, Math.min(H - 1, Math.floor(local.y / CELL))));
   });
 
+  function initSidebarAccordion() {
+    const sections = [...document.querySelectorAll('.sidebar details[data-accordion]')];
+    if (!sections.length) return;
+
+    const syncButtons = () => {
+      for (const section of sections) {
+        const button = section.querySelector('.accordion-toggle');
+        if (button) {
+          const isOpen = section.open;
+          button.textContent = isOpen ? 'Collapse' : 'Open';
+          button.setAttribute('aria-label', `${isOpen ? 'Collapse' : 'Open'} ${section.querySelector('summary > span:first-child')?.textContent || 'section'}`);
+        }
+      }
+    };
+
+    sections.forEach((section, index) => {
+      if (index !== 0) section.open = false;
+      const button = section.querySelector('.accordion-toggle');
+      if (button) {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          section.open = !section.open;
+          syncButtons();
+        });
+      }
+      section.addEventListener('toggle', () => {
+        if (!section.open) {
+          syncButtons();
+          return;
+        }
+        for (const other of sections) {
+          if (other !== section) other.open = false;
+        }
+        syncButtons();
+      });
+    });
+
+    syncButtons();
+  }
+
   loadCustomRules();
   buildEngineGUI();
+  initSidebarAccordion();
   updateSelectionUI();
   updateAIStatusUI();
   hydrateAIFromDB();
