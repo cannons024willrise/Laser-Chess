@@ -9,22 +9,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --theme-color:#4db8ff;
-      --theme-rgb:77,184,255;
-      --mode-halo:rgba(3,233,244,.18);
-      --overlay-top:rgba(0,0,0,.75);
-      --overlay-bottom:rgba(0,0,0,.9);
-      --red-theme:#f44336;
-      --red-rgb:244,67,54;
-      --player-blue:#4db8ff;
-      --player-blue-rgb:77,184,255;
-      --player-red:#ff8f84;
-      --player-red-rgb:255,143,132;
+      --theme-color:#00e5ff;
+      --theme-rgb:0,229,255;
+      --mode-halo:rgba(0,229,255,.24);
+      --overlay-top:rgba(0,8,18,.78);
+      --overlay-bottom:rgba(0,14,28,.95);
+      --red-theme:#ff2d55;
+      --red-rgb:255,45,85;
+      --player-blue:#00e5ff;
+      --player-blue-rgb:0,229,255;
+      --player-red:#ff2d55;
+      --player-red-rgb:255,45,85;
       --bg0:#06080b;
       --bg1:#0d1116;
       --bg2:#121821;
-      --panel:rgba(8,10,14,.94);
-      --line:rgba(255,255,255,.08);
+      --panel:rgba(4,10,18,.94);
+      --line:rgba(0,229,255,.22);
       --text:#e8f6ff;
       --muted:#97a8b6;
       --shadow:0 25px 70px rgba(0,0,0,.85);
@@ -359,6 +359,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      box-shadow: 0 0 14px rgba(var(--theme-rgb), .06);
     }
     .turn-blue { color: var(--player-blue); border-color: rgba(var(--player-blue-rgb), .35); }
     .turn-red { color: var(--player-red); border-color: rgba(var(--player-red-rgb), .35); }
@@ -397,13 +398,13 @@
       color: var(--theme-color);
     }
     .btn.danger {
-      background: linear-gradient(180deg, rgba(244,67,54,.16), rgba(244,67,54,.06));
-      border-color: rgba(244,67,54,.38);
+      background: linear-gradient(180deg, rgba(255,45,85,.16), rgba(255,45,85,.06));
+      border-color: rgba(255,45,85,.38);
       color: #ffb0a8;
     }
     .btn.danger:hover {
-      border-color: rgba(244,67,54,.8);
-      box-shadow: 0 0 0 1px rgba(244,67,54,.4), 0 8px 20px rgba(0,0,0,.24);
+      border-color: rgba(255,45,85,.8);
+      box-shadow: 0 0 0 1px rgba(255,45,85,.4), 0 8px 20px rgba(0,0,0,.24);
     }
     .kbd {
       display: inline-flex;
@@ -1165,49 +1166,49 @@
 
   const GAMEPLAY_THEMES = {
     TWO_PLAYER: {
-      accent: "#4db8ff",
-      rgb: "77,184,255",
-      halo: "rgba(77,184,255,.18)",
-      overlayTop: "rgba(2,8,20,.78)",
-      overlayBottom: "rgba(4,12,30,.92)",
-      panel: "rgba(7,10,18,.94)",
-      line: "rgba(77,184,255,.16)"
+      accent: "#00e5ff",
+      rgb: "0,229,255",
+      halo: "rgba(0,229,255,.26)",
+      overlayTop: "rgba(0,8,18,.80)",
+      overlayBottom: "rgba(0,14,28,.95)",
+      panel: "rgba(4,10,18,.94)",
+      line: "rgba(0,229,255,.24)"
     },
     AI_BLUE: {
-      accent: "#4db8ff",
-      rgb: "77,184,255",
-      halo: "rgba(77,184,255,.20)",
-      overlayTop: "rgba(2,8,20,.78)",
-      overlayBottom: "rgba(4,12,30,.92)",
-      panel: "rgba(7,10,18,.94)",
-      line: "rgba(77,184,255,.16)"
+      accent: "#00e5ff",
+      rgb: "0,229,255",
+      halo: "rgba(0,229,255,.30)",
+      overlayTop: "rgba(0,8,18,.80)",
+      overlayBottom: "rgba(0,14,28,.95)",
+      panel: "rgba(4,10,18,.94)",
+      line: "rgba(0,229,255,.26)"
     },
     AI_RED: {
-      accent: "#ff6b5f",
-      rgb: "255,107,95",
-      halo: "rgba(255,107,95,.20)",
-      overlayTop: "rgba(20,7,8,.78)",
-      overlayBottom: "rgba(34,10,12,.92)",
-      panel: "rgba(18,8,10,.94)",
-      line: "rgba(255,107,95,.16)"
+      accent: "#ff2d55",
+      rgb: "255,45,85",
+      halo: "rgba(255,45,85,.30)",
+      overlayTop: "rgba(22,0,10,.82)",
+      overlayBottom: "rgba(34,5,16,.96)",
+      panel: "rgba(18,4,10,.94)",
+      line: "rgba(255,45,85,.24)"
     },
     AI_VS_AI: {
-      accent: "#b36bff",
-      rgb: "179,107,255",
-      halo: "rgba(179,107,255,.20)",
-      overlayTop: "rgba(11,6,20,.78)",
-      overlayBottom: "rgba(22,10,34,.92)",
-      panel: "rgba(12,8,18,.94)",
-      line: "rgba(179,107,255,.16)"
+      accent: "#b026ff",
+      rgb: "176,38,255",
+      halo: "rgba(176,38,255,.30)",
+      overlayTop: "rgba(10,4,24,.82)",
+      overlayBottom: "rgba(22,6,36,.96)",
+      panel: "rgba(12,6,20,.94)",
+      line: "rgba(176,38,255,.24)"
     },
     NETWORK: {
-      accent: "#b36bff",
-      rgb: "179,107,255",
-      halo: "rgba(179,107,255,.20)",
-      overlayTop: "rgba(11,6,20,.78)",
-      overlayBottom: "rgba(22,10,34,.92)",
-      panel: "rgba(12,8,18,.94)",
-      line: "rgba(179,107,255,.16)"
+      accent: "#b026ff",
+      rgb: "176,38,255",
+      halo: "rgba(176,38,255,.30)",
+      overlayTop: "rgba(10,4,24,.82)",
+      overlayBottom: "rgba(22,6,36,.96)",
+      panel: "rgba(12,6,20,.94)",
+      line: "rgba(176,38,255,.24)"
     }
   };
 
@@ -1857,7 +1858,7 @@
         const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
         const rect = svgEl("rect", {
           x: x * CELL, y: y * CELL, width: CELL, height: CELL,
-          fill: reserved === "blue" ? "rgba(3,233,244,.08)" : reserved === "red" ? "rgba(244,67,54,.08)" : "rgba(0,0,0,.42)",
+          fill: reserved === "blue" ? "rgba(0,229,255,.08)" : reserved === "red" ? "rgba(255,45,85,.08)" : "rgba(0,0,0,.42)",
           stroke: "rgba(255,255,255,.07)",
           "stroke-width": "1"
         });
@@ -1918,7 +1919,7 @@
 
     const target = sel || pieceAt(cursor.x, cursor.y);
     if (target) {
-      svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(3,233,244,.78)", "stroke-width": "3", rx: "10" }));
+      svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(0,229,255,.78)", "stroke-width": "3", rx: "10" }));
     } else {
       svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
     }
@@ -1933,7 +1934,7 @@
         cx: x + 50,
         cy: y + 50,
         r: 28,
-        fill: isBlue ? "rgba(3,233,244,0.35)" : "rgba(244,67,54,0.35)"
+        fill: isBlue ? "rgba(0,229,255,0.35)" : "rgba(255,45,85,0.35)"
       });
       bloom.style.filter = "blur(12px)";
       g.appendChild(bloom);
