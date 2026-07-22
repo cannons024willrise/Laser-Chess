@@ -11,23 +11,23 @@
     :root{
       --theme-color:#00e5ff;
       --theme-rgb:0,229,255;
-      --mode-halo:rgba(0,229,255,.24);
-      --overlay-top:rgba(0,8,18,.78);
-      --overlay-bottom:rgba(0,14,28,.95);
+      --mode-halo:rgba(0,229,255,.22);
+      --overlay-top:rgba(0,0,0,.92);
+      --overlay-bottom:rgba(0,0,0,.99);
       --red-theme:#ff2d55;
       --red-rgb:255,45,85;
       --player-blue:#00e5ff;
       --player-blue-rgb:0,229,255;
       --player-red:#ff2d55;
       --player-red-rgb:255,45,85;
-      --bg0:#06080b;
-      --bg1:#0d1116;
-      --bg2:#121821;
-      --panel:rgba(4,10,18,.94);
-      --line:rgba(0,229,255,.22);
+      --bg0:#000000;
+      --bg1:#050505;
+      --bg2:#0b0b0b;
+      --panel:rgba(0,0,0,.96);
+      --line:rgba(255,255,255,.08);
       --text:#e8f6ff;
       --muted:#97a8b6;
-      --shadow:0 25px 70px rgba(0,0,0,.85);
+      --shadow:0 25px 70px rgba(0,0,0,.92);
     }
     * { box-sizing: border-box; }
     html, body { 
@@ -59,7 +59,7 @@
       gap: 1rem;
       padding: 0.4rem 1.25rem;
       border-bottom: 1px solid var(--line);
-      background: rgba(5,7,10,.84);
+      background: rgba(0,0,0,.88);
       box-shadow: 0 10px 30px rgba(0,0,0,.45);
       z-index: 5;
       flex-shrink: 0;
@@ -80,7 +80,7 @@
       padding: .25rem .65rem;
       border: 1px solid var(--line);
       border-radius: 999px;
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.03);
       font-size: .7rem;
       letter-spacing: .12em;
       text-transform: uppercase;
@@ -156,7 +156,7 @@
       height: 100%;
       padding: .25rem;
       border-radius: 16px;
-      background: rgba(0,0,0,.45);
+      background: rgba(0,0,0,.70);
       border: 1px solid rgba(255,255,255,.06);
       display: flex;
       align-items: center;
@@ -171,7 +171,7 @@
       aspect-ratio: 10 / 8;
       object-fit: contain;
       display: block;
-      background: linear-gradient(180deg, rgba(1,3,6,.95), rgba(10,12,15,.92));
+      background: linear-gradient(180deg, rgba(0,0,0,.98), rgba(10,10,10,.96));
       border-radius: 12px;
       touch-action: manipulation;
     }
@@ -354,7 +354,7 @@
       letter-spacing: .12em;
       font-size: .65rem;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.03);
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
@@ -372,7 +372,7 @@
     .btn {
       appearance: none;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.03);
       color: var(--text);
       padding: .55rem .45rem;
       border-radius: 10px;
@@ -414,7 +414,7 @@
       border: 1px solid rgba(255,255,255,0.1);
       border-bottom-width: 2px;
       border-radius: 4px;
-      background: rgba(255,255,255,.04);
+      background: rgba(255,255,255,.03);
       color: var(--text);
       font-size: .7em;
       margin-left: auto;
@@ -1168,47 +1168,47 @@
     TWO_PLAYER: {
       accent: "#00e5ff",
       rgb: "0,229,255",
-      halo: "rgba(0,229,255,.26)",
-      overlayTop: "rgba(0,8,18,.80)",
-      overlayBottom: "rgba(0,14,28,.95)",
-      panel: "rgba(4,10,18,.94)",
-      line: "rgba(0,229,255,.24)"
+      halo: "rgba(0,229,255,.22)",
+      overlayTop: "rgba(0,0,0,.92)",
+      overlayBottom: "rgba(0,0,0,.99)",
+      panel: "rgba(0,0,0,.96)",
+      line: "rgba(0,229,255,.22)"
     },
     AI_BLUE: {
       accent: "#00e5ff",
       rgb: "0,229,255",
-      halo: "rgba(0,229,255,.30)",
-      overlayTop: "rgba(0,8,18,.80)",
-      overlayBottom: "rgba(0,14,28,.95)",
-      panel: "rgba(4,10,18,.94)",
+      halo: "rgba(0,229,255,.28)",
+      overlayTop: "rgba(0,0,0,.92)",
+      overlayBottom: "rgba(0,0,0,.99)",
+      panel: "rgba(0,0,0,.96)",
       line: "rgba(0,229,255,.26)"
     },
     AI_RED: {
       accent: "#ff2d55",
       rgb: "255,45,85",
-      halo: "rgba(255,45,85,.30)",
-      overlayTop: "rgba(22,0,10,.82)",
-      overlayBottom: "rgba(34,5,16,.96)",
-      panel: "rgba(18,4,10,.94)",
-      line: "rgba(255,45,85,.24)"
+      halo: "rgba(255,45,85,.28)",
+      overlayTop: "rgba(0,0,0,.92)",
+      overlayBottom: "rgba(0,0,0,.99)",
+      panel: "rgba(0,0,0,.96)",
+      line: "rgba(255,45,85,.26)"
     },
     AI_VS_AI: {
       accent: "#b026ff",
       rgb: "176,38,255",
-      halo: "rgba(176,38,255,.30)",
-      overlayTop: "rgba(10,4,24,.82)",
-      overlayBottom: "rgba(22,6,36,.96)",
-      panel: "rgba(12,6,20,.94)",
-      line: "rgba(176,38,255,.24)"
+      halo: "rgba(176,38,255,.28)",
+      overlayTop: "rgba(0,0,0,.92)",
+      overlayBottom: "rgba(0,0,0,.99)",
+      panel: "rgba(0,0,0,.96)",
+      line: "rgba(176,38,255,.26)"
     },
     NETWORK: {
       accent: "#b026ff",
       rgb: "176,38,255",
-      halo: "rgba(176,38,255,.30)",
-      overlayTop: "rgba(10,4,24,.82)",
-      overlayBottom: "rgba(22,6,36,.96)",
-      panel: "rgba(12,6,20,.94)",
-      line: "rgba(176,38,255,.24)"
+      halo: "rgba(176,38,255,.28)",
+      overlayTop: "rgba(0,0,0,.92)",
+      overlayBottom: "rgba(0,0,0,.99)",
+      panel: "rgba(0,0,0,.96)",
+      line: "rgba(176,38,255,.26)"
     }
   };
 
