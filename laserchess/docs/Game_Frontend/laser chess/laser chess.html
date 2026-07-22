@@ -203,6 +203,40 @@
       color: var(--muted);
       text-align: left;
     }
+    .mode-status-card {
+      padding: .85rem .9rem;
+      display: grid;
+      gap: .55rem;
+      min-height: 0;
+    }
+    .mode-status-card h3 {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .8rem;
+      text-align: center;
+    }
+    .mode-current {
+      border: 1px solid rgba(var(--theme-rgb), .2);
+      background: rgba(var(--theme-rgb), .05);
+      border-radius: 12px;
+      padding: .65rem .75rem;
+      display: grid;
+      gap: .35rem;
+      text-align: center;
+    }
+    .mode-label {
+      font-size: 1.02rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--theme-color);
+    }
+    .mode-detail {
+      font-size: .72rem;
+      line-height: 1.35;
+      color: var(--muted);
+    }
     .advanced-panel {
       padding: 0;
     }
@@ -471,6 +505,7 @@
     <div class="header-meta">
       <div class="pill" id="movePill">Move 1</div>
       <div class="pill" id="savePill">Saved locally</div>
+      <div class="pill" id="modePill">2 Player</div>
     </div>
   </header>
 
@@ -485,6 +520,15 @@
       </section>
 
       <aside class="sidebar">
+        <section class="panel side-card mode-status-card">
+          <h3>Selected Mode</h3>
+          <div class="mode-current">
+            <div class="mode-label" id="modeLabel">2 Player</div>
+            <div class="mode-detail" id="modeDetail">Two humans on one board.</div>
+          </div>
+          <div class="turn-badge" id="modePill">2 Player</div>
+        </section>
+
         <details class="panel accordion-section" data-accordion open>
           <summary>
             <span>Quick Start</span>
@@ -512,21 +556,22 @@
 
         <details class="panel accordion-section" data-accordion>
           <summary>
-            <span>AI Opponent</span>
+            <span>Gameplay Mode</span>
             <span style="display:flex; align-items:center; gap:.45rem;">
-              <span class="accordion-summary-note">One or both colors</span>
-              <button type="button" class="accordion-toggle" aria-label="Open AI Opponent">Open</button>
+              <span class="accordion-summary-note">Choose who plays</span>
+              <button type="button" class="accordion-toggle" aria-label="Open Gameplay Mode">Open</button>
             </span>
           </summary>
           <div class="accordion-body">
-            <p class="quick-tip">Switch the AI on for one or both colors. Casual play stays simple. The machines can still embarrass each other later.</p>
+            <p class="quick-tip">Pick a mode. The status box above always shows the current selection, because menus should not play hide and seek.</p>
             <div class="controls">
-              <button class="btn" id="aiOffBtn">2-Player (AI off)</button>
-              <button class="btn" id="aiBlueBtn">AI plays BLUE</button>
-              <button class="btn" id="aiRedBtn">AI plays RED</button>
-              <button class="btn" id="aiBothBtn">AI vs AI</button>
+              <button class="btn" id="modeTwoPlayerBtn">2 Player</button>
+              <button class="btn" id="modeAIBlueBtn">AI plays BLUE</button>
+              <button class="btn" id="modeAIRedBtn">AI plays RED</button>
+              <button class="btn" id="modeAIVsAIBtn">AI vs AI</button>
+              <button class="btn" id="modeNetworkBtn">Network (Coming Soon)</button>
             </div>
-            <div id="aiStatus" style="font-size:12px; opacity:0.75; margin-top:8px;"></div>
+            <div id="modeStatus" style="font-size:12px; opacity:0.75; margin-top:8px;"></div>
           </div>
         </details>
 
@@ -639,6 +684,7 @@
     localStorage.removeItem("laserchess_custom_rules");
     localStorage.setItem("laserchess_engine_version", PHYSICS_VERSION);
   }
+  const SAVED_GAMEPLAY_MODE_KEY = "laserchess_gameplay_mode";
 
   const PIECE_BASE = "./";
   const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
@@ -779,11 +825,20 @@
     aiRedBtn: document.getElementById("aiRedBtn"),
     aiBothBtn: document.getElementById("aiBothBtn"),
     aiStatus: document.getElementById("aiStatus"),
+    modeStatus: document.getElementById("modeStatus"),
     aiAutoLoopChk: document.getElementById("aiAutoLoopChk"),
     downloadWeightsBtn: document.getElementById("downloadWeightsBtn"),
     importWeightsBtn: document.getElementById("importWeightsBtn"),
     resetWeightsBtn: document.getElementById("resetWeightsBtn"),
     importWeightsFile: document.getElementById("importWeightsFile"),
+    modeLabel: document.getElementById("modeLabel"),
+    modeDetail: document.getElementById("modeDetail"),
+    modePill: document.getElementById("modePill"),
+    modeTwoPlayerBtn: document.getElementById("modeTwoPlayerBtn"),
+    modeAIBlueBtn: document.getElementById("modeAIBlueBtn"),
+    modeAIRedBtn: document.getElementById("modeAIRedBtn"),
+    modeAIVsAIBtn: document.getElementById("modeAIVsAIBtn"),
+    modeNetworkBtn: document.getElementById("modeNetworkBtn"),
     trainAIBtn: document.getElementById("trainAIBtn"),
     trainModal: document.getElementById("trainModal"),
     trainGamesInput: document.getElementById("trainGamesInput"),
@@ -1072,6 +1127,35 @@
     RED:  [0.248, -0.514, 0.306, 0.014, -0.663, 1.432, -0.337]
   };
 
+  const GAMEPLAY_MODES = {
+    TWO_PLAYER: {
+      label: "2 Player",
+      detail: "Two humans on one board.",
+      ai: { BLUE: false, RED: false }
+    },
+    AI_BLUE: {
+      label: "AI (BLUE)",
+      detail: "Blue is controlled by AI.",
+      ai: { BLUE: true, RED: false }
+    },
+    AI_RED: {
+      label: "AI (RED)",
+      detail: "Red is controlled by AI.",
+      ai: { BLUE: false, RED: true }
+    },
+    AI_VS_AI: {
+      label: "AI vs AI",
+      detail: "Both colors are controlled by AI.",
+      ai: { BLUE: true, RED: true }
+    },
+    NETWORK: {
+      label: "Network",
+      detail: "Coming soon: online multiplayer.",
+      ai: { BLUE: false, RED: false }
+    }
+  };
+
+  let gameplayMode = "TWO_PLAYER";
   let aiControl = { BLUE: false, RED: false };
   let aiTrajectory = { BLUE: [], RED: [] };
   let aiAutoLoop = false;
@@ -1537,6 +1621,42 @@
     reader.readAsText(file);
   }
 
+  function updateGameplayModeUI() {
+    const cfg = GAMEPLAY_MODES[gameplayMode] || GAMEPLAY_MODES.TWO_PLAYER;
+    if (el.modeLabel) el.modeLabel.textContent = cfg.label;
+    if (el.modeDetail) el.modeDetail.textContent = cfg.detail;
+    if (el.modePill) el.modePill.textContent = cfg.label;
+    if (el.modeStatus) {
+      const aiText = cfg.ai.BLUE || cfg.ai.RED
+        ? `AI active: ${cfg.ai.BLUE ? "BLUE" : ""}${cfg.ai.BLUE && cfg.ai.RED ? " + " : ""}${cfg.ai.RED ? "RED" : ""}`
+        : "AI inactive";
+      el.modeStatus.textContent = `${cfg.label} selected · ${aiText}`;
+    }
+  }
+
+  function setGameplayMode(mode, { persist = true } = {}) {
+    if (!GAMEPLAY_MODES[mode]) mode = "TWO_PLAYER";
+    gameplayMode = mode;
+    const cfg = GAMEPLAY_MODES[mode];
+    aiControl = { ...cfg.ai };
+    if (persist) {
+      try { localStorage.setItem(SAVED_GAMEPLAY_MODE_KEY, gameplayMode); } catch (e) {}
+    }
+    updateGameplayModeUI();
+    updateAIStatusUI();
+    if (!state.winner) setTimeout(() => aiTakeTurn(state.turn), 400);
+  }
+
+  function loadSavedGameplayMode() {
+    try {
+      const saved = localStorage.getItem(SAVED_GAMEPLAY_MODE_KEY);
+      if (saved && GAMEPLAY_MODES[saved]) {
+        gameplayMode = saved;
+      }
+    } catch (e) {}
+    setGameplayMode(gameplayMode, { persist: false });
+  }
+
   function resetAIWeightsToDefaults() {
     aiWeights.BLUE = AI_DEFAULT_WEIGHTS.BLUE.slice();
     aiWeights.RED = AI_DEFAULT_WEIGHTS.RED.slice();
@@ -1558,6 +1678,8 @@
   function updateAIStatusUI() {
     if (!el.aiStatus) return;
     const parts = [];
+    const cfg = GAMEPLAY_MODES[gameplayMode] || GAMEPLAY_MODES.TWO_PLAYER;
+    parts.push(`Mode: ${cfg.label} · ${cfg.detail}`);
     parts.push(`BLUE AI: ${aiControl.BLUE ? "ON" : "off"} · ${aiGamesLearned("BLUE")} games learned · randomness ${(aiTemperature.BLUE * 100).toFixed(0)}%`);
     parts.push(`RED AI: ${aiControl.RED ? "ON" : "off"} · ${aiGamesLearned("RED")} games learned · randomness ${(aiTemperature.RED * 100).toFixed(0)}%`);
     parts.push(`Storage: ${typeof indexedDB !== "undefined" ? "IndexedDB (" + AI_DB_NAME + ")" : "localStorage fallback"} · ${aiHydrated ? "loaded" : "loading…"}`);
@@ -1565,9 +1687,8 @@
   }
 
   function setAIControl(blueOn, redOn) {
-    aiControl = { BLUE: blueOn, RED: redOn };
-    updateAIStatusUI();
-    if (!state.winner) setTimeout(() => aiTakeTurn(state.turn), 400);
+    const nextMode = blueOn && redOn ? "AI_VS_AI" : blueOn ? "AI_BLUE" : redOn ? "AI_RED" : "TWO_PLAYER";
+    setGameplayMode(nextMode);
   }
 
   function doMoveOrSwap(targetX, targetY) {
@@ -1860,10 +1981,11 @@
     location.reload(); 
   });
 
-  el.aiOffBtn.addEventListener("click", () => setAIControl(false, false));
-  el.aiBlueBtn.addEventListener("click", () => setAIControl(true, false));
-  el.aiRedBtn.addEventListener("click", () => setAIControl(false, true));
-  el.aiBothBtn.addEventListener("click", () => setAIControl(true, true));
+  el.modeTwoPlayerBtn.addEventListener("click", () => setGameplayMode("TWO_PLAYER"));
+  el.modeAIBlueBtn.addEventListener("click", () => setGameplayMode("AI_BLUE"));
+  el.modeAIRedBtn.addEventListener("click", () => setGameplayMode("AI_RED"));
+  el.modeAIVsAIBtn.addEventListener("click", () => setGameplayMode("AI_VS_AI"));
+  el.modeNetworkBtn.addEventListener("click", () => setGameplayMode("NETWORK"));
 
   el.trainAIBtn.addEventListener("click", toggleTrainModal);
   el.closeTrainBtn.addEventListener("click", toggleTrainModal);
@@ -1939,6 +2061,7 @@
   buildEngineGUI();
   initSidebarAccordion();
   updateSelectionUI();
+  loadSavedGameplayMode();
   updateAIStatusUI();
   hydrateAIFromDB();
   render();
