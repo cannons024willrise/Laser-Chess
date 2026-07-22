@@ -974,6 +974,9 @@
   let cursor = { x: 0, y: 0 };
   let flashTimer = null;
   let isDelaying = false;
+  let deathVoxels = [];
+  let deathBursts = [];
+  let deathAnimRaf = null;
 
   function loadState() {
     try {
@@ -1125,6 +1128,7 @@
 
     if (result.hit && result.hit.destroyed) {
       const victim = result.hit.piece;
+      spawnDeathVoxels(victim);
       state.pieces.splice(state.pieces.findIndex(p => p.id === victim.id), 1);
       if (victim.pieceType === "KING") {
         state.loser = victim.color;
@@ -1889,6 +1893,12 @@
     selectedId = null;
     cursor = { x: 0, y: 0 };
     isDelaying = false;
+    deathVoxels = [];
+    deathBursts = [];
+    if (deathAnimRaf) {
+      cancelAnimationFrame(deathAnimRaf);
+      deathAnimRaf = null;
+    }
     aiTrajectory = { BLUE: [], RED: [] };
     localStorage.removeItem("laserchess_local_state");
     updateSelectionUI();
@@ -1899,6 +1909,59 @@
   function toggleRules() {
     el.rulesModal.classList.toggle("active");
   }
+
+
+const DEATH_ANIM_MS = 1150;
+
+function spawnDeathVoxels(piece) {
+  const originX = piece.x * CELL;
+  const originY = piece.y * CELL;
+  const isBlue = piece.color === "BLUE";
+  const baseColor = isBlue ? "0,229,255" : "255,45,85";
+  const altColor = isBlue ? "163,249,255" : "255,155,180";
+  const sparkColor = isBlue ? "255,255,255" : "255,245,248";
+  const now = performance.now();
+
+  deathBursts.push({
+    x: originX + CELL / 2,
+    y: originY + CELL / 2,
+    color: baseColor,
+    start: now,
+    life: DEATH_ANIM_MS
+  });
+
+  const cols = 8;
+  const rows = 8;
+  const cellW = CELL / cols;
+  const cellH = CELL / rows;
+
+  for (let gy = 0; gy < rows; gy++) {
+    for (let gx = 0; gx < cols; gx++) {
+      const seed = (gx * 97 + gy * 57 + piece.id.length * 13) % 997;
+      const jitterX = ((seed * 37) % 1000) / 1000 - 0.5;
+      const jitterY = ((seed * 91) % 1000) / 1000 - 0.5;
+      const centerX = originX + gx * cellW + cellW / 2;
+      const centerY = originY + gy * cellH + cellH / 2;
+      const dx = centerX - (originX + CELL / 2);
+      const dy = centerY - (originY + CELL / 2);
+      const dist = Math.max(1, Math.hypot(dx, dy));
+      const outward = 24 + (seed % 34);
+      deathVoxels.push({
+        x: centerX + jitterX * 10,
+        y: centerY + jitterY * 10,
+        size: 6 + ((seed >> 2) % 7),
+        vx: dx / dist * outward + jitterX * 6,
+        vy: dy / dist * outward + jitterY * 6,
+        rot: ((seed * 17) % 360),
+        spin: (((seed % 2) ? 1 : -1) * (0.8 + ((seed % 5) / 14))),
+        start: now + (seed % 8) * 8,
+        life: DEATH_ANIM_MS + (seed % 200),
+        color: ((gx + gy + seed) % 4 === 0) ? sparkColor : (((gx + gy + seed) % 2 === 0) ? baseColor : altColor)
+      });
+    }
+  }
+  scheduleDeathAnimation();
+}
 
   function flashLaserPath() {
     if (flashTimer) clearTimeout(flashTimer);
@@ -1914,140 +1977,201 @@
     return node;
   }
 
-  function drawBoard() {
-    const svg = el.board;
-    svg.innerHTML = "";
 
-    svg.appendChild(svgEl("defs", {}, {}));
-    const defs = svg.querySelector("defs");
-    
-    const fLaser = svgEl("filter", { 
-      id: "laserGlow", 
-      filterUnits: "userSpaceOnUse",
-      x: "0", 
-      y: "0", 
-      width: "1000", 
-      height: "800" 
-    });
-    fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "8", result: "blur" }));
-    const mLaser = svgEl("feMerge");
-    mLaser.appendChild(svgEl("feMergeNode", { in: "blur" }));
-    mLaser.appendChild(svgEl("feMergeNode", { in: "blur" })); 
-    mLaser.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
-    fLaser.appendChild(mLaser);
-    defs.appendChild(fLaser);
+function drawBoard(now = performance.now()) {
+  const svg = el.board;
+  svg.innerHTML = "";
 
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
-        const rect = svgEl("rect", {
-          x: x * CELL, y: y * CELL, width: CELL, height: CELL,
-          fill: reserved === "blue" ? "rgba(0,229,255,.08)" : reserved === "red" ? "rgba(255,45,85,.08)" : "rgba(0,0,0,.42)",
-          stroke: "rgba(255,255,255,.07)",
-          "stroke-width": "1"
-        });
-        rect.style.cursor = "pointer";
-        rect.addEventListener("click", () => onCellClick(x, y));
-        svg.appendChild(rect);
-      }
-    }
+  svg.appendChild(svgEl("defs", {}, {}));
+  const defs = svg.querySelector("defs");
 
+  const fLaser = svgEl("filter", {
+    id: "laserGlow",
+    filterUnits: "userSpaceOnUse",
+    x: "0",
+    y: "0",
+    width: "1000",
+    height: "800"
+  });
+  fLaser.appendChild(svgEl("feGaussianBlur", { stdDeviation: "8", result: "blur" }));
+  const mLaser = svgEl("feMerge");
+  mLaser.appendChild(svgEl("feMergeNode", { in: "blur" }));
+  mLaser.appendChild(svgEl("feMergeNode", { in: "blur" }));
+  mLaser.appendChild(svgEl("feMergeNode", { in: "SourceGraphic" }));
+  fLaser.appendChild(mLaser);
+  defs.appendChild(fLaser);
+
+  for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const txt = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14" });
-      txt.textContent = x;
-      svg.appendChild(txt);
-    }
-    for (let y = 0; y < H; y++) {
-      const txt = svgEl("text", { x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14" });
-      txt.textContent = y;
-      svg.appendChild(txt);
-    }
-
-    const sel = getSelectedPiece();
-    if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
-      for (const m of legalMoves(sel)) {
-        svg.appendChild(svgEl("rect", {
-          x: m.x * CELL + 6, y: m.y * CELL + 6, width: CELL - 12, height: CELL - 12,
-          fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10"
-        }));
-      }
-    }
-
-    if (state.lastLaserPath?.length) {
-      const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
-      const isRed = state.lastLaserColor === "RED";
-      
-      const beamColor = isRed ? "#ff003c" : "#00f0ff"; 
-
-      const aura = svgEl("polyline", { 
-        points: pts, 
-        fill: "none", 
-        stroke: beamColor,
-        "stroke-linecap": "round", 
-        "stroke-linejoin": "round", 
-        filter: "url(#laserGlow)"
+      const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
+      const rect = svgEl("rect", {
+        x: x * CELL, y: y * CELL, width: CELL, height: CELL,
+        fill: reserved === "blue" ? "rgba(0,229,255,.08)" : reserved === "red" ? "rgba(255,45,85,.08)" : "rgba(0,0,0,.42)",
+        stroke: "rgba(255,255,255,.07)",
+        "stroke-width": "1"
       });
-      aura.style.animation = "neonPulse 0.4s ease-in-out infinite"; 
-      svg.appendChild(aura);
-      
-      const core = svgEl("polyline", { 
-        points: pts, 
-        fill: "none", 
-        stroke: "#ffffff",
-        "stroke-linecap": "round", 
-        "stroke-linejoin": "round"
-      });
-      core.style.animation = "corePulse 0.4s ease-in-out infinite"; 
-      svg.appendChild(core);
-    }
-
-    const target = sel || pieceAt(cursor.x, cursor.y);
-    if (target) {
-      svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(0,229,255,.78)", "stroke-width": "3", rx: "10" }));
-    } else {
-      svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
-    }
-
-    for (const piece of state.pieces) {
-      const g = svgEl("g");
-      const x = piece.x * CELL;
-      const y = piece.y * CELL;
-      const isBlue = piece.color === "BLUE";
-
-      const bloom = svgEl("circle", {
-        cx: x + 50,
-        cy: y + 50,
-        r: 28,
-        fill: isBlue ? "rgba(0,229,255,0.35)" : "rgba(255,45,85,0.35)"
-      });
-      bloom.style.filter = "blur(12px)";
-      g.appendChild(bloom);
-
-      const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
-      // The LASER artwork's barrel is drawn facing the opposite way from the
-      // direction laserDirFromRotation() actually fires at rotation 0, so it
-      // needs a fixed 180-degree correction to stay visually in sync with the beam.
-      const visualOffset = piece.pieceType === "LASER" ? 180 : 0;
-      img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90 + visualOffset} ${x + 50} ${y + 50})`);
-      g.appendChild(img);
-      
-      g.style.cursor = "pointer";
-      g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
-      svg.appendChild(g);
-    }
-
-    if (state.winner) {
-      svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.85)", stroke: "rgba(255,255,255,.14)" }));
-      const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
-      t1.textContent = `${state.winner} WINS`;
-      svg.appendChild(t1);
-      const t2 = svgEl("text", { x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22" });
-      t2.textContent = "Press Reset to start again";
-      svg.appendChild(t2);
+      rect.style.cursor = "pointer";
+      rect.addEventListener("click", () => onCellClick(x, y));
+      svg.appendChild(rect);
     }
   }
 
-  function onPieceClick(piece) {
+  for (let x = 0; x < W; x++) {
+    const txt = svgEl("text", { x: x * CELL + 50, y: 18, "text-anchor": "middle", fill: "rgba(255,255,255,.35)", "font-size": "14" });
+    txt.textContent = x;
+    svg.appendChild(txt);
+  }
+  for (let y = 0; y < H; y++) {
+    const txt = svgEl("text", { x: 12, y: y * CELL + 58, fill: "rgba(255,255,255,.35)", "font-size": "14" });
+    txt.textContent = y;
+    svg.appendChild(txt);
+  }
+
+  const sel = getSelectedPiece();
+  if (sel && sel.color === state.turn && sel.pieceType !== "LASER") {
+    for (const m of legalMoves(sel)) {
+      svg.appendChild(svgEl("rect", {
+        x: m.x * CELL + 6, y: m.y * CELL + 6, width: CELL - 12, height: CELL - 12,
+        fill: "rgba(36,209,143,.16)", stroke: "rgba(36,209,143,.5)", "stroke-width": "2", rx: "10"
+      }));
+    }
+  }
+
+  if (state.lastLaserPath?.length) {
+    const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
+    const isRed = state.lastLaserColor === "RED";
+    const beamColor = isRed ? "#ff003c" : "#00f0ff";
+
+    const aura = svgEl("polyline", {
+      points: pts,
+      fill: "none",
+      stroke: beamColor,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      filter: "url(#laserGlow)"
+    });
+    aura.style.animation = "neonPulse 0.4s ease-in-out infinite";
+    svg.appendChild(aura);
+
+    const core = svgEl("polyline", {
+      points: pts,
+      fill: "none",
+      stroke: "#ffffff",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round"
+    });
+    core.style.animation = "corePulse 0.4s ease-in-out infinite";
+    svg.appendChild(core);
+  }
+
+  const target = sel || pieceAt(cursor.x, cursor.y);
+  if (target) {
+    svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(0,229,255,.78)", "stroke-width": "3", rx: "10" }));
+  } else {
+    svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
+  }
+
+  for (const piece of state.pieces) {
+    const g = svgEl("g");
+    const x = piece.x * CELL;
+    const y = piece.y * CELL;
+    const isBlue = piece.color === "BLUE";
+
+    const bloom = svgEl("circle", {
+      cx: x + 50,
+      cy: y + 50,
+      r: 28,
+      fill: isBlue ? "rgba(0,229,255,0.35)" : "rgba(255,45,85,0.35)"
+    });
+    bloom.style.filter = "blur(12px)";
+    g.appendChild(bloom);
+
+    const img = svgEl("image", { href: pieceImage(piece), x: x + 6, y: y + 6, width: CELL - 12, height: CELL - 12, preserveAspectRatio: "xMidYMid meet" });
+    const visualOffset = piece.pieceType === "LASER" ? 180 : 0;
+    img.setAttribute("transform", `rotate(${(piece.rotation || 0) * 90 + visualOffset} ${x + 50} ${y + 50})`);
+    g.appendChild(img);
+
+    g.style.cursor = "pointer";
+    g.addEventListener("click", (ev) => { ev.stopPropagation(); onPieceClick(piece); });
+    svg.appendChild(g);
+  }
+
+  const activeVoxels = [];
+  for (const voxel of deathVoxels) {
+    const age = now - voxel.start;
+    if (age < 0 || age > voxel.life) continue;
+    const t = age / voxel.life;
+    const fade = Math.max(0, 1 - t);
+    const driftX = voxel.x + voxel.vx * t * 7;
+    const driftY = voxel.y + voxel.vy * t * 7 + t * t * 32;
+    const wobble = Math.sin(t * Math.PI * 6 + voxel.rot) * 2.5;
+    const size = Math.max(1.2, voxel.size * (1 - t * 0.75));
+    activeVoxels.push({
+      x: driftX + wobble,
+      y: driftY - wobble * 0.4,
+      size,
+      alpha: Math.max(0, fade * fade),
+      rot: voxel.rot + voxel.spin * t * 140,
+      color: voxel.color
+    });
+  }
+  deathVoxels = deathVoxels.filter(v => now - v.start <= v.life);
+  deathBursts = deathBursts.filter(b => now - b.start <= b.life);
+  if (deathVoxels.length === 0 && deathBursts.length === 0 && deathAnimRaf) {
+    cancelAnimationFrame(deathAnimRaf);
+    deathAnimRaf = null;
+  }
+  for (const burst of deathBursts) {
+    const age = now - burst.start;
+    if (age < 0 || age > burst.life) continue;
+    const t = age / burst.life;
+    const ring = 18 + t * 70;
+    const alpha = Math.max(0, 0.65 * (1 - t));
+    svg.appendChild(svgEl("circle", {
+      cx: burst.x,
+      cy: burst.y,
+      r: ring,
+      fill: "none",
+      stroke: `rgba(${burst.color},${alpha})`,
+      "stroke-width": String(10 - t * 7)
+    }));
+    const core = svgEl("circle", {
+      cx: burst.x,
+      cy: burst.y,
+      r: Math.max(2, 16 - t * 14),
+      fill: `rgba(${burst.color},${alpha * 0.55})`
+    });
+    core.style.filter = "blur(10px)";
+    svg.appendChild(core);
+  }
+  for (const voxel of activeVoxels) {
+    const rect = svgEl("rect", {
+      x: voxel.x - voxel.size / 2,
+      y: voxel.y - voxel.size / 2,
+      width: voxel.size,
+      height: voxel.size,
+      rx: 1.5,
+      fill: `rgba(${voxel.color},${voxel.alpha})`,
+      opacity: String(voxel.alpha),
+      transform: `rotate(${voxel.rot} ${voxel.x} ${voxel.y})`
+    });
+    rect.style.filter = "drop-shadow(0 0 8px rgba(255,255,255,.15))";
+    svg.appendChild(rect);
+  }
+
+  if (state.winner && deathVoxels.length === 0 && deathBursts.length === 0) {
+    svg.appendChild(svgEl("rect", { x: 150, y: 255, width: 700, height: 290, rx: 26, fill: "rgba(0,0,0,.85)", stroke: "rgba(255,255,255,.14)" }));
+    const t1 = svgEl("text", { x: 500, y: 385, "text-anchor": "middle", fill: "white", "font-size": "52", "font-weight": "900" });
+    t1.textContent = `${state.winner} WINS`;
+    svg.appendChild(t1);
+    const t2 = svgEl("text", { x: 500, y: 445, "text-anchor": "middle", fill: "rgba(255,255,255,.78)", "font-size": "22" });
+    t2.textContent = "Press Reset to start again";
+    svg.appendChild(t2);
+  }
+}
+
+function onPieceClick(piece) {
+
     if (state.winner || isDelaying) return;
     
     const sel = getSelectedPiece();
@@ -2083,8 +2207,8 @@
     if (!target) selectPiece(null); else onPieceClick(target);
   }
 
-  function render() {
-    drawBoard();
+  function render(now = performance.now()) {
+    drawBoard(now);
     updateSelectionUI();
     saveState();
   }
