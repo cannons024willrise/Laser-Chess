@@ -9,10 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --theme-color:#03e9f4;
-      --theme-rgb:3,233,244;
+      --theme-color:#4db8ff;
+      --theme-rgb:77,184,255;
+      --mode-halo:rgba(3,233,244,.18);
+      --overlay-top:rgba(0,0,0,.75);
+      --overlay-bottom:rgba(0,0,0,.9);
       --red-theme:#f44336;
       --red-rgb:244,67,54;
+      --player-blue:#4db8ff;
+      --player-blue-rgb:77,184,255;
+      --player-red:#ff8f84;
+      --player-red-rgb:255,143,132;
       --bg0:#06080b;
       --bg1:#0d1116;
       --bg2:#121821;
@@ -34,7 +41,7 @@
       font-family: "Quantico", sans-serif;
       color: var(--text);
       background:
-        linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.9)),
+        linear-gradient(var(--overlay-top), var(--overlay-bottom)),
         url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
     }
     
@@ -116,7 +123,7 @@
       inset: -2px;
       border-radius: 20px;
       padding: 2px;
-      background: linear-gradient(135deg, rgba(var(--theme-rgb), 0.3), transparent 60%, rgba(244,67,54,0.15));
+      background: linear-gradient(135deg, rgba(var(--theme-rgb), 0.3), transparent 60%, var(--mode-halo));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
@@ -353,8 +360,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .turn-blue { color: var(--theme-color); border-color: rgba(var(--theme-rgb), .35); }
-    .turn-red { color: #ff8f84; border-color: rgba(244,67,54,.35); }
+    .turn-blue { color: var(--player-blue); border-color: rgba(var(--player-blue-rgb), .35); }
+    .turn-red { color: var(--player-red); border-color: rgba(var(--player-red-rgb), .35); }
     
     .controls {
       display: grid;
@@ -526,7 +533,7 @@
             <div class="mode-label" id="modeLabel">2 Player</div>
             <div class="mode-detail" id="modeDetail">Two humans on one board.</div>
           </div>
-          <div class="turn-badge" id="modePill">2 Player</div>
+          <div class="turn-badge" id="modeStatePill">2 Player</div>
         </section>
 
         <details class="panel accordion-section" data-accordion open>
@@ -834,6 +841,7 @@
     modeLabel: document.getElementById("modeLabel"),
     modeDetail: document.getElementById("modeDetail"),
     modePill: document.getElementById("modePill"),
+    modeStatePill: document.getElementById("modeStatePill"),
     modeTwoPlayerBtn: document.getElementById("modeTwoPlayerBtn"),
     modeAIBlueBtn: document.getElementById("modeAIBlueBtn"),
     modeAIRedBtn: document.getElementById("modeAIRedBtn"),
@@ -1152,6 +1160,54 @@
       label: "Network",
       detail: "Coming soon: online multiplayer.",
       ai: { BLUE: false, RED: false }
+    }
+  };
+
+  const GAMEPLAY_THEMES = {
+    TWO_PLAYER: {
+      accent: "#4db8ff",
+      rgb: "77,184,255",
+      halo: "rgba(77,184,255,.18)",
+      overlayTop: "rgba(2,8,20,.78)",
+      overlayBottom: "rgba(4,12,30,.92)",
+      panel: "rgba(7,10,18,.94)",
+      line: "rgba(77,184,255,.16)"
+    },
+    AI_BLUE: {
+      accent: "#4db8ff",
+      rgb: "77,184,255",
+      halo: "rgba(77,184,255,.20)",
+      overlayTop: "rgba(2,8,20,.78)",
+      overlayBottom: "rgba(4,12,30,.92)",
+      panel: "rgba(7,10,18,.94)",
+      line: "rgba(77,184,255,.16)"
+    },
+    AI_RED: {
+      accent: "#ff6b5f",
+      rgb: "255,107,95",
+      halo: "rgba(255,107,95,.20)",
+      overlayTop: "rgba(20,7,8,.78)",
+      overlayBottom: "rgba(34,10,12,.92)",
+      panel: "rgba(18,8,10,.94)",
+      line: "rgba(255,107,95,.16)"
+    },
+    AI_VS_AI: {
+      accent: "#b36bff",
+      rgb: "179,107,255",
+      halo: "rgba(179,107,255,.20)",
+      overlayTop: "rgba(11,6,20,.78)",
+      overlayBottom: "rgba(22,10,34,.92)",
+      panel: "rgba(12,8,18,.94)",
+      line: "rgba(179,107,255,.16)"
+    },
+    NETWORK: {
+      accent: "#b36bff",
+      rgb: "179,107,255",
+      halo: "rgba(179,107,255,.20)",
+      overlayTop: "rgba(11,6,20,.78)",
+      overlayBottom: "rgba(22,10,34,.92)",
+      panel: "rgba(12,8,18,.94)",
+      line: "rgba(179,107,255,.16)"
     }
   };
 
@@ -1621,11 +1677,27 @@
     reader.readAsText(file);
   }
 
+  function applyGameplayTheme(mode) {
+    const cfg = GAMEPLAY_MODES[mode] || GAMEPLAY_MODES.TWO_PLAYER;
+    const theme = GAMEPLAY_THEMES[mode] || GAMEPLAY_THEMES.TWO_PLAYER;
+    const root = document.documentElement;
+    root.style.setProperty("--theme-color", theme.accent);
+    root.style.setProperty("--theme-rgb", theme.rgb);
+    root.style.setProperty("--mode-halo", theme.halo);
+    root.style.setProperty("--overlay-top", theme.overlayTop);
+    root.style.setProperty("--overlay-bottom", theme.overlayBottom);
+    root.style.setProperty("--panel", theme.panel);
+    root.style.setProperty("--line", theme.line);
+    document.body.dataset.mode = mode;
+    return cfg;
+  }
+
   function updateGameplayModeUI() {
     const cfg = GAMEPLAY_MODES[gameplayMode] || GAMEPLAY_MODES.TWO_PLAYER;
     if (el.modeLabel) el.modeLabel.textContent = cfg.label;
     if (el.modeDetail) el.modeDetail.textContent = cfg.detail;
     if (el.modePill) el.modePill.textContent = cfg.label;
+    if (el.modeStatePill) el.modeStatePill.textContent = cfg.label;
     if (el.modeStatus) {
       const aiText = cfg.ai.BLUE || cfg.ai.RED
         ? `AI active: ${cfg.ai.BLUE ? "BLUE" : ""}${cfg.ai.BLUE && cfg.ai.RED ? " + " : ""}${cfg.ai.RED ? "RED" : ""}`
@@ -1639,6 +1711,7 @@
     gameplayMode = mode;
     const cfg = GAMEPLAY_MODES[mode];
     aiControl = { ...cfg.ai };
+    applyGameplayTheme(gameplayMode);
     if (persist) {
       try { localStorage.setItem(SAVED_GAMEPLAY_MODE_KEY, gameplayMode); } catch (e) {}
     }
@@ -1654,6 +1727,7 @@
         gameplayMode = saved;
       }
     } catch (e) {}
+    applyGameplayTheme(gameplayMode);
     setGameplayMode(gameplayMode, { persist: false });
   }
 
