@@ -642,11 +642,12 @@
           <div class="accordion-body">
             <div class="advanced-group">
               <h4>Weight Management</h4>
-              <p class="quick-tip">Export, import, or reset the learned twin weights.</p>
+              <p class="quick-tip">Export, import, reset to zero, or restore the default preset.</p>
               <div class="controls">
                 <button class="btn" id="downloadWeightsBtn">⬇ Download Weights</button>
                 <button class="btn" id="importWeightsBtn">⬆ Import Weights</button>
-                <button class="btn danger" id="resetWeightsBtn">Reset Weights</button>
+                <button class="btn" id="restoreWeightsBtn">Restore Weights</button>
+                <button class="btn danger" id="resetWeightsBtn">Reset Weights (Empty)</button>
                 <input type="file" id="importWeightsFile" accept="application/json" style="display:none;">
               </div>
             </div>
@@ -866,6 +867,7 @@
     aiAutoLoopChk: document.getElementById("aiAutoLoopChk"),
     downloadWeightsBtn: document.getElementById("downloadWeightsBtn"),
     importWeightsBtn: document.getElementById("importWeightsBtn"),
+    restoreWeightsBtn: document.getElementById("restoreWeightsBtn"),
     resetWeightsBtn: document.getElementById("resetWeightsBtn"),
     importWeightsFile: document.getElementById("importWeightsFile"),
     modeLabel: document.getElementById("modeLabel"),
@@ -1160,17 +1162,31 @@
      rules it's actually playing under.
      ===================================================================== */
 
+
   const AI_FEATURE_NAMES = ["bias", "defenderDiff", "deflectorDiff", "switchDiff", "mobilityDiff", "iCanWinNow", "enemyCanWinNow"];
-  // Baked-in defaults from an offline self-play run (3000 games, depth-2
-  // search, softmax exploration, reward only at game end). Overridden by
-  // whatever's in the AI's own IndexedDB store once a browser has
-  // played/trained locally.
-  const AI_DEFAULT_WEIGHTS = {
-    BLUE: [0.390, -0.096, 0.583, -0.013, -0.715, 1.340, -0.667],
-    RED:  [0.248, -0.514, 0.306, 0.014, -0.663, 1.432, -0.337]
+  // Uploaded default preset supplied by the user. This is the AI's boot-time
+  // baseline and the value restored by the "Restore Weights" control.
+  const AI_DEFAULT_PRESET = {
+    name: "Uploaded default preset",
+    weights: {
+      BLUE: [-0.11727056704831175, 0.08016136014405455, 0.17422076378370605, -0.013, 0.29971722057757877, 1.3439391385488977, -0.6536996379024455],
+      RED: [0.13566235517235664, 0.06807456751685516, 0.17984186189873755, 0.014, 0.3011821634049142, 1.437577594331126, -0.39306176684939115]
+    },
+    temperature: {
+      BLUE: 0.05,
+      RED: 0.05
+    },
+    gamesLearned: {
+      BLUE: 501,
+      RED: 501
+    }
   };
+  const AI_DEFAULT_WEIGHTS = AI_DEFAULT_PRESET.weights;
+  const AI_DEFAULT_TEMPERATURE = AI_DEFAULT_PRESET.temperature;
+  const AI_DEFAULT_GAMES = AI_DEFAULT_PRESET.gamesLearned;
 
   const GAMEPLAY_MODES = {
+
     TWO_PLAYER: {
       label: "2 Player",
       detail: "Two humans on one board.",
@@ -1351,9 +1367,41 @@
   // status UI) can read/write synchronously; every write also fires an
   // async persist to IndexedDB underneath.
   let aiWeights = { BLUE: AI_DEFAULT_WEIGHTS.BLUE.slice(), RED: AI_DEFAULT_WEIGHTS.RED.slice() };
-  let aiTemperature = { BLUE: 0.6, RED: 0.6 };
-  let aiGamesLearnedCache = { BLUE: 0, RED: 0 };
+  let aiTemperature = { BLUE: AI_DEFAULT_TEMPERATURE.BLUE, RED: AI_DEFAULT_TEMPERATURE.RED };
+  let aiGamesLearnedCache = { BLUE: AI_DEFAULT_GAMES.BLUE, RED: AI_DEFAULT_GAMES.RED };
+  let aiWeightSource = AI_DEFAULT_PRESET.name;
   let aiHydrated = false;
+
+  function sameNumberArray(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (Number(a[i]) !== Number(b[i])) return false;
+    }
+    return true;
+  }
+
+  function syncAIWeightSourceLabel() {
+    const looksCleared =
+      sameNumberArray(aiWeights.BLUE, Array(AI_FEATURE_NAMES.length).fill(0)) &&
+      sameNumberArray(aiWeights.RED, Array(AI_FEATURE_NAMES.length).fill(0)) &&
+      Number(aiTemperature.BLUE) === 0.05 &&
+      Number(aiTemperature.RED) === 0.05 &&
+      Number(aiGamesLearnedCache.BLUE) === 0 &&
+      Number(aiGamesLearnedCache.RED) === 0;
+
+    const looksLikePreset =
+      sameNumberArray(aiWeights.BLUE, AI_DEFAULT_WEIGHTS.BLUE) &&
+      sameNumberArray(aiWeights.RED, AI_DEFAULT_WEIGHTS.RED) &&
+      Number(aiTemperature.BLUE) === Number(AI_DEFAULT_TEMPERATURE.BLUE) &&
+      Number(aiTemperature.RED) === Number(AI_DEFAULT_TEMPERATURE.RED) &&
+      Number(aiGamesLearnedCache.BLUE) === Number(AI_DEFAULT_GAMES.BLUE) &&
+      Number(aiGamesLearnedCache.RED) === Number(AI_DEFAULT_GAMES.RED);
+
+    if (looksCleared) aiWeightSource = "Cleared weights";
+    else if (looksLikePreset) aiWeightSource = AI_DEFAULT_PRESET.name;
+    else aiWeightSource = "Custom saved weights";
+  }
+
 
   async function hydrateAIFromDB() {
     const [wb, wr, tb, tr, gb, gr] = await Promise.all([
@@ -1367,6 +1415,7 @@
     if (typeof tr === "number" && isFinite(tr)) aiTemperature.RED = Math.max(0.05, Math.min(1, tr));
     if (typeof gb === "number") aiGamesLearnedCache.BLUE = gb;
     if (typeof gr === "number") aiGamesLearnedCache.RED = gr;
+    syncAIWeightSourceLabel();
     aiHydrated = true;
     updateAIStatusUI();
   }
@@ -1716,7 +1765,8 @@
       featureNames: AI_FEATURE_NAMES,
       weights: aiWeights,
       temperature: aiTemperature,
-      gamesLearned: { BLUE: aiGamesLearnedCache.BLUE, RED: aiGamesLearnedCache.RED }
+      gamesLearned: { BLUE: aiGamesLearnedCache.BLUE, RED: aiGamesLearnedCache.RED },
+      weightSource: aiWeightSource
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -1745,6 +1795,7 @@
             aiDBSet("games_" + color.toLowerCase(), g);
           }
         }
+        aiWeightSource = "Imported weights file";
         updateAIStatusUI();
         el.trainProgress.textContent = "Imported weights from file.";
       } catch (e) {
@@ -1820,14 +1871,15 @@
     setGameplayMode(gameplayMode, { persist: false });
   }
 
-  function resetAIWeightsToDefaults() {
-    aiWeights.BLUE = AI_DEFAULT_WEIGHTS.BLUE.slice();
-    aiWeights.RED = AI_DEFAULT_WEIGHTS.RED.slice();
-    aiTemperature.BLUE = 0.6;
-    aiTemperature.RED = 0.6;
+  function resetAIWeightsToZero() {
+    aiWeights.BLUE = Array(AI_FEATURE_NAMES.length).fill(0);
+    aiWeights.RED = Array(AI_FEATURE_NAMES.length).fill(0);
+    aiTemperature.BLUE = 0.05;
+    aiTemperature.RED = 0.05;
     aiGamesLearnedCache.BLUE = 0;
     aiGamesLearnedCache.RED = 0;
     aiTrajectory = { BLUE: [], RED: [] };
+    aiWeightSource = "Cleared weights";
     saveAIWeights("BLUE", aiWeights.BLUE.slice());
     saveAIWeights("RED", aiWeights.RED.slice());
     saveAITemperature("BLUE", aiTemperature.BLUE);
@@ -1835,7 +1887,26 @@
     aiDBSet("games_blue", 0);
     aiDBSet("games_red", 0);
     updateAIStatusUI();
-    if (el.trainProgress) el.trainProgress.textContent = "Weights reset to defaults.";
+    if (el.trainProgress) el.trainProgress.textContent = "Weights cleared to zero.";
+  }
+
+  function restoreAIWeightsFromPreset() {
+    aiWeights.BLUE = AI_DEFAULT_WEIGHTS.BLUE.slice();
+    aiWeights.RED = AI_DEFAULT_WEIGHTS.RED.slice();
+    aiTemperature.BLUE = AI_DEFAULT_TEMPERATURE.BLUE;
+    aiTemperature.RED = AI_DEFAULT_TEMPERATURE.RED;
+    aiGamesLearnedCache.BLUE = AI_DEFAULT_GAMES.BLUE;
+    aiGamesLearnedCache.RED = AI_DEFAULT_GAMES.RED;
+    aiTrajectory = { BLUE: [], RED: [] };
+    aiWeightSource = AI_DEFAULT_PRESET.name;
+    saveAIWeights("BLUE", aiWeights.BLUE.slice());
+    saveAIWeights("RED", aiWeights.RED.slice());
+    saveAITemperature("BLUE", aiTemperature.BLUE);
+    saveAITemperature("RED", aiTemperature.RED);
+    aiDBSet("games_blue", aiGamesLearnedCache.BLUE);
+    aiDBSet("games_red", aiGamesLearnedCache.RED);
+    updateAIStatusUI();
+    if (el.trainProgress) el.trainProgress.textContent = "Default weight preset restored.";
   }
 
   function updateAIStatusUI() {
@@ -1843,6 +1914,7 @@
     const parts = [];
     const cfg = GAMEPLAY_MODES[gameplayMode] || GAMEPLAY_MODES.TWO_PLAYER;
     parts.push(`Mode: ${cfg.label} · ${cfg.detail}`);
+    parts.push(`Weights: ${aiWeightSource}`);
     parts.push(`BLUE AI: ${aiControl.BLUE ? "ON" : "off"} · ${aiGamesLearned("BLUE")} games learned · randomness ${(aiTemperature.BLUE * 100).toFixed(0)}%`);
     parts.push(`RED AI: ${aiControl.RED ? "ON" : "off"} · ${aiGamesLearned("RED")} games learned · randomness ${(aiTemperature.RED * 100).toFixed(0)}%`);
     parts.push(`Storage: ${typeof indexedDB !== "undefined" ? "IndexedDB (" + AI_DB_NAME + ")" : "localStorage fallback"} · ${aiHydrated ? "loaded" : "loading…"}`);
@@ -2280,7 +2352,8 @@ function onPieceClick(piece) {
   el.aiAutoLoopChk.addEventListener("change", () => { aiAutoLoop = el.aiAutoLoopChk.checked; });
   el.downloadWeightsBtn.addEventListener("click", downloadAIWeights);
   el.importWeightsBtn.addEventListener("click", () => el.importWeightsFile.click());
-  el.resetWeightsBtn.addEventListener("click", resetAIWeightsToDefaults);
+  el.restoreWeightsBtn.addEventListener("click", restoreAIWeightsFromPreset);
+  el.resetWeightsBtn.addEventListener("click", resetAIWeightsToZero);
   el.importWeightsFile.addEventListener("change", () => {
     if (el.importWeightsFile.files && el.importWeightsFile.files[0]) {
       importAIWeightsFromFile(el.importWeightsFile.files[0]);
