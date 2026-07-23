@@ -33,6 +33,7 @@
       --overlay-bottom:rgba(4,5,7,.99);
       --panel:rgba(11,12,16,.96);
       --line:rgba(47,124,255,.22);
+      --board-bg-image:url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png');
 
       /* -- fixed identity colors (read directly by the script) -- */
       --red-theme:#ff3b3b;
@@ -71,7 +72,7 @@
         repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 34px),
         repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 34px),
         linear-gradient(var(--overlay-top), var(--overlay-bottom)),
-        url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
+        var(--board-bg-image) center center / cover fixed no-repeat;
     }
     ::selection { background: rgba(var(--theme-rgb), .35); color: #fff; }
     :focus-visible {
@@ -681,6 +682,46 @@
     }
     .matrix-select option { background: var(--bg1); color: var(--text); }
 
+    .asset-list {
+      display: grid;
+      gap: .5rem;
+    }
+    .asset-row {
+      display: grid;
+      grid-template-columns: minmax(9rem, 11rem) minmax(0, 1fr);
+      gap: .5rem;
+      align-items: center;
+    }
+    .asset-key {
+      font-family: var(--font-mono);
+      font-size: .64rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .asset-input {
+      width: 100%;
+      padding: .45rem .55rem;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: .7rem;
+    }
+    .asset-input:focus {
+      outline: none;
+      border-color: var(--theme-color);
+      box-shadow: 0 0 0 2px rgba(var(--theme-rgb), .18);
+    }
+    .asset-note {
+      margin: 0;
+      font-size: .72rem;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
     /* ---------------------------------------------------------------- motion -- */
     @keyframes neonPulse {
       0% { stroke-width: 12px; opacity: 0.5; }
@@ -937,6 +978,16 @@
                 <input type="file" id="importWeightsFile" accept="application/json" style="display:none;">
               </div>
             </div>
+
+            <div class="advanced-group">
+              <h4>Asset paths</h4>
+              <p class="asset-note">Edit these live. The board background uses the first field, and the piece image names use the rest. Everything saves locally, because forgetting paths repeatedly is apparently a workflow.</p>
+              <div id="assetPathList" class="asset-list"></div>
+              <div class="controls" style="margin-top:.2rem;">
+                <button class="btn" id="assetResetBtn">Reset asset paths</button>
+              </div>
+              <div id="assetStatus" class="status-readout"></div>
+            </div>
           </div>
         </details>
       </aside>
@@ -1011,6 +1062,22 @@
     localStorage.setItem("laserchess_engine_version", PHYSICS_VERSION);
   }
   const SAVED_GAMEPLAY_MODE_KEY = "laserchess_gameplay_mode";
+
+  const SAVED_ASSET_PATHS_KEY = "laserchess_asset_paths";
+  const DEFAULT_ASSET_PATHS = {
+    boardBackground: "https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png",
+    blueking: "./blueking.png",
+    redking: "./redking.png",
+    bluedefender: "./bluedefender.png",
+    reddefender: "./reddefender.png",
+    bluedeflector: "./bluedeflector.png",
+    reddeflector: "./reddeflector.png",
+    blueswitch: "./blueswitch.png",
+    redswitch: "./redswitch.png",
+    bluelaser: "./bluelaser.png",
+    redlaser: "./redlaser.png"
+  };
+  let assetPaths = null;
 
   const PIECE_BASE = "./";
   const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
@@ -1093,6 +1160,81 @@
     localStorage.setItem("laserchess_custom_rules", JSON.stringify(INTERACTION_MAP));
   }
 
+  function cssUrl(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw) return "none";
+    return `url("${raw.replace(/"/g, '\\"')}")`;
+  }
+
+  function loadAssetPaths() {
+    try {
+      const raw = localStorage.getItem(SAVED_ASSET_PATHS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return { ...DEFAULT_ASSET_PATHS, ...(parsed && typeof parsed === "object" ? parsed : {}) };
+      }
+    } catch (e) {}
+    return { ...DEFAULT_ASSET_PATHS };
+  }
+
+  function saveAssetPaths() {
+    localStorage.setItem(SAVED_ASSET_PATHS_KEY, JSON.stringify(assetPaths));
+  }
+
+  function applyAssetPaths() {
+    const root = document.documentElement;
+    root.style.setProperty("--board-bg-image", cssUrl(assetPaths.boardBackground));
+    saveAssetPaths();
+    if (el.assetStatus) {
+      el.assetStatus.textContent = "Asset paths applied and saved locally.";
+    }
+  }
+
+  function renderAssetEditor() {
+    if (!el.assetPathList) return;
+    const entries = [
+      ["boardBackground", "Board background"],
+      ["blueking", "Blue king"],
+      ["redking", "Red king"],
+      ["bluedefender", "Blue defender"],
+      ["reddefender", "Red defender"],
+      ["bluedeflector", "Blue deflector"],
+      ["reddeflector", "Red deflector"],
+      ["blueswitch", "Blue switch"],
+      ["redswitch", "Red switch"],
+      ["bluelaser", "Blue laser"],
+      ["redlaser", "Red laser"]
+    ];
+    el.assetPathList.innerHTML = "";
+    for (const [key, label] of entries) {
+      const row = document.createElement("label");
+      row.className = "asset-row";
+      row.innerHTML = `
+        <span class="asset-key">${label}</span>
+        <input class="asset-input" type="text" spellcheck="false" autocomplete="off" data-asset-key="${key}" value="${String(assetPaths[key] ?? "").replace(/"/g, "&quot;")}">`
+      ;
+      el.assetPathList.appendChild(row);
+    }
+    el.assetPathList.querySelectorAll("[data-asset-key]").forEach(input => {
+      input.addEventListener("input", () => {
+        const key = input.dataset.assetKey;
+        assetPaths[key] = input.value;
+        if (key === "boardBackground") {
+          document.documentElement.style.setProperty("--board-bg-image", cssUrl(input.value));
+        }
+        saveAssetPaths();
+        if (el.assetStatus) el.assetStatus.textContent = `Updated ${key}.`;
+      });
+    });
+  }
+
+  function resetAssetPaths() {
+    assetPaths = { ...DEFAULT_ASSET_PATHS };
+    renderAssetEditor();
+    applyAssetPaths();
+    if (el.assetStatus) el.assetStatus.textContent = "Asset paths restored to defaults.";
+  }
+
   const START_STATE = () => ({
     turn: "BLUE",
     moveNumber: 1,
@@ -1158,6 +1300,9 @@
     restoreWeightsBtn: document.getElementById("restoreWeightsBtn"),
     resetWeightsBtn: document.getElementById("resetWeightsBtn"),
     importWeightsFile: document.getElementById("importWeightsFile"),
+    assetPathList: document.getElementById("assetPathList"),
+    assetStatus: document.getElementById("assetStatus"),
+    assetResetBtn: document.getElementById("assetResetBtn"),
     modeLabel: document.getElementById("modeLabel"),
     modeDetail: document.getElementById("modeDetail"),
     modePill: document.getElementById("modePill"),
@@ -1177,6 +1322,8 @@
     trainProgress: document.getElementById("trainProgress"),
     closeTrainBtn: document.getElementById("closeTrainBtn")
   };
+
+  assetPaths = loadAssetPaths();
 
   function buildEngineGUI() {
     el.engineTableBody.innerHTML = "";
@@ -1282,7 +1429,8 @@
   }
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
   function pieceImage(piece) {
-    return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`;
+    const key = `${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}`;
+    return assetPaths[key] || `${PIECE_BASE}${key}.png`;
   }
   function pieceAt(x, y, pieces = state.pieces) {
     return pieces.find(p => p.x === x && p.y === y) || null;
@@ -2633,6 +2781,11 @@ function onPieceClick(piece) {
     location.reload(); 
   });
 
+  if (el.assetResetBtn) el.assetResetBtn.addEventListener("click", () => {
+    if (!confirm("Reset asset paths to defaults?")) return;
+    resetAssetPaths();
+  });
+
   el.modeTwoPlayerBtn.addEventListener("click", () => setGameplayMode("TWO_PLAYER"));
   el.modeAIBlueBtn.addEventListener("click", () => setGameplayMode("AI_BLUE"));
   el.modeAIRedBtn.addEventListener("click", () => setGameplayMode("AI_RED"));
@@ -2719,6 +2872,8 @@ function onPieceClick(piece) {
 
   loadCustomRules();
   buildEngineGUI();
+  renderAssetEditor();
+  applyAssetPaths();
   initSidebarAccordion();
   updateSelectionUI();
   loadSavedGameplayMode();
