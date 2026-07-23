@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Laser Chess</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,7 +58,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      flex-wrap: wrap;
+      gap: .5rem 1rem;
       padding: 0.4rem 1.25rem;
       border-bottom: 1px solid var(--line);
       background: rgba(0,0,0,.88);
@@ -68,15 +69,17 @@
     }
     .brand h1 {
       margin: 0;
-      font-size: clamp(1rem, 1.8vw, 1.4rem);
+      font-size: clamp(0.95rem, 3.5vw, 1.4rem);
       letter-spacing: .16em;
       font-weight: 900;
       text-transform: uppercase;
+      white-space: nowrap;
     }
     .header-meta {
       display: flex;
       align-items: center;
-      gap: .7rem;
+      flex-wrap: wrap;
+      gap: .5rem .7rem;
     }
     .pill {
       padding: .25rem .65rem;
@@ -529,94 +532,138 @@
       100% { stroke-width: 3px; opacity: 0.8; }
     }
 
-    @media (max-width: 1180px), (max-height: 820px) {
-      .dialogue-overlay { padding: .18rem; }
-      .layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(44vh, .98fr) minmax(0, 1fr);
-        padding: .5rem;
-        gap: .5rem;
-      }
-      .layout::before { border-radius: 14px; }
-      .board-panel { min-height: 0; }
-      .sidebar {
-        min-height: 0;
-        max-height: 100%;
-      }
-      .side-card h3 { font-size: 0.72rem; margin-bottom: 0.22rem; }
-      .quick-tip { font-size: 0.72rem; }
-      .mode-status-card { padding: .72rem .75rem; }
-      .accordion-body { max-height: 28vh; }
-      .turn-badge { font-size: 0.58rem; padding: .28rem .12rem; }
-      .interaction-table { font-size: 0.68rem; }
-      .interaction-table th, .interaction-table td { padding: 0.3rem; }
-    }
+    /* ==================================================================
+       RESPONSIVE SYSTEM (mobile-first cascade, non-overlapping tiers)
 
-    @media (max-width: 900px){
-      .dialogue-overlay { padding: .16rem; }
-      .layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(42vh, 1fr) minmax(0, 1fr);
-        padding: .42rem;
-        gap: .42rem;
-        border-radius: 12px;
-      }
-      .layout::before { border-radius: 12px; }
-      .board-panel { min-height: 0; }
-      .sidebar {
-        min-height: 0;
-        max-height: 100%;
-      }
-      .side-card h3 { font-size: 0.66rem; margin-bottom: 0.2rem; }
-      .quick-tip { font-size: 0.68rem; }
-      .advanced-panel > summary { font-size: 0.64rem; padding: .58rem .5rem; }
-      .accordion-body { max-height: 32vh; }
-      .turn-badge { font-size: 0.56rem; padding: .27rem .12rem; }
-      .interaction-table { font-size: 0.66rem; }
-      .interaction-table th, .interaction-table td { padding: 0.3rem; }
-    }
+       > 1200px         desktop / large laptop  — board + fixed sidebar
+       901px – 1200px    small laptop / large tablet — stacked, roomy
+       641px – 900px      tablet portrait — stacked, compact
+       ≤ 640px            phone portrait — stacked, 2-col button grid
+       ≤ 380px            small phone — tightest type & spacing
+       short + landscape  phones on their side — board + sidebar again,
+                          because vertical space is the scarce resource
+       ================================================================== */
 
-    
-    @media (max-width: 1500px), (max-height: 900px){
-      .dialogue-overlay {
-        padding: .3rem;
-      }
+    @media (max-width: 1200px) {
+      .dialogue-overlay { padding: .3rem; }
       .layout {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(42vh, auto) auto;
-        width: min(100%, 1400px);
+        grid-template-rows: minmax(40vh, auto) auto;
+        width: min(100%, 1000px);
         gap: .5rem;
         padding: .5rem;
         min-height: calc(100vh - 5rem);
+        border-radius: 16px;
       }
-      .board-panel {
-        min-height: 42vh;
-      }
+      .layout::before { border-radius: 16px; }
+      .board-panel { min-height: 40vh; }
       .sidebar {
         max-height: none;
         overflow: visible;
         padding-right: 0;
       }
-      .accordion-body {
-        max-height: min(38vh, 24rem);
-      }
+      .accordion-body { max-height: min(36vh, 24rem); }
+      .controls { grid-template-columns: repeat(2, 1fr); }
+      .controls .btn.primary,
+      .controls .btn.danger { grid-column: 1 / -1; }
     }
-@media (max-width: 640px){
-      .dialogue-overlay { padding: .12rem; }
+
+    @media (max-width: 900px) {
+      header { flex-wrap: wrap; row-gap: .4rem; padding: .5rem .9rem; }
+      .brand { width: 100%; text-align: center; }
+      .header-meta { width: 100%; justify-content: center; flex-wrap: wrap; }
+      .dialogue-overlay { padding: .22rem; }
       .layout {
-        grid-template-rows: minmax(40vh, 1fr) minmax(0, 1fr);
+        padding: .42rem;
+        gap: .42rem;
+        border-radius: 12px;
+        grid-template-rows: minmax(36vh, auto) auto;
+      }
+      .layout::before { border-radius: 12px; }
+      .board-panel { min-height: 36vh; }
+      .side-card h3 { font-size: 0.7rem; margin-bottom: 0.22rem; }
+      .quick-tip { font-size: 0.72rem; }
+      .advanced-panel > summary { font-size: 0.68rem; padding: .58rem .5rem; }
+      .accordion-body { max-height: 32vh; }
+      .turn-badge { font-size: 0.58rem; padding: .3rem .15rem; }
+      .interaction-table { font-size: 0.7rem; }
+      .interaction-table th, .interaction-table td { padding: 0.32rem; }
+      .modal-content { padding: 1.1rem; width: 95%; }
+    }
+
+    @media (max-width: 640px) {
+      .dialogue-overlay { padding: .16rem; }
+      .layout {
+        grid-template-rows: minmax(32vh, auto) auto;
         padding: .32rem;
         gap: .32rem;
       }
+      .board-panel { min-height: 32vh; }
       .kbd { display: none; }
-      .btn { font-size: 0.56rem; padding: .42rem .18rem; border-radius: 6px; }
-      .side-card h3 { font-size: 0.6rem; margin-bottom: 0.18rem; }
-      .quick-tip { font-size: 0.64rem; }
-      .advanced-panel > summary { font-size: 0.6rem; padding: .52rem .45rem; }
-      .accordion-body { max-height: 30vh; }
-      .turn-badge { font-size: 0.53rem; padding: .24rem .1rem; }
+      .btn { font-size: 0.62rem; padding: .55rem .3rem; border-radius: 8px; }
+      .controls { gap: .35rem; }
+      .side-card h3 { font-size: 0.64rem; margin-bottom: 0.2rem; }
+      .quick-tip { font-size: 0.68rem; }
+      .advanced-panel > summary { font-size: 0.62rem; padding: .55rem .45rem; }
+      .accordion-summary-note { display: none; }
+      .accordion-body { max-height: 34vh; }
+      .turn-badge { font-size: 0.56rem; padding: .26rem .12rem; }
       .interaction-table { font-size: 0.64rem; }
       .interaction-table th, .interaction-table td { padding: 0.28rem; }
+      .modal-content { padding: .9rem; width: 96%; }
+      .modal-content h3 { font-size: 1rem; }
+    }
+
+    @media (max-width: 380px) {
+      .brand h1 { font-size: 0.95rem; letter-spacing: .1em; }
+      .pill { font-size: 0.6rem; padding: .22rem .5rem; }
+      .btn { font-size: 0.58rem; padding: .5rem .25rem; }
+      .controls { grid-template-columns: 1fr; }
+      .controls .btn.primary,
+      .controls .btn.danger { grid-column: auto; }
+      .side-card h3 { font-size: 0.6rem; }
+      .turn-badge { font-size: 0.54rem; }
+    }
+
+    /* Phones/short tablets on their side: vertical space is the limiting
+       factor, so bring back a side-by-side layout instead of stacking. */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .dialogue-overlay { padding: .2rem; align-items: stretch; }
+      header { flex-wrap: nowrap; padding: .3rem .9rem; }
+      .brand { width: auto; }
+      .brand h1 { font-size: 0.85rem; }
+      .header-meta { width: auto; }
+      .layout {
+        grid-template-columns: minmax(0, 1fr) minmax(170px, 230px);
+        grid-template-rows: 1fr;
+        min-height: calc(100vh - 3.2rem);
+        padding: .4rem;
+        gap: .4rem;
+      }
+      .board-panel { min-height: 0; }
+      .sidebar { max-height: 100%; overflow-y: auto; padding-right: .15rem; }
+      .accordion-body { max-height: 20vh; }
+      .quick-tip { display: none; }
+      .controls { grid-template-columns: repeat(2, 1fr); }
+      .controls .btn.primary,
+      .controls .btn.danger { grid-column: 1 / -1; }
+    }
+
+    /* Touch devices get bigger, easier-to-hit controls regardless of
+       screen size (a 13" touchscreen laptop still has fat fingers). */
+    @media (pointer: coarse) {
+      .btn { min-height: 42px; }
+      .accordion-toggle { min-height: 28px; padding: .3rem .65rem; }
+    }
+
+    @supports (padding: max(0px)) {
+      header {
+        padding-left: max(1.25rem, env(safe-area-inset-left));
+        padding-right: max(1.25rem, env(safe-area-inset-right));
+      }
+      .dialogue-overlay {
+        padding-bottom: max(.5rem, env(safe-area-inset-bottom));
+      }
     }
   </style>
 </head>
