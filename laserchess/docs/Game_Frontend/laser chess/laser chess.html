@@ -2,258 +2,363 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Laser Chess</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* ==========================================================================
+       LASER CHESS — "OPTICS BENCH" UI
+       Design language: the chrome around the board reads like the housing of a
+       benchtop laser-optics instrument — flat panels, hairline seams, mono
+       telemetry, and a viewfinder frame around the board itself. The one bold
+       gesture is that viewfinder: corner brackets + a slow scanline sweep.
+       Everything else stays quiet on purpose.
+
+       Contract with the script below (do not rename):
+         CSS vars set at runtime — --theme-color --theme-rgb --mode-halo
+           --overlay-top --overlay-bottom --panel --line
+         CSS vars read directly by JS strings — --red-theme --muted --theme-color
+         Keyframes referenced from JS — neonPulse, corePulse
+         IDs — see body markup; every id present here is read by the script.
+       ========================================================================== */
+
     :root{
-      --theme-color:#00e5ff;
-      --theme-rgb:0,229,255;
-      --mode-halo:rgba(0,229,255,.22);
-      --overlay-top:rgba(0,0,0,.92);
-      --overlay-bottom:rgba(0,0,0,.99);
-      --red-theme:#ff2d55;
-      --red-rgb:255,45,85;
-      --player-blue:#00e5ff;
-      --player-blue-rgb:0,229,255;
-      --player-red:#ff2d55;
-      --player-red-rgb:255,45,85;
-      --bg0:#000000;
-      --bg1:#050505;
-      --bg2:#0b0b0b;
-      --panel:rgba(0,0,0,.96);
-      --line:rgba(255,255,255,.08);
-      --text:#e8f6ff;
-      --muted:#97a8b6;
-      --shadow:0 25px 70px rgba(0,0,0,.92);
+      /* -- dynamic theme tokens: overwritten every render by applyThemeVars() -- */
+      --theme-color:#2f7cff;
+      --theme-rgb:47,124,255;
+      --mode-halo:rgba(47,124,255,.22);
+      --overlay-top:rgba(6,7,10,.94);
+      --overlay-bottom:rgba(4,5,7,.99);
+      --panel:rgba(11,12,16,.96);
+      --line:rgba(47,124,255,.22);
+      --board-bg-image:url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png');
+
+      /* -- fixed identity colors (read directly by the script) -- */
+      --red-theme:#ff3b3b;
+      --red-rgb:255,59,59;
+      --player-blue:#2f7cff;
+      --player-blue-rgb:47,124,255;
+      --player-red:#ff3b3b;
+      --player-red-rgb:255,59,59;
+
+      /* -- chassis neutrals -- */
+      --bg0:#08090b;
+      --bg1:#121419;
+      --bg2:#181b21;
+      --text:#eef2f6;
+      --muted:#8b93a1;
+      --shadow:0 25px 70px rgba(0,0,0,.85);
+
+      --font-display:'Chakra Petch', 'Segoe UI', sans-serif;
+      --font-body:'IBM Plex Sans', 'Segoe UI', sans-serif;
+      --font-mono:'IBM Plex Mono', 'Consolas', monospace;
     }
+
     * { box-sizing: border-box; }
-    html, body { 
+    html, body {
       height: 100%;
       width: 100%;
       margin: 0;
       padding: 0;
-      overflow: hidden !important;
+      overflow: hidden;
+      overscroll-behavior: none;
     }
     body {
-      font-family: "Quantico", sans-serif;
+      font-family: var(--font-body);
       color: var(--text);
       background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 1px, transparent 1px 34px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 34px),
         linear-gradient(var(--overlay-top), var(--overlay-bottom)),
-        url('https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png') center center / cover fixed no-repeat;
+        var(--board-bg-image) center center / cover fixed no-repeat;
     }
-    
+    ::selection { background: rgba(var(--theme-rgb), .35); color: #fff; }
+    :focus-visible {
+      outline: 2px solid var(--theme-color);
+      outline-offset: 2px;
+    }
+    a { color: var(--theme-color); }
+
     .shell {
-      height: 100vh;
+      min-height: 100%;
+      height: 100%;
       width: 100vw;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
+
+    /* ---------------------------------------------------------------- header:
+       a slim console strip — mark + wordmark on the left, telemetry chips
+       (separated by hairlines, not pills) on the right. ------------------- */
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      padding: 0.4rem 1.25rem;
+      flex-wrap: wrap;
+      gap: .5rem 1.25rem;
+      padding: .55rem 1.25rem;
       border-bottom: 1px solid var(--line);
-      background: rgba(0,0,0,.88);
+      background: linear-gradient(180deg, rgba(10,11,14,.94), rgba(8,9,11,.9));
       box-shadow: 0 10px 30px rgba(0,0,0,.45);
       z-index: 5;
       flex-shrink: 0;
     }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+    }
+    .brand-mark {
+      width: 1.4rem;
+      height: 1.4rem;
+      flex-shrink: 0;
+      color: var(--theme-color);
+      filter: drop-shadow(0 0 6px rgba(var(--theme-rgb), .55));
+    }
     .brand h1 {
       margin: 0;
-      font-size: clamp(1rem, 1.8vw, 1.4rem);
-      letter-spacing: .16em;
-      font-weight: 900;
+      font-family: var(--font-display);
+      font-size: clamp(0.95rem, 3.2vw, 1.35rem);
+      letter-spacing: .2em;
+      font-weight: 700;
       text-transform: uppercase;
+      white-space: nowrap;
     }
     .header-meta {
       display: flex;
-      align-items: center;
-      gap: .7rem;
+      align-items: stretch;
+      flex-wrap: wrap;
+      gap: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(255,255,255,.02);
     }
     .pill {
-      padding: .25rem .65rem;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(255,255,255,.03);
-      font-size: .7rem;
-      letter-spacing: .12em;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: .1rem;
+      padding: .3rem .75rem;
+      font-family: var(--font-mono);
+      font-size: .68rem;
+      letter-spacing: .04em;
+      color: var(--text);
+      border-right: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    .header-meta .pill:last-child { border-right: none; }
+    .pill::before {
+      content: attr(data-label);
+      display: block;
+      font-size: .55rem;
+      letter-spacing: .14em;
       text-transform: uppercase;
       color: var(--muted);
     }
-    
+
+    /* ---------------------------------------------------------------- stage --- */
     .dialogue-overlay {
       flex: 1;
       width: 100%;
       background: rgba(3, 4, 7, 0.4);
       backdrop-filter: blur(4px);
       display: flex;
-      align-items: center;
+      align-items: stretch;
       justify-content: center;
-      padding: 0.5rem;
+      padding: 0.6rem;
       overflow: hidden;
+      min-height: 0;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 240px);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 258px);
       align-items: stretch;
       gap: 1rem;
       width: 100%;
       height: 100%;
+      min-height: 0;
       max-width: 1600px;
       background: var(--panel);
-      border: 2px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
       box-shadow: var(--shadow);
-      padding: 0.75rem;
-      align-items: center;
+      padding: .85rem;
       position: relative;
       overflow: hidden;
     }
-
-    .layout::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: 20px;
-      padding: 2px;
-      background: linear-gradient(135deg, rgba(var(--theme-rgb), 0.3), transparent 60%, var(--mode-halo));
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
+    /* corner tick marks on the outer chassis — instrument-panel fastener motif */
+    .layout::before, .layout::after,
+    .layout .chassis-tick { display: none; }
 
     .panel {
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(255,255,255,.015);
       border: 1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 3px;
     }
+
+    /* ---------------------------------------------------------------- board:
+       the signature element. A viewfinder — reticle brackets at the corners,
+       a slow scanline sweep, and a faint crosshair grid under the pieces. --- */
     .board-panel {
-      padding: .25rem;
+      padding: .3rem;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: stretch;
       width: 100%;
       height: 100%;
+      min-height: 0;
+      min-width: 0;
       overflow: hidden;
     }
     .board-wrap {
       width: 100%;
       height: 100%;
+      min-height: 0;
+      min-width: 0;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .board-shell {
+      position: relative;
       width: 100%;
       height: 100%;
-      padding: .25rem;
-      border-radius: 16px;
-      background: rgba(0,0,0,.70);
-      border: 1px solid rgba(255,255,255,.06);
+      min-height: 0;
+      min-width: 0;
+      padding: .3rem;
+      border-radius: 4px;
+      background:
+        repeating-linear-gradient(0deg, rgba(var(--theme-rgb),.05) 0 1px, transparent 1px 40px),
+        repeating-linear-gradient(90deg, rgba(var(--theme-rgb),.05) 0 1px, transparent 1px 40px),
+        linear-gradient(180deg, rgba(0,0,0,.85), rgba(6,6,8,.8));
+      border: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
     }
+    .board-shell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent 0%, rgba(var(--theme-rgb),.10) 45%, transparent 55%);
+      background-size: 100% 260%;
+      animation: scanSweep 9s linear infinite;
+      mix-blend-mode: screen;
+    }
+    .reticle {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      z-index: 2;
+      pointer-events: none;
+      opacity: .85;
+      animation: reticlePulse 3.6s ease-in-out infinite;
+    }
+    .reticle-tl { top: 8px; left: 8px; border-top: 2px solid var(--theme-color); border-left: 2px solid var(--theme-color); }
+    .reticle-tr { top: 8px; right: 8px; border-top: 2px solid var(--theme-color); border-right: 2px solid var(--theme-color); }
+    .reticle-bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--theme-color); border-left: 2px solid var(--theme-color); }
+    .reticle-br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--theme-color); border-right: 2px solid var(--theme-color); }
+
     svg#board {
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
       aspect-ratio: 10 / 8;
       object-fit: contain;
       display: block;
-      background: linear-gradient(180deg, rgba(0,0,0,.98), rgba(10,10,10,.96));
-      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(0,0,0,.98), rgba(10,10,10,.94));
+      border-radius: 2px;
       touch-action: manipulation;
+      position: relative;
+      z-index: 1;
     }
-    
+
+    /* ---------------------------------------------------------------- sidebar:
+       instrument modules — flat panels, mono eyebrows, bracket toggles. ---- */
     .sidebar {
       width: 100%;
-      height: 100%;
+      height: auto;
       min-height: 0;
       display: flex;
       flex-direction: column;
-      gap: .65rem;
+      align-items: stretch;
+      gap: .6rem;
       justify-content: flex-start;
       overflow-y: auto;
       overflow-x: hidden;
       padding-right: .15rem;
+      scrollbar-gutter: stable;
+      overscroll-behavior: contain;
+      max-height: calc(100vh - 7.2rem);
     }
     .side-card {
-      padding: .75rem;
+      padding: .8rem .85rem;
       height: auto;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      overflow: hidden;
+      overflow: visible;
+      min-height: 0;
+      border-top: 2px solid var(--theme-color);
     }
     .side-card h3 {
-      margin: 0 0 .4rem;
+      margin: 0 0 .5rem;
+      font-family: var(--font-display);
       text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: .8rem;
-      text-align: center;
+      letter-spacing: .16em;
+      font-size: .74rem;
+      font-weight: 600;
+      text-align: left;
+      color: var(--muted);
     }
     .quick-tip {
-      margin: 0 0 .55rem;
+      margin: 0 0 .6rem;
       font-size: .78rem;
-      line-height: 1.45;
+      line-height: 1.5;
       color: var(--muted);
       text-align: left;
     }
-    .mode-status-card {
-      padding: .85rem .9rem;
-      display: grid;
-      gap: .55rem;
-      min-height: 0;
-    }
-    .mode-status-card h3 {
-      margin: 0;
-      text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: .8rem;
-      text-align: center;
-    }
+
+    .mode-status-card { gap: .55rem; display: grid; }
     .mode-current {
-      border: 1px solid rgba(var(--theme-rgb), .2);
-      background: rgba(var(--theme-rgb), .05);
-      border-radius: 12px;
-      padding: .65rem .75rem;
+      border: 1px solid var(--line);
+      background: rgba(var(--theme-rgb), .06);
+      border-radius: 3px;
+      padding: .6rem .7rem;
       display: grid;
-      gap: .35rem;
-      text-align: center;
+      gap: .3rem;
     }
     .mode-label {
-      font-size: 1.02rem;
+      font-family: var(--font-display);
+      font-size: 1rem;
       font-weight: 700;
-      letter-spacing: .08em;
+      letter-spacing: .06em;
       text-transform: uppercase;
       color: var(--theme-color);
     }
     .mode-detail {
       font-size: .72rem;
-      line-height: 1.35;
+      line-height: 1.4;
       color: var(--muted);
     }
+
     .theme-transition,
     body,
     header,
-    .layout::before,
+    .header-meta,
+    .pill,
     .panel,
     .side-card,
-    .mode-status-card,
     .mode-current,
     .turn-badge,
-    .pill,
     .btn,
     .btn.primary,
     .accordion-toggle,
@@ -261,6 +366,7 @@
     .mode-label,
     .mode-detail,
     .board-shell,
+    .reticle,
     svg#board {
       transition:
         color .65s ease,
@@ -273,235 +379,350 @@
         opacity .65s ease,
         transform .65s ease;
     }
-    .advanced-panel {
-      padding: 0;
-    }
+
+    .advanced-panel { padding: 0; }
     .advanced-panel > summary {
       list-style: none;
       cursor: pointer;
       padding: .72rem .8rem;
+      font-family: var(--font-mono);
       text-transform: uppercase;
-      letter-spacing: .16em;
-      font-size: .75rem;
-      text-align: center;
+      letter-spacing: .14em;
+      font-size: .72rem;
+      text-align: left;
       border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.02);
       user-select: none;
     }
     .advanced-panel > summary::-webkit-details-marker { display: none; }
-    .advanced-body {
-      padding: .75rem;
-      display: grid;
-      gap: .85rem;
-    }
-    .advanced-group {
-      display: grid;
-      gap: .45rem;
-    }
+    .advanced-body { padding: .8rem; display: grid; gap: .85rem; }
+    .advanced-group { display: grid; gap: .5rem; }
     .advanced-group h4 {
       margin: 0;
+      font-family: var(--font-mono);
       text-transform: uppercase;
       letter-spacing: .12em;
-      font-size: .72rem;
+      font-size: .68rem;
       color: var(--theme-color);
       text-align: left;
     }
+
     .accordion-section {
       padding: 0;
-      border-radius: 14px;
+      border-radius: 3px;
       overflow: hidden;
       min-height: 0;
+      flex: 0 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border-top: 2px solid transparent;
     }
+    .accordion-section[open] { border-top-color: var(--theme-color); }
     .accordion-section > summary {
       list-style: none;
       cursor: pointer;
-      padding: .72rem .8rem;
-      text-transform: uppercase;
-      letter-spacing: .16em;
-      font-size: .75rem;
-      text-align: center;
+      padding: .68rem .8rem;
+      text-align: left;
       border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.02);
       user-select: none;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: .5rem;
+      flex: 0 0 auto;
     }
     .accordion-section > summary::-webkit-details-marker { display: none; }
+    .accordion-section > summary > span:first-child {
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      font-size: .76rem;
+      font-weight: 600;
+    }
     .accordion-summary-note {
-      font-size: .62rem;
-      letter-spacing: .08em;
+      font-family: var(--font-mono);
+      font-size: .6rem;
+      letter-spacing: .06em;
       color: var(--muted);
       text-transform: uppercase;
       white-space: nowrap;
     }
     .accordion-toggle {
       appearance: none;
-      border: 1px solid rgba(var(--theme-rgb), .22);
-      background: rgba(var(--theme-rgb), .08);
+      border: none;
+      background: none;
       color: var(--theme-color);
-      border-radius: 999px;
       font: inherit;
-      font-size: .62rem;
-      letter-spacing: .12em;
+      font-family: var(--font-mono);
+      font-size: .64rem;
+      letter-spacing: .06em;
       text-transform: uppercase;
-      padding: .18rem .5rem;
+      padding: .18rem .1rem;
       cursor: pointer;
       flex-shrink: 0;
     }
-    .accordion-toggle:hover {
-      background: rgba(var(--theme-rgb), .14);
-      border-color: rgba(var(--theme-rgb), .38);
-    }
-    .accordion-toggle:focus-visible {
-      outline: 2px solid rgba(var(--theme-rgb), .65);
-      outline-offset: 2px;
-    }
+    .accordion-toggle::before { content: "["; margin-right: .1rem; color: var(--muted); }
+    .accordion-toggle::after { content: "]"; margin-left: .1rem; color: var(--muted); }
+    .accordion-toggle:hover { color: var(--text); }
+    .accordion-toggle:hover::before, .accordion-toggle:hover::after { color: var(--theme-color); }
     .accordion-body {
-      padding: .75rem;
+      padding: .8rem;
       display: grid;
-      gap: .75rem;
+      gap: .8rem;
+      min-height: 0;
+      flex: 1 1 auto;
+      max-height: min(42vh, 28rem);
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
     }
     .accordion-section[open] > summary {
-      background: rgba(var(--theme-rgb), .08);
-      color: var(--theme-color);
+      background: rgba(var(--theme-rgb), .07);
     }
+    .accordion-section[open] > summary > span:first-child,
     .accordion-section[open] > summary .accordion-summary-note {
       color: var(--theme-color);
     }
-    .turn-row {
-      display: flex;
-      flex-direction: column;
-      gap: .3rem;
-      margin-bottom: .4rem;
-    }
+
+    /* ---------------------------------------------------------------- turn
+       readout — a mono "instrument strip" with a colored edge, not a pill.  */
+    .turn-row { display: flex; flex-direction: column; gap: .35rem; margin-bottom: .45rem; }
     .turn-badge {
-      padding: .4rem .5rem;
-      border-radius: 999px;
+      padding: .5rem .65rem;
+      border-radius: 2px;
+      font-family: var(--font-mono);
       text-transform: uppercase;
-      letter-spacing: .12em;
-      font-size: .65rem;
+      letter-spacing: .1em;
+      font-size: .68rem;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-      text-align: center;
+      border-left-width: 4px;
+      background: rgba(255,255,255,.02);
+      text-align: left;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      box-shadow: 0 0 14px rgba(var(--theme-rgb), .06);
     }
-    .turn-blue { color: var(--player-blue); border-color: rgba(var(--player-blue-rgb), .35); }
-    .turn-red { color: var(--player-red); border-color: rgba(var(--player-red-rgb), .35); }
-    
+    .turn-blue {
+      color: var(--player-blue);
+      border-color: rgba(var(--player-blue-rgb), .3);
+      border-left-color: var(--player-blue);
+      box-shadow: 0 0 0 1px rgba(var(--player-blue-rgb),.05) inset;
+      animation: readoutPulse 2.6s ease-in-out infinite;
+    }
+    .turn-red {
+      color: var(--player-red);
+      border-color: rgba(var(--player-red-rgb), .3);
+      border-left-color: var(--player-red);
+      box-shadow: 0 0 0 1px rgba(var(--player-red-rgb),.05) inset;
+      animation: readoutPulse 2.6s ease-in-out infinite;
+    }
+
+    /* ---------------------------------------------------------------- controls
+       flat console buttons, 2-up once there's room, brackets on hover. ----- */
     .controls {
       display: grid;
       grid-template-columns: 1fr;
-      gap: .3rem;
+      gap: .35rem;
     }
     .btn {
       appearance: none;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.025);
       color: var(--text);
-      padding: .55rem .45rem;
-      border-radius: 10px;
+      font-family: var(--font-display);
+      padding: .58rem .5rem;
+      border-radius: 3px;
       cursor: pointer;
-      letter-spacing: .08em;
+      letter-spacing: .07em;
       text-transform: uppercase;
       font-size: .68rem;
+      font-weight: 500;
       transition: transform .15s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
       user-select: none;
       width: 100%;
       display: inline-flex;
       justify-content: center;
       align-items: center;
+      gap: .3rem;
     }
     .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(var(--theme-rgb), .35);
-      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .18), 0 8px 20px rgba(0,0,0,.24);
+      border-color: rgba(var(--theme-rgb), .45);
+      box-shadow: 0 0 0 1px rgba(var(--theme-rgb), .2), 0 8px 18px rgba(0,0,0,.28);
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
     }
     .btn.primary {
-      background: linear-gradient(180deg, rgba(var(--theme-rgb), .16), rgba(var(--theme-rgb), .06));
-      border-color: rgba(var(--theme-rgb), .35);
+      background: linear-gradient(180deg, rgba(var(--theme-rgb), .2), rgba(var(--theme-rgb), .07));
+      border-color: rgba(var(--theme-rgb), .45);
       color: var(--theme-color);
     }
     .btn.danger {
-      background: linear-gradient(180deg, rgba(255,45,85,.16), rgba(255,45,85,.06));
-      border-color: rgba(255,45,85,.38);
-      color: #ffb0a8;
+      background: linear-gradient(180deg, rgba(var(--red-rgb),.18), rgba(var(--red-rgb),.06));
+      border-color: rgba(var(--red-rgb),.42);
+      color: #ffb3ab;
     }
     .btn.danger:hover {
-      border-color: rgba(255,45,85,.8);
-      box-shadow: 0 0 0 1px rgba(255,45,85,.4), 0 8px 20px rgba(0,0,0,.24);
+      border-color: rgba(var(--red-rgb),.85);
+      box-shadow: 0 0 0 1px rgba(var(--red-rgb),.4), 0 8px 18px rgba(0,0,0,.28);
     }
     .kbd {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: .1rem .25rem;
-      border: 1px solid rgba(255,255,255,0.1);
+      padding: .1rem .3rem;
+      border: 1px solid rgba(255,255,255,.14);
       border-bottom-width: 2px;
-      border-radius: 4px;
+      border-radius: 3px;
       background: rgba(255,255,255,.03);
-      color: var(--text);
-      font-size: .7em;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: .68em;
       margin-left: auto;
     }
 
-    /* Modal Styles */
+    /* ---------------------------------------------------------------- modals -- */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+      position: fixed; inset: 0; background: rgba(2,2,4,0.82); backdrop-filter: blur(6px);
       display: none; justify-content: center; align-items: center; z-index: 100;
+      padding: 1rem;
     }
     .modal-overlay.active { display: flex; }
     .modal-content {
-      background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 4px;
       padding: 1.5rem; width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto;
       box-shadow: var(--shadow);
     }
+    .modal-eyebrow {
+      font-family: var(--font-mono);
+      font-size: .68rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      margin: 0 0 .3rem;
+    }
+    .modal-content h3 {
+      margin: 0 0 .35rem;
+      font-family: var(--font-display);
+      color: var(--theme-color);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      text-align: center;
+      font-weight: 700;
+    }
+    .modal-copy {
+      text-align: center; color: var(--muted); font-size: .8rem; line-height: 1.55;
+      max-width: 640px; margin: 0 auto 1.1rem;
+    }
+    .field-label {
+      font-size: .8rem; color: var(--muted); font-family: var(--font-mono);
+      display: block;
+    }
+    .field-input {
+      width: 100%; padding: .5rem .6rem; margin-top: .35rem;
+      background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 3px;
+      color: var(--text); font-family: var(--font-mono);
+    }
+    .readout-block {
+      font-family: var(--font-mono); font-size: .74rem; line-height: 1.65;
+      color: var(--muted); text-align: center; min-height: 3.5em;
+    }
+    .status-readout {
+      font-family: var(--font-mono);
+      font-size: .68rem;
+      line-height: 1.7;
+      color: var(--muted);
+      margin-top: .6rem;
+      padding-top: .55rem;
+      border-top: 1px dashed var(--line);
+    }
+
     .interaction-table {
-      width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center; margin-bottom: 1rem;
+      width: 100%; border-collapse: collapse; font-family: var(--font-mono);
+      font-size: 0.78rem; text-align: center; margin-bottom: 1rem;
     }
     .interaction-table th, .interaction-table td {
-      border: 1px solid var(--line); padding: 0.4rem;
+      border: 1px solid var(--line); padding: 0.45rem;
     }
-    .interaction-table th { 
-      background: rgba(255,255,255,0.05); color: var(--theme-color); text-transform: uppercase; 
-      padding: 0.6rem;
+    .interaction-table th {
+      background: rgba(var(--theme-rgb),.08); color: var(--theme-color); text-transform: uppercase;
+      letter-spacing: .04em;
+      padding: 0.6rem; font-size: .68rem;
     }
-    .interaction-table td b { color: var(--text); font-weight: 900; letter-spacing: 0.08em; }
-    
-    /* Interactive Engine Modifiers */
+    .interaction-table td b { color: var(--text); font-weight: 700; letter-spacing: 0.06em; }
+
     .matrix-select {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.04);
       color: var(--text);
       border: 1px solid var(--line);
-      border-radius: 4px;
+      border-radius: 3px;
       padding: 0.4rem;
-      font-family: inherit;
-      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
       width: 100%;
       cursor: pointer;
       text-align: center;
       transition: all 0.2s ease;
-      font-weight: bold;
+      font-weight: 600;
     }
-    .matrix-select:hover {
-      border-color: rgba(var(--theme-rgb), 0.5);
-      background: rgba(255,255,255,0.1);
-    }
+    .matrix-select:hover { border-color: rgba(var(--theme-rgb), 0.5); background: rgba(255,255,255,0.08); }
     .matrix-select:focus {
       outline: none;
       border-color: var(--theme-color);
       box-shadow: 0 0 0 2px rgba(var(--theme-rgb), 0.2);
     }
-    .matrix-select option {
-      background: var(--bg1);
+    .matrix-select option { background: var(--bg1); color: var(--text); }
+
+    .asset-list {
+      display: grid;
+      gap: .5rem;
+    }
+    .asset-row {
+      display: grid;
+      grid-template-columns: minmax(9rem, 11rem) minmax(0, 1fr);
+      gap: .5rem;
+      align-items: center;
+    }
+    .asset-key {
+      font-family: var(--font-mono);
+      font-size: .64rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .asset-input {
+      width: 100%;
+      padding: .45rem .55rem;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: 3px;
       color: var(--text);
+      font-family: var(--font-mono);
+      font-size: .7rem;
+    }
+    .asset-input:focus {
+      outline: none;
+      border-color: var(--theme-color);
+      box-shadow: 0 0 0 2px rgba(var(--theme-rgb), .18);
+    }
+    .asset-note {
+      margin: 0;
+      font-size: .72rem;
+      line-height: 1.5;
+      color: var(--muted);
     }
 
-    /* Base Keyframes for Inline Animations */
+    /* ---------------------------------------------------------------- motion -- */
     @keyframes neonPulse {
       0% { stroke-width: 12px; opacity: 0.5; }
       50% { stroke-width: 28px; opacity: 1; }
@@ -512,24 +733,124 @@
       50% { stroke-width: 6px; opacity: 1; }
       100% { stroke-width: 3px; opacity: 0.8; }
     }
+    @keyframes scanSweep {
+      0% { background-position: 0 -160%; }
+      100% { background-position: 0 160%; }
+    }
+    @keyframes reticlePulse {
+      0%, 100% { opacity: .55; }
+      50% { opacity: 1; }
+    }
+    @keyframes readoutPulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(var(--theme-rgb), 0); }
+      50% { box-shadow: 0 0 14px rgba(var(--theme-rgb), .3); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .board-shell::after, .reticle, .turn-blue, .turn-red { animation: none !important; }
+      .theme-transition, body, header, .header-meta, .pill, .panel, .side-card,
+      .mode-current, .turn-badge, .btn, .btn.primary, .accordion-toggle,
+      .accordion-section > summary, .mode-label, .mode-detail, .board-shell,
+      .reticle, svg#board { transition: none !important; }
+    }
 
-    @media (max-width: 640px){
-      .dialogue-overlay { padding: .15rem; }
+    /* ==========================================================================
+       RESPONSIVE SYSTEM — non-overlapping tiers, largest to smallest
+       > 1200px desktop · 901–1200px small laptop/tablet · 641–900px tablet
+       ≤ 640px phone · ≤ 380px small phone · short+landscape phones re-split
+       ========================================================================== */
+
+    @media (max-width: 1200px) {
+      .dialogue-overlay { padding: .35rem; }
       .layout {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 130px);
-        padding: .4rem;
-        gap: .35rem;
-        border-radius: 12px;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) auto;
+        width: min(100%, 1000px);
+        gap: .55rem;
+        padding: .55rem;
+        height: 100%;
+        min-height: 0;
       }
-      .layout::before { border-radius: 12px; }
+      .board-panel { min-height: 0; }
+      .sidebar { max-height: none; overflow: visible; padding-right: 0; }
+      .accordion-body { max-height: min(36vh, 24rem); }
+      .controls { grid-template-columns: repeat(2, 1fr); }
+      .controls .btn.primary, .controls .btn.danger { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 900px) {
+      header { padding: .5rem .9rem; }
+      .header-meta { width: 100%; justify-content: space-between; }
+      .pill { flex: 1; padding: .3rem .5rem; }
+      .dialogue-overlay { padding: .24rem; }
+      .layout { padding: .45rem; gap: .45rem; grid-template-rows: minmax(0, 1fr) auto; }
+      .board-panel { min-height: 0; }
+      .side-card h3 { font-size: .68rem; }
+      .quick-tip { font-size: 0.72rem; }
+      .accordion-body { max-height: 32vh; }
+      .turn-badge { font-size: 0.62rem; }
+      .interaction-table { font-size: 0.7rem; }
+      .interaction-table th, .interaction-table td { padding: 0.32rem; }
+      .modal-content { padding: 1.1rem; width: 95%; }
+    }
+
+    @media (max-width: 640px) {
+      .dialogue-overlay { padding: .18rem; }
+      .layout { grid-template-rows: minmax(0, 1fr) auto; padding: .32rem; gap: .32rem; }
+      .board-panel { min-height: 0; }
       .kbd { display: none; }
-      .btn { font-size: 0.58rem; padding: .45rem .2rem; border-radius: 6px; }
-      .side-card h3 { font-size: 0.62rem; margin-bottom: 0.2rem; }
-      .quick-tip { font-size: 0.66rem; }
-      .advanced-panel > summary { font-size: 0.62rem; padding: .55rem .5rem; }
-      .turn-badge { font-size: 0.55rem; padding: .25rem .1rem; }
-      .interaction-table { font-size: 0.65rem; }
-      .interaction-table th, .interaction-table td { padding: 0.3rem; }
+      .btn { font-size: 0.64rem; padding: .58rem .3rem; }
+      .side-card h3 { font-size: 0.64rem; }
+      .quick-tip { font-size: 0.68rem; }
+      .accordion-summary-note { display: none; }
+      .accordion-body { max-height: 34vh; }
+      .turn-badge { font-size: 0.58rem; padding: .42rem .5rem; }
+      .interaction-table { font-size: 0.64rem; }
+      .interaction-table th, .interaction-table td { padding: 0.28rem; }
+      .modal-content { padding: .9rem; width: 96%; }
+      .brand-mark { width: 1.2rem; height: 1.2rem; }
+    }
+
+    @media (max-width: 380px) {
+      .brand h1 { font-size: 0.88rem; letter-spacing: .12em; }
+      .pill { font-size: 0.58rem; }
+      .pill::before { font-size: .5rem; }
+      .btn { font-size: 0.6rem; padding: .55rem .25rem; }
+      .controls { grid-template-columns: 1fr; }
+      .controls .btn.primary, .controls .btn.danger { grid-column: auto; }
+      .side-card h3 { font-size: 0.6rem; }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+      .dialogue-overlay { padding: .2rem; align-items: stretch; }
+      header { padding: .3rem .9rem; }
+      .brand h1 { font-size: .8rem; }
+      .layout {
+        grid-template-columns: minmax(0, 1fr) minmax(170px, 230px);
+        grid-template-rows: 1fr;
+        height: 100%;
+        min-height: 0;
+        padding: .4rem;
+        gap: .4rem;
+      }
+      .board-panel { min-height: 0; }
+      .sidebar { max-height: 100%; overflow-y: auto; }
+      .accordion-body { max-height: 20vh; }
+      .quick-tip { display: none; }
+      .controls { grid-template-columns: repeat(2, 1fr); }
+      .controls .btn.primary, .controls .btn.danger { grid-column: 1 / -1; }
+    }
+
+    @media (pointer: coarse) {
+      .btn { min-height: 42px; }
+      .accordion-toggle { min-height: 26px; padding: .3rem .2rem; }
+    }
+
+    @supports (padding: max(0px)) {
+      header {
+        padding-left: max(1.25rem, env(safe-area-inset-left));
+        padding-right: max(1.25rem, env(safe-area-inset-right));
+      }
+      .dialogue-overlay { padding-bottom: max(.5rem, env(safe-area-inset-bottom)); }
     }
   </style>
 </head>
@@ -537,39 +858,39 @@
 <div class="shell">
   <header>
     <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2" y="10" width="7" height="4" rx="1" fill="currentColor" opacity=".85"/>
+        <path d="M9 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="21.5" cy="12" r="1.5" fill="currentColor"/>
+      </svg>
       <h1>Laser Chess</h1>
     </div>
     <div class="header-meta">
-      <div class="pill" id="movePill">Move 1</div>
-      <div class="pill" id="savePill">Saved locally</div>
-      <div class="pill" id="modePill">2 Player</div>
+      <div class="pill" id="movePill" data-label="Move">1</div>
+      <div class="pill" id="savePill" data-label="Storage">Saved locally</div>
+      <div class="pill" id="modePill" data-label="Mode">2 Player</div>
     </div>
   </header>
 
   <div class="dialogue-overlay">
-    <main class="layout" role="dialog" aria-modal="true" aria-label="Laser Chess Gameplay Interface">
+    <main class="layout" aria-label="Laser Chess gameplay interface">
       <section class="panel board-panel">
         <div class="board-wrap">
           <div class="board-shell">
+            <span class="reticle reticle-tl" aria-hidden="true"></span>
+            <span class="reticle reticle-tr" aria-hidden="true"></span>
+            <span class="reticle reticle-bl" aria-hidden="true"></span>
+            <span class="reticle reticle-br" aria-hidden="true"></span>
             <svg id="board" viewBox="0 0 1000 800" aria-label="Laser Chess board" tabindex="0"></svg>
           </div>
         </div>
       </section>
 
       <aside class="sidebar">
-        <section class="panel side-card mode-status-card">
-          <h3>Selected Mode</h3>
-          <div class="mode-current">
-            <div class="mode-label" id="modeLabel">2 Player</div>
-            <div class="mode-detail" id="modeDetail">Two humans on one board.</div>
-          </div>
-          <div class="turn-badge" id="modeStatePill">2 Player</div>
-        </section>
-
         <details class="panel accordion-section" data-accordion open>
           <summary>
-            <span>Quick Start</span>
-            <span style="display:flex; align-items:center; gap:.45rem;">
+            <span>Quick start</span>
+            <span style="display:flex; align-items:center; gap:.5rem;">
               <span class="accordion-summary-note">How to play</span>
               <button type="button" class="accordion-toggle" aria-label="Collapse Quick Start">Collapse</button>
             </span>
@@ -581,41 +902,46 @@
               <div class="turn-badge" id="phaseBadge">Select a piece</div>
             </div>
             <div class="controls">
-              <button class="btn primary" id="fireBtn">Fire Laser <span class="kbd">F</span></button>
+              <button class="btn primary" id="fireBtn">Fire laser <span class="kbd">F</span></button>
               <button class="btn" id="rotateCCWBtn">↺ Rotate CCW <span class="kbd">Q</span></button>
               <button class="btn" id="rotateCWBtn">Rotate CW ↻ <span class="kbd">E</span></button>
-              <button class="btn" id="endTurnBtn">Pass / End Turn</button>
-              <button class="btn danger" id="resetBtn">Reset Game <span class="kbd">N</span></button>
-              <button class="btn" id="rulesBtn">Modify Rules <span class="kbd">M</span></button>
+              <button class="btn" id="endTurnBtn">Pass / end turn</button>
+              <button class="btn danger" id="resetBtn">Reset game <span class="kbd">N</span></button>
+              <button class="btn" id="rulesBtn">Modify rules <span class="kbd">M</span></button>
             </div>
           </div>
         </details>
 
         <details class="panel accordion-section" data-accordion>
           <summary>
-            <span>Gameplay Mode</span>
-            <span style="display:flex; align-items:center; gap:.45rem;">
+            <span>Gameplay mode</span>
+            <span style="display:flex; align-items:center; gap:.5rem;">
               <span class="accordion-summary-note">Choose who plays</span>
               <button type="button" class="accordion-toggle" aria-label="Open Gameplay Mode">Open</button>
             </span>
           </summary>
           <div class="accordion-body">
-            <p class="quick-tip">Pick a mode. The status box above always shows the current selection, because menus should not play hide and seek.</p>
+            <p class="quick-tip">Pick a mode. The status box below always shows the current selection, because menus should not play hide and seek.</p>
+            <div class="mode-current">
+              <div class="mode-label" id="modeLabel">2 Player</div>
+              <div class="mode-detail" id="modeDetail">Two humans on one board.</div>
+            </div>
+            <div class="turn-badge" id="modeStatePill">2 Player</div>
             <div class="controls">
               <button class="btn" id="modeTwoPlayerBtn">2 Player</button>
               <button class="btn" id="modeAIBlueBtn">AI plays BLUE</button>
               <button class="btn" id="modeAIRedBtn">AI plays RED</button>
               <button class="btn" id="modeAIVsAIBtn">AI vs AI</button>
-              <button class="btn" id="modeNetworkBtn">Network (Coming Soon)</button>
+              <button class="btn" id="modeNetworkBtn">Network (coming soon)</button>
             </div>
-            <div id="modeStatus" style="font-size:12px; opacity:0.75; margin-top:8px;"></div>
+            <div id="modeStatus" class="status-readout"></div>
           </div>
         </details>
 
         <details class="panel accordion-section" data-accordion>
           <summary>
-            <span>AI Training</span>
-            <span style="display:flex; align-items:center; gap:.45rem;">
+            <span>AI training</span>
+            <span style="display:flex; align-items:center; gap:.5rem;">
               <span class="accordion-summary-note">Twin RL self-play</span>
               <button type="button" class="accordion-toggle" aria-label="Open AI Training">Open</button>
             </span>
@@ -625,31 +951,42 @@
             <div class="controls">
               <button class="btn primary" id="trainAIBtn">Train AI…</button>
             </div>
-            <label style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.85; margin-top:8px;">
+            <label style="display:flex; align-items:center; gap:.45rem; font-size:.72rem; color:var(--muted); margin-top:.4rem;">
               <input type="checkbox" id="aiAutoLoopChk"> Auto-continue AI vs AI (loop games, no clicking Reset)
             </label>
+            <div id="aiStatus" class="status-readout"></div>
           </div>
         </details>
 
         <details class="panel accordion-section" data-accordion>
           <summary>
-            <span>Advanced Options</span>
-            <span style="display:flex; align-items:center; gap:.45rem;">
+            <span>Advanced options</span>
+            <span style="display:flex; align-items:center; gap:.5rem;">
               <span class="accordion-summary-note">Weights and export</span>
               <button type="button" class="accordion-toggle" aria-label="Open Advanced Options">Open</button>
             </span>
           </summary>
           <div class="accordion-body">
             <div class="advanced-group">
-              <h4>Weight Management</h4>
+              <h4>Weight management</h4>
               <p class="quick-tip">Export, import, reset to zero, or restore the default preset.</p>
               <div class="controls">
-                <button class="btn" id="downloadWeightsBtn">⬇ Download Weights</button>
-                <button class="btn" id="importWeightsBtn">⬆ Import Weights</button>
-                <button class="btn" id="restoreWeightsBtn">Restore Weights</button>
-                <button class="btn danger" id="resetWeightsBtn">Reset Weights (Empty)</button>
+                <button class="btn" id="downloadWeightsBtn">⬇ Download weights</button>
+                <button class="btn" id="importWeightsBtn">⬆ Import weights</button>
+                <button class="btn" id="restoreWeightsBtn">Restore weights</button>
+                <button class="btn danger" id="resetWeightsBtn">Reset weights (empty)</button>
                 <input type="file" id="importWeightsFile" accept="application/json" style="display:none;">
               </div>
+            </div>
+
+            <div class="advanced-group">
+              <h4>Asset paths</h4>
+              <p class="asset-note">Edit these live. The board background uses the first field, and the piece image names use the rest. Everything saves locally, because forgetting paths repeatedly is apparently a workflow.</p>
+              <div id="assetPathList" class="asset-list"></div>
+              <div class="controls" style="margin-top:.2rem;">
+                <button class="btn" id="assetResetBtn">Reset asset paths</button>
+              </div>
+              <div id="assetStatus" class="status-readout"></div>
             </div>
           </div>
         </details>
@@ -660,23 +997,24 @@
 
 <div id="trainModal" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="margin-top:0; color: var(--theme-color); text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">Train the Twin RL Models</h3>
-    <p style="text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: -10px;">
+    <p class="modal-eyebrow">System // Training</p>
+    <h3>Train the twin RL models</h3>
+    <p class="modal-copy">
       Runs fast, unrendered self-play games (no 500ms move delay) directly through this file's own
       rules engine. Rewards stay sparse: the first king destroyed loses, the surviving king wins,
       and only end-of-match outcomes update the models. BLUE and RED never share memory.
     </p>
     <div style="display:flex; flex-direction:column; gap:10px; max-width:420px; margin:0 auto;">
-      <label style="font-size:0.85rem;">Games to play
-        <input type="number" id="trainGamesInput" value="500" min="10" max="20000" step="10" style="width:100%; padding:6px; margin-top:4px;">
+      <label class="field-label">Games to play
+        <input type="number" id="trainGamesInput" value="500" min="10" max="20000" step="10" class="field-input">
       </label>
       <div style="display:flex; gap:8px;">
         <button class="btn" id="trainBlueBtn" style="flex:1;">Train BLUE only</button>
         <button class="btn" id="trainRedBtn" style="flex:1;">Train RED only</button>
       </div>
       <button class="btn primary" id="trainBothBtn">Train BLUE + RED (self-play)</button>
-      <button class="btn danger" id="trainStopBtn" style="display:none;">Stop Training</button>
-      <div id="trainProgress" style="font-size:0.8rem; opacity:0.85; text-align:center; min-height:3.5em;"></div>
+      <button class="btn danger" id="trainStopBtn" style="display:none;">Stop training</button>
+      <div id="trainProgress" class="readout-block"></div>
     </div>
     <div style="text-align:center; margin-top:14px;">
       <button class="btn" id="closeTrainBtn">Close <span class="kbd">ESC</span></button>
@@ -686,8 +1024,9 @@
 
 <div id="rulesModal" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="margin-top:0; color: var(--theme-color); text-transform: uppercase; letter-spacing: 0.1em; text-align: center;">Laser Physics Engine</h3>
-    <p style="text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: -10px;">Customize the game mechanics below. Changes save automatically.</p>
+    <p class="modal-eyebrow">System // Rules Engine</p>
+    <h3>Laser physics engine</h3>
+    <p class="modal-copy">Customize the game mechanics below. Changes save automatically.</p>
     <div style="overflow-x: auto;">
       <table class="interaction-table" id="engineTable">
         <thead>
@@ -705,8 +1044,8 @@
       </table>
     </div>
     <div style="display: flex; gap: 10px; margin-top: 15px;">
-      <button class="btn danger" id="resetRulesBtn" style="flex: 1;">Reset Engine Defaults</button>
-      <button class="btn" id="closeRulesBtn" style="flex: 1;">Save & Close <span class="kbd">ESC</span></button>
+      <button class="btn danger" id="resetRulesBtn" style="flex: 1;">Reset engine defaults</button>
+      <button class="btn" id="closeRulesBtn" style="flex: 1;">Save & close <span class="kbd">ESC</span></button>
     </div>
   </div>
 </div>
@@ -723,6 +1062,22 @@
     localStorage.setItem("laserchess_engine_version", PHYSICS_VERSION);
   }
   const SAVED_GAMEPLAY_MODE_KEY = "laserchess_gameplay_mode";
+
+  const SAVED_ASSET_PATHS_KEY = "laserchess_asset_paths";
+  const DEFAULT_ASSET_PATHS = {
+    boardBackground: "https://cannons024willrise.github.io/Laser-Chess/docs/home/Gemini_Generated_Image_tjcevutjcevutjce.png",
+    blueking: "./blueking.png",
+    redking: "./redking.png",
+    bluedefender: "./bluedefender.png",
+    reddefender: "./reddefender.png",
+    bluedeflector: "./bluedeflector.png",
+    reddeflector: "./reddeflector.png",
+    blueswitch: "./blueswitch.png",
+    redswitch: "./redswitch.png",
+    bluelaser: "./bluelaser.png",
+    redlaser: "./redlaser.png"
+  };
+  let assetPaths = null;
 
   const PIECE_BASE = "./";
   const RES_BLUE = [{x:9,y:0},{x:9,y:1},{x:9,y:2},{x:9,y:3},{x:9,y:4},{x:9,y:5},{x:9,y:6},{x:9,y:7},{x:1,y:0},{x:1,y:7}];
@@ -805,6 +1160,81 @@
     localStorage.setItem("laserchess_custom_rules", JSON.stringify(INTERACTION_MAP));
   }
 
+  function cssUrl(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw) return "none";
+    return `url("${raw.replace(/"/g, '\\"')}")`;
+  }
+
+  function loadAssetPaths() {
+    try {
+      const raw = localStorage.getItem(SAVED_ASSET_PATHS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return { ...DEFAULT_ASSET_PATHS, ...(parsed && typeof parsed === "object" ? parsed : {}) };
+      }
+    } catch (e) {}
+    return { ...DEFAULT_ASSET_PATHS };
+  }
+
+  function saveAssetPaths() {
+    localStorage.setItem(SAVED_ASSET_PATHS_KEY, JSON.stringify(assetPaths));
+  }
+
+  function applyAssetPaths() {
+    const root = document.documentElement;
+    root.style.setProperty("--board-bg-image", cssUrl(assetPaths.boardBackground));
+    saveAssetPaths();
+    if (el.assetStatus) {
+      el.assetStatus.textContent = "Asset paths applied and saved locally.";
+    }
+  }
+
+  function renderAssetEditor() {
+    if (!el.assetPathList) return;
+    const entries = [
+      ["boardBackground", "Board background"],
+      ["blueking", "Blue king"],
+      ["redking", "Red king"],
+      ["bluedefender", "Blue defender"],
+      ["reddefender", "Red defender"],
+      ["bluedeflector", "Blue deflector"],
+      ["reddeflector", "Red deflector"],
+      ["blueswitch", "Blue switch"],
+      ["redswitch", "Red switch"],
+      ["bluelaser", "Blue laser"],
+      ["redlaser", "Red laser"]
+    ];
+    el.assetPathList.innerHTML = "";
+    for (const [key, label] of entries) {
+      const row = document.createElement("label");
+      row.className = "asset-row";
+      row.innerHTML = `
+        <span class="asset-key">${label}</span>
+        <input class="asset-input" type="text" spellcheck="false" autocomplete="off" data-asset-key="${key}" value="${String(assetPaths[key] ?? "").replace(/"/g, "&quot;")}">`
+      ;
+      el.assetPathList.appendChild(row);
+    }
+    el.assetPathList.querySelectorAll("[data-asset-key]").forEach(input => {
+      input.addEventListener("input", () => {
+        const key = input.dataset.assetKey;
+        assetPaths[key] = input.value;
+        if (key === "boardBackground") {
+          document.documentElement.style.setProperty("--board-bg-image", cssUrl(input.value));
+        }
+        saveAssetPaths();
+        if (el.assetStatus) el.assetStatus.textContent = `Updated ${key}.`;
+      });
+    });
+  }
+
+  function resetAssetPaths() {
+    assetPaths = { ...DEFAULT_ASSET_PATHS };
+    renderAssetEditor();
+    applyAssetPaths();
+    if (el.assetStatus) el.assetStatus.textContent = "Asset paths restored to defaults.";
+  }
+
   const START_STATE = () => ({
     turn: "BLUE",
     moveNumber: 1,
@@ -870,6 +1300,9 @@
     restoreWeightsBtn: document.getElementById("restoreWeightsBtn"),
     resetWeightsBtn: document.getElementById("resetWeightsBtn"),
     importWeightsFile: document.getElementById("importWeightsFile"),
+    assetPathList: document.getElementById("assetPathList"),
+    assetStatus: document.getElementById("assetStatus"),
+    assetResetBtn: document.getElementById("assetResetBtn"),
     modeLabel: document.getElementById("modeLabel"),
     modeDetail: document.getElementById("modeDetail"),
     modePill: document.getElementById("modePill"),
@@ -889,6 +1322,8 @@
     trainProgress: document.getElementById("trainProgress"),
     closeTrainBtn: document.getElementById("closeTrainBtn")
   };
+
+  assetPaths = loadAssetPaths();
 
   function buildEngineGUI() {
     el.engineTableBody.innerHTML = "";
@@ -994,7 +1429,8 @@
   }
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
   function pieceImage(piece) {
-    return `${PIECE_BASE}${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}.png`;
+    const key = `${piece.color.toLowerCase()}${PIECE_MAP[piece.pieceType]}`;
+    return assetPaths[key] || `${PIECE_BASE}${key}.png`;
   }
   function pieceAt(x, y, pieces = state.pieces) {
     return pieces.find(p => p.x === x && p.y === y) || null;
@@ -1216,70 +1652,70 @@
 
   const GAMEPLAY_THEMES = {
     TWO_PLAYER: {
-      accent: "#00e5ff",
-      rgb: "0,229,255",
-      halo: "rgba(0,229,255,.22)",
-      overlayTop: "rgba(0,0,0,.92)",
-      overlayBottom: "rgba(0,0,0,.99)",
-      panel: "rgba(0,0,0,.96)",
-      line: "rgba(0,229,255,.22)"
+      accent: "#2f7cff",
+      rgb: "47,124,255",
+      halo: "rgba(47,124,255,.22)",
+      overlayTop: "rgba(6,7,10,.94)",
+      overlayBottom: "rgba(4,5,7,.99)",
+      panel: "rgba(11,12,16,.96)",
+      line: "rgba(47,124,255,.22)"
     },
     AI_BLUE: {
-      accent: "#00e5ff",
-      rgb: "0,229,255",
-      halo: "rgba(0,229,255,.28)",
-      overlayTop: "rgba(0,0,0,.92)",
-      overlayBottom: "rgba(0,0,0,.99)",
-      panel: "rgba(0,0,0,.96)",
-      line: "rgba(0,229,255,.26)"
+      accent: "#2f7cff",
+      rgb: "47,124,255",
+      halo: "rgba(47,124,255,.28)",
+      overlayTop: "rgba(6,7,10,.94)",
+      overlayBottom: "rgba(4,5,7,.99)",
+      panel: "rgba(11,12,16,.96)",
+      line: "rgba(47,124,255,.26)"
     },
     AI_RED: {
-      accent: "#ff2d55",
-      rgb: "255,45,85",
-      halo: "rgba(255,45,85,.28)",
-      overlayTop: "rgba(0,0,0,.92)",
-      overlayBottom: "rgba(0,0,0,.99)",
-      panel: "rgba(0,0,0,.96)",
-      line: "rgba(255,45,85,.26)"
+      accent: "#ff3b3b",
+      rgb: "255,59,59",
+      halo: "rgba(255,59,59,.28)",
+      overlayTop: "rgba(6,7,10,.94)",
+      overlayBottom: "rgba(4,5,7,.99)",
+      panel: "rgba(11,12,16,.96)",
+      line: "rgba(255,59,59,.26)"
     },
     AI_VS_AI: {
-      accent: "#b026ff",
-      rgb: "176,38,255",
-      halo: "rgba(176,38,255,.28)",
-      overlayTop: "rgba(0,0,0,.92)",
-      overlayBottom: "rgba(0,0,0,.99)",
-      panel: "rgba(0,0,0,.96)",
-      line: "rgba(176,38,255,.26)"
+      accent: "#a855f7",
+      rgb: "168,85,247",
+      halo: "rgba(168,85,247,.28)",
+      overlayTop: "rgba(6,7,10,.94)",
+      overlayBottom: "rgba(4,5,7,.99)",
+      panel: "rgba(11,12,16,.96)",
+      line: "rgba(168,85,247,.26)"
     },
     NETWORK: {
-      accent: "#b026ff",
-      rgb: "176,38,255",
-      halo: "rgba(176,38,255,.28)",
-      overlayTop: "rgba(0,0,0,.92)",
-      overlayBottom: "rgba(0,0,0,.99)",
-      panel: "rgba(0,0,0,.96)",
-      line: "rgba(176,38,255,.26)"
+      accent: "#a855f7",
+      rgb: "168,85,247",
+      halo: "rgba(168,85,247,.28)",
+      overlayTop: "rgba(6,7,10,.94)",
+      overlayBottom: "rgba(4,5,7,.99)",
+      panel: "rgba(11,12,16,.96)",
+      line: "rgba(168,85,247,.26)"
     }
   };
 
   const TURN_THEMES = {
     BLUE: {
-      accent: "#00e5ff",
-      rgb: "0,229,255",
-      halo: "rgba(0,229,255,.20)",
-      overlayTop: "rgba(0,0,0,.92)",
-      overlayBottom: "rgba(0,0,0,.99)",
-      panel: "rgba(0,0,0,.96)",
-      line: "rgba(0,229,255,.22)"
+      accent: "#2f7cff",
+      rgb: "47,124,255",
+      halo: "rgba(47,124,255,.20)",
+      overlayTop: "rgba(6,7,10,.94)",
+      overlayBottom: "rgba(4,5,7,.99)",
+      panel: "rgba(11,12,16,.96)",
+      line: "rgba(47,124,255,.22)"
     },
     RED: {
-      accent: "#ff2d55",
-      rgb: "255,45,85",
-      halo: "rgba(255,45,85,.20)",
-      overlayTop: "rgba(0,0,0,.92)",
-      overlayBottom: "rgba(0,0,0,.99)",
-      panel: "rgba(0,0,0,.96)",
-      line: "rgba(255,45,85,.22)"
+      accent: "#ff3b3b",
+      rgb: "255,59,59",
+      halo: "rgba(255,59,59,.20)",
+      overlayTop: "rgba(6,7,10,.94)",
+      overlayBottom: "rgba(4,5,7,.99)",
+      panel: "rgba(11,12,16,.96)",
+      line: "rgba(255,59,59,.22)"
     }
   };
 
@@ -1733,8 +2169,15 @@
 
   function stopTraining() { trainingActive = false; }
 
+  function closeAllModals() {
+    el.trainModal.classList.remove("active");
+    el.rulesModal.classList.remove("active");
+  }
+
   function toggleTrainModal() {
-    el.trainModal.classList.toggle("active");
+    const shouldOpen = !el.trainModal.classList.contains("active");
+    closeAllModals();
+    if (shouldOpen) el.trainModal.classList.add("active");
   }
 
   function startTrainingFromUI(trainColors) {
@@ -1979,7 +2422,9 @@
   }
   
   function toggleRules() {
-    el.rulesModal.classList.toggle("active");
+    const shouldOpen = !el.rulesModal.classList.contains("active");
+    closeAllModals();
+    if (shouldOpen) el.rulesModal.classList.add("active");
   }
 
 
@@ -1989,8 +2434,8 @@ function spawnDeathVoxels(piece) {
   const originX = piece.x * CELL;
   const originY = piece.y * CELL;
   const isBlue = piece.color === "BLUE";
-  const baseColor = isBlue ? "0,229,255" : "255,45,85";
-  const altColor = isBlue ? "163,249,255" : "255,155,180";
+  const baseColor = isBlue ? "47,124,255" : "255,59,59";
+  const altColor = isBlue ? "150,190,255" : "255,150,140";
   const sparkColor = isBlue ? "255,255,255" : "255,245,248";
   const now = performance.now();
 
@@ -2078,7 +2523,7 @@ function drawBoard(now = performance.now()) {
       const reserved = RES_BLUE.some(s => s.x === x && s.y === y) ? "blue" : RES_RED.some(s => s.x === x && s.y === y) ? "red" : null;
       const rect = svgEl("rect", {
         x: x * CELL, y: y * CELL, width: CELL, height: CELL,
-        fill: reserved === "blue" ? "rgba(0,229,255,.08)" : reserved === "red" ? "rgba(255,45,85,.08)" : "rgba(0,0,0,.42)",
+        fill: reserved === "blue" ? "rgba(47,124,255,.08)" : reserved === "red" ? "rgba(255,59,59,.08)" : "rgba(0,0,0,.42)",
         stroke: "rgba(255,255,255,.07)",
         "stroke-width": "1"
       });
@@ -2112,7 +2557,7 @@ function drawBoard(now = performance.now()) {
   if (state.lastLaserPath?.length) {
     const pts = state.lastLaserPath.map(p => `${p.x * CELL + 50},${p.y * CELL + 50}`).join(" ");
     const isRed = state.lastLaserColor === "RED";
-    const beamColor = isRed ? "#ff003c" : "#00f0ff";
+    const beamColor = isRed ? "#ff3b3b" : "#2f7cff";
 
     const aura = svgEl("polyline", {
       points: pts,
@@ -2138,7 +2583,7 @@ function drawBoard(now = performance.now()) {
 
   const target = sel || pieceAt(cursor.x, cursor.y);
   if (target) {
-    svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(0,229,255,.78)", "stroke-width": "3", rx: "10" }));
+    svg.appendChild(svgEl("rect", { x: target.x * CELL + 6, y: target.y * CELL + 6, width: CELL - 12, height: CELL - 12, fill: "none", stroke: "rgba(255,196,0,.82)", "stroke-width": "3", rx: "10" }));
   } else {
     svg.appendChild(svgEl("rect", { x: cursor.x * CELL + 8, y: cursor.y * CELL + 8, width: CELL - 16, height: CELL - 16, fill: "none", stroke: "rgba(255,255,255,.7)", "stroke-width": "2", rx: "10", "stroke-dasharray": "10 8" }));
   }
@@ -2153,7 +2598,7 @@ function drawBoard(now = performance.now()) {
       cx: x + 50,
       cy: y + 50,
       r: 28,
-      fill: isBlue ? "rgba(0,229,255,0.35)" : "rgba(255,45,85,0.35)"
+      fill: isBlue ? "rgba(47,124,255,0.35)" : "rgba(255,59,59,0.35)"
     });
     bloom.style.filter = "blur(12px)";
     g.appendChild(bloom);
@@ -2336,6 +2781,11 @@ function onPieceClick(piece) {
     location.reload(); 
   });
 
+  if (el.assetResetBtn) el.assetResetBtn.addEventListener("click", () => {
+    if (!confirm("Reset asset paths to defaults?")) return;
+    resetAssetPaths();
+  });
+
   el.modeTwoPlayerBtn.addEventListener("click", () => setGameplayMode("TWO_PLAYER"));
   el.modeAIBlueBtn.addEventListener("click", () => setGameplayMode("AI_BLUE"));
   el.modeAIRedBtn.addEventListener("click", () => setGameplayMode("AI_RED"));
@@ -2348,6 +2798,13 @@ function onPieceClick(piece) {
   el.trainRedBtn.addEventListener("click", () => startTrainingFromUI(["RED"]));
   el.trainBothBtn.addEventListener("click", () => startTrainingFromUI(["BLUE", "RED"]));
   el.trainStopBtn.addEventListener("click", stopTraining);
+
+  el.trainModal.addEventListener("click", (e) => {
+    if (e.target === el.trainModal) toggleTrainModal();
+  });
+  el.rulesModal.addEventListener("click", (e) => {
+    if (e.target === el.rulesModal) toggleRules();
+  });
 
   el.aiAutoLoopChk.addEventListener("change", () => { aiAutoLoop = el.aiAutoLoopChk.checked; });
   el.downloadWeightsBtn.addEventListener("click", downloadAIWeights);
@@ -2415,6 +2872,8 @@ function onPieceClick(piece) {
 
   loadCustomRules();
   buildEngineGUI();
+  renderAssetEditor();
+  applyAssetPaths();
   initSidebarAccordion();
   updateSelectionUI();
   loadSavedGameplayMode();
