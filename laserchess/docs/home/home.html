@@ -284,6 +284,7 @@
       min-height: 0;
       display: flex;
       flex-direction: column;
+      align-items: stretch;
       gap: .6rem;
       justify-content: flex-start;
       overflow-y: auto;
@@ -407,6 +408,10 @@
       overflow: hidden;
       min-height: 0;
       flex: 0 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
       border-top: 2px solid transparent;
     }
     .accordion-section[open] { border-top-color: var(--theme-color); }
@@ -422,6 +427,7 @@
       align-items: center;
       justify-content: space-between;
       gap: .5rem;
+      flex: 0 0 auto;
     }
     .accordion-section > summary::-webkit-details-marker { display: none; }
     .accordion-section > summary > span:first-child {
@@ -461,6 +467,8 @@
       padding: .8rem;
       display: grid;
       gap: .8rem;
+      min-height: 0;
+      flex: 1 1 auto;
       max-height: min(42vh, 28rem);
       overflow-y: auto;
       overflow-x: hidden;
@@ -2011,8 +2019,15 @@
 
   function stopTraining() { trainingActive = false; }
 
+  function closeAllModals() {
+    el.trainModal.classList.remove("active");
+    el.rulesModal.classList.remove("active");
+  }
+
   function toggleTrainModal() {
-    el.trainModal.classList.toggle("active");
+    const shouldOpen = !el.trainModal.classList.contains("active");
+    closeAllModals();
+    if (shouldOpen) el.trainModal.classList.add("active");
   }
 
   function startTrainingFromUI(trainColors) {
@@ -2257,7 +2272,9 @@
   }
   
   function toggleRules() {
-    el.rulesModal.classList.toggle("active");
+    const shouldOpen = !el.rulesModal.classList.contains("active");
+    closeAllModals();
+    if (shouldOpen) el.rulesModal.classList.add("active");
   }
 
 
@@ -2626,6 +2643,13 @@ function onPieceClick(piece) {
   el.trainRedBtn.addEventListener("click", () => startTrainingFromUI(["RED"]));
   el.trainBothBtn.addEventListener("click", () => startTrainingFromUI(["BLUE", "RED"]));
   el.trainStopBtn.addEventListener("click", stopTraining);
+
+  el.trainModal.addEventListener("click", (e) => {
+    if (e.target === el.trainModal) toggleTrainModal();
+  });
+  el.rulesModal.addEventListener("click", (e) => {
+    if (e.target === el.rulesModal) toggleRules();
+  });
 
   el.aiAutoLoopChk.addEventListener("change", () => { aiAutoLoop = el.aiAutoLoopChk.checked; });
   el.downloadWeightsBtn.addEventListener("click", downloadAIWeights);
