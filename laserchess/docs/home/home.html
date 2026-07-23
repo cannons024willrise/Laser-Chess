@@ -61,7 +61,7 @@
       width: 100%;
       margin: 0;
       padding: 0;
-      overflow: auto;
+      overflow: hidden;
       overscroll-behavior: none;
     }
     body {
@@ -81,12 +81,12 @@
     a { color: var(--theme-color); }
 
     .shell {
-      min-height: 100vh;
-      height: auto;
+      min-height: 100%;
+      height: 100%;
       width: 100vw;
       display: flex;
       flex-direction: column;
-      overflow: visible;
+      overflow: hidden;
     }
 
     /* ---------------------------------------------------------------- header:
@@ -166,10 +166,11 @@
       background: rgba(3, 4, 7, 0.4);
       backdrop-filter: blur(4px);
       display: flex;
-      align-items: flex-start;
+      align-items: stretch;
       justify-content: center;
       padding: 0.6rem;
-      overflow: visible;
+      overflow: hidden;
+      min-height: 0;
     }
 
     .layout {
@@ -178,8 +179,8 @@
       align-items: stretch;
       gap: 1rem;
       width: 100%;
-      height: auto;
-      min-height: calc(100vh - 5.2rem);
+      height: 100%;
+      min-height: 0;
       max-width: 1600px;
       background: var(--panel);
       border: 1px solid var(--line);
@@ -187,7 +188,7 @@
       box-shadow: var(--shadow);
       padding: .85rem;
       position: relative;
-      overflow: visible;
+      overflow: hidden;
     }
     /* corner tick marks on the outer chassis — instrument-panel fastener motif */
     .layout::before, .layout::after,
@@ -210,12 +211,14 @@
       width: 100%;
       height: 100%;
       min-height: 0;
+      min-width: 0;
       overflow: hidden;
     }
     .board-wrap {
       width: 100%;
       height: 100%;
       min-height: 0;
+      min-width: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -225,6 +228,7 @@
       width: 100%;
       height: 100%;
       min-height: 0;
+      min-width: 0;
       padding: .3rem;
       border-radius: 4px;
       background:
@@ -262,10 +266,10 @@
     .reticle-br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--theme-color); border-right: 2px solid var(--theme-color); }
 
     svg#board {
-      width: auto;
-      height: auto;
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      max-height: none;
       aspect-ratio: 10 / 8;
       object-fit: contain;
       display: block;
@@ -718,13 +722,14 @@
       .dialogue-overlay { padding: .35rem; }
       .layout {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(40vh, auto) auto;
+        grid-template-rows: minmax(0, 1fr) auto;
         width: min(100%, 1000px);
         gap: .55rem;
         padding: .55rem;
-        min-height: calc(100vh - 5.2rem);
+        height: 100%;
+        min-height: 0;
       }
-      .board-panel { min-height: 40vh; }
+      .board-panel { min-height: 0; }
       .sidebar { max-height: none; overflow: visible; padding-right: 0; }
       .accordion-body { max-height: min(36vh, 24rem); }
       .controls { grid-template-columns: repeat(2, 1fr); }
@@ -736,8 +741,8 @@
       .header-meta { width: 100%; justify-content: space-between; }
       .pill { flex: 1; padding: .3rem .5rem; }
       .dialogue-overlay { padding: .24rem; }
-      .layout { padding: .45rem; gap: .45rem; grid-template-rows: minmax(36vh, auto) auto; }
-      .board-panel { min-height: 36vh; }
+      .layout { padding: .45rem; gap: .45rem; grid-template-rows: minmax(0, 1fr) auto; }
+      .board-panel { min-height: 0; }
       .side-card h3 { font-size: .68rem; }
       .quick-tip { font-size: 0.72rem; }
       .accordion-body { max-height: 32vh; }
@@ -749,8 +754,8 @@
 
     @media (max-width: 640px) {
       .dialogue-overlay { padding: .18rem; }
-      .layout { grid-template-rows: minmax(30vh, auto) auto; padding: .32rem; gap: .32rem; }
-      .board-panel { min-height: 30vh; }
+      .layout { grid-template-rows: minmax(0, 1fr) auto; padding: .32rem; gap: .32rem; }
+      .board-panel { min-height: 0; }
       .kbd { display: none; }
       .btn { font-size: 0.64rem; padding: .58rem .3rem; }
       .side-card h3 { font-size: 0.64rem; }
@@ -781,7 +786,8 @@
       .layout {
         grid-template-columns: minmax(0, 1fr) minmax(170px, 230px);
         grid-template-rows: 1fr;
-        min-height: calc(100vh - 3.2rem);
+        height: 100%;
+        min-height: 0;
         padding: .4rem;
         gap: .4rem;
       }
