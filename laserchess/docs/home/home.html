@@ -840,15 +840,6 @@
       </section>
 
       <aside class="sidebar">
-        <section class="panel side-card mode-status-card">
-          <h3>Selected mode</h3>
-          <div class="mode-current">
-            <div class="mode-label" id="modeLabel">2 Player</div>
-            <div class="mode-detail" id="modeDetail">Two humans on one board.</div>
-          </div>
-          <div class="turn-badge" id="modeStatePill">2 Player</div>
-        </section>
-
         <details class="panel accordion-section" data-accordion open>
           <summary>
             <span>Quick start</span>
@@ -883,7 +874,12 @@
             </span>
           </summary>
           <div class="accordion-body">
-            <p class="quick-tip">Pick a mode. The status box above always shows the current selection, because menus should not play hide and seek.</p>
+            <p class="quick-tip">Pick a mode. The status box below always shows the current selection, because menus should not play hide and seek.</p>
+            <div class="mode-current">
+              <div class="mode-label" id="modeLabel">2 Player</div>
+              <div class="mode-detail" id="modeDetail">Two humans on one board.</div>
+            </div>
+            <div class="turn-badge" id="modeStatePill">2 Player</div>
             <div class="controls">
               <button class="btn" id="modeTwoPlayerBtn">2 Player</button>
               <button class="btn" id="modeAIBlueBtn">AI plays BLUE</button>
